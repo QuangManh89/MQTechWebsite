@@ -1,11 +1,14 @@
 import { validateServiceRequestInput } from "../../../lib/validations/service-request.ts";
 import { serviceRequestRepo } from "../../../lib/db/repository.ts";
 import { intakeRateLimiter } from "../../../lib/utils/rate-limiter.ts";
-import { validateServerEnv } from "../../../lib/env.ts";
+import { guardApiRoute } from "../../../lib/security/request-guard.ts";
 
 export async function POST(req: Request) {
   try {
-    validateServerEnv();
+    const guard = guardApiRoute(req, { checkOrigin: true });
+    if (!guard.allowed && guard.response) {
+      return guard.response;
+    }
     // 1. Identify client IP for rate-limiting
     const forwarded = req.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";

@@ -1,15 +1,24 @@
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { validateServerEnv } from "../src/lib/env.ts";
+import { validateServerEnv, getAppConfig } from "../src/lib/env.ts";
 import {
   createSessionToken,
   ADMIN_COOKIE_NAME,
 } from "../src/lib/auth/session.ts";
 import { serviceRequestRepo } from "../src/lib/db/repository.ts";
 import { adminService } from "../src/lib/auth/admin-service.ts";
+import { guardApiRoute } from "../src/lib/security/request-guard.ts";
+import { validateBootstrapTarget } from "../scripts/bootstrap-admin.mjs";
+import { validateMigrationTarget, computeChecksum } from "../scripts/migrate.mjs";
 import { POST as handleIntakePost } from "../src/app/api/service-requests/route.ts";
-import { PATCH as handleAdminPatch } from "../src/app/api/admin/requests/[id]/route.ts";
+import {
+  GET as handleAdminDetail,
+  PATCH as handleAdminPatch,
+} from "../src/app/api/admin/requests/[id]/route.ts";
 import { POST as handleAdminLogin } from "../src/app/api/admin/login/route.ts";
+import { GET as handleAdminMe } from "../src/app/api/admin/me/route.ts";
+import { GET as handleAdminRequests } from "../src/app/api/admin/requests/route.ts";
+import { GET as handleAdminStats } from "../src/app/api/admin/stats/route.ts";
 
 function createMockReq(url, method = "GET", body = null, headers = {}) {
   const serialized = body ? JSON.stringify(body) : null;
@@ -35,11 +44,31 @@ function createMockReq(url, method = "GET", body = null, headers = {}) {
 
 describe("P4 Production Security Boundary & Failure Behavior Verification", () => {
   beforeEach(() => {
+    process.env.NODE_ENV = "test";
     serviceRequestRepo.clearDevStore();
     adminService.clearDevStore();
     delete process.env.DATABASE_URL;
     delete process.env.ADMIN_SESSION_SECRET;
     delete process.env.ALLOW_MEMORY_STORE;
+  });
+
+  // --- Fix A: Unconditional Prohibition of Memory Store in Production ---
+
+  test("validateServerEnv: should strictly reject ALLOW_MEMORY_STORE=true in production", () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    process.env.ALLOW_MEMORY_STORE = "true";
+    process.env.DATABASE_URL = "postgresql://mqtech:secret@localhost:5432/mqtech_db";
+    process.env.ADMIN_SESSION_SECRET = "super-secret-key-that-is-at-least-32-chars-long";
+
+    try {
+      assert.throws(
+        () => validateServerEnv(),
+        /ALLOW_MEMORY_STORE=true is strictly forbidden in production/
+      );
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
   });
 
   test("validateServerEnv: should throw in production if DATABASE_URL is missing", () => {
@@ -84,6 +113,18 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
         () => validateServerEnv(),
         /ADMIN_SESSION_SECRET must be at least 32 characters long in production/
       );
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
+
+  test("getAppConfig: test environment can still use isolated memory storage", () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "test";
+
+    try {
+      const config = getAppConfig();
+      assert.strictEqual(config.allowMemoryStore, true);
     } finally {
       process.env.NODE_ENV = originalEnv;
     }
@@ -134,7 +175,6 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
   });
 
   test("updateStatus: should detect and reject concurrent status transitions using optimistic lock", async () => {
-    // 1. Seed initial request in AWAITING_CONFIRMATION
     const req = await serviceRequestRepo.create({
       customerName: "Trần Thị B",
       customerPhone: "0987654321",
@@ -144,18 +184,16 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
       issueDescription: "Cần cài lại hệ điều hành Windows bản quyền",
     });
 
-    // 2. Technician 1 updates status to CONFIRMED
     const res1 = await serviceRequestRepo.updateStatus(
       req.id,
       "CONFIRMED",
       "tech1",
       "Đã gọi điện xác nhận lịch hẹn",
-      "AWAITING_CONFIRMATION" // expected current status
+      "AWAITING_CONFIRMATION"
     );
     assert.strictEqual(res1.success, true);
     assert.strictEqual(res1.request?.status, "CONFIRMED");
 
-    // 3. Technician 2 attempts concurrent transition assuming it was still AWAITING_CONFIRMATION
     const res2 = await serviceRequestRepo.updateStatus(
       req.id,
       "CANCELLED",
@@ -169,7 +207,6 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
       /Yêu cầu đã được cập nhật bởi một phiên làm việc khác/
     );
 
-    // Verify status remained CONFIRMED
     const current = await serviceRequestRepo.findById(req.id);
     assert.strictEqual(current?.status, "CONFIRMED");
   });
@@ -184,20 +221,18 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
       issueDescription: "Vệ sinh tra keo tản nhiệt máy tính định kỳ",
     });
 
-    // Authenticated admin session as 'actual_admin'
     const token = createSessionToken({
       username: "actual_admin",
       fullName: "Kỹ Thuật Viên Chính Thức",
       role: "ADMIN",
     });
 
-    // Client attempts to spoof changedBy as 'fake_boss' inside body
     const patchReq = createMockReq(
       `http://localhost:3000/api/admin/requests/${req.id}`,
       "PATCH",
       {
         status: "CONFIRMED",
-        changedBy: "fake_boss", // Malicious spoof attempt
+        changedBy: "fake_boss",
         note: "Xác nhận lịch",
       },
       {
@@ -210,7 +245,6 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
     });
     assert.strictEqual(res.status, 200);
 
-    // Verify audit history recorded 'actual_admin', NEVER 'fake_boss'
     const history = await serviceRequestRepo.getStatusHistory(req.id);
     const transition = history.find((h) => h.toStatus === "CONFIRMED");
     assert.ok(transition, "Transition to CONFIRMED must exist in audit history");
@@ -218,55 +252,155 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
     assert.notStrictEqual(transition.changedBy, "fake_boss");
   });
 
-  test("Intake API POST /api/service-requests: fails immediately if server env is missing in production", async () => {
+  // --- Fix B: Centralized Environment Validation Across All Routes ---
+
+  test("All administrative and public API routes fail safely on missing production environment", async () => {
     const originalEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = "production";
     delete process.env.DATABASE_URL;
 
     try {
-      const intakeReq = createMockReq(
-        "http://localhost:3000/api/service-requests",
-        "POST",
-        {
-          customerName: "Nguyễn Văn D",
-          customerPhone: "0912999888",
-          serviceMode: "IN_STORE",
-          deviceCategory: "LAPTOP",
-          serviceCategoryId: "svc_desktop_laptop",
-          issueDescription: "Máy tính phát tiếng kêu lạ từ quạt tản nhiệt",
-        }
+      // 1. Intake POST
+      const resIntake = await handleIntakePost(
+        createMockReq("http://localhost:3000/api/service-requests", "POST", { customerName: "A" })
       );
+      assert.strictEqual(resIntake.status, 500);
 
-      const res = await handleIntakePost(intakeReq);
-      assert.strictEqual(res.status, 500);
-      const json = await res.json();
-      assert.strictEqual(json.success, false);
+      // 2. Admin Login POST
+      const resLogin = await handleAdminLogin(
+        createMockReq("http://localhost:3000/api/admin/login", "POST", { username: "admin" })
+      );
+      assert.strictEqual(resLogin.status, 500);
+
+      // 3. Admin Me GET
+      const resMe = await handleAdminMe(
+        createMockReq("http://localhost:3000/api/admin/me", "GET")
+      );
+      assert.strictEqual(resMe.status, 500);
+
+      // 4. Admin Requests GET
+      const resRequests = await handleAdminRequests(
+        createMockReq("http://localhost:3000/api/admin/requests", "GET")
+      );
+      assert.strictEqual(resRequests.status, 500);
+
+      // 5. Admin Stats GET
+      const resStats = await handleAdminStats(
+        createMockReq("http://localhost:3000/api/admin/stats", "GET")
+      );
+      assert.strictEqual(resStats.status, 500);
+
+      // 6. Admin Detail GET
+      const resDetail = await handleAdminDetail(
+        createMockReq("http://localhost:3000/api/admin/requests/any-id", "GET"),
+        { params: Promise.resolve({ id: "any-id" }) }
+      );
+      assert.strictEqual(resDetail.status, 500);
     } finally {
       process.env.NODE_ENV = originalEnv;
     }
   });
 
-  test("Admin Login API POST /api/admin/login: fails immediately if server env is missing in production", async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
-    delete process.env.DATABASE_URL;
+  // --- Fix C: Bootstrap Target Validation ---
 
-    try {
-      const loginReq = createMockReq(
-        "http://localhost:3000/api/admin/login",
-        "POST",
-        {
-          username: "admin",
-          password: "SomePassword123!",
-        }
-      );
+  test("validateBootstrapTarget: rejects remote cloud hosts and production-like database names", () => {
+    // 1. Reject remote cloud host
+    const resRemote = validateBootstrapTarget(
+      "postgresql://user:pass@fly.dev:5432/mqtech_dev",
+      false,
+      false
+    );
+    assert.strictEqual(resRemote.allowed, false);
+    assert.match(resRemote.reason, /Phát hiện mục tiêu cơ sở dữ liệu có dấu hiệu môi trường thật/);
 
-      const res = await handleAdminLogin(loginReq);
-      assert.strictEqual(res.status, 500);
-      const json = await res.json();
-      assert.strictEqual(json.success, false);
-    } finally {
-      process.env.NODE_ENV = originalEnv;
-    }
+    // 2. Reject production database name
+    const resProdName = validateBootstrapTarget(
+      "postgresql://user:pass@localhost:5432/mqtech_production",
+      false,
+      false
+    );
+    assert.strictEqual(resProdName.allowed, false);
+    assert.match(resProdName.reason, /Phát hiện mục tiêu cơ sở dữ liệu có dấu hiệu môi trường thật/);
+
+    // 3. Reject --dev overriding unsafe host
+    const resOverride = validateBootstrapTarget(
+      "postgresql://user:pass@192.168.1.100:5432/mqtech_live",
+      true, // --dev flag passed
+      false
+    );
+    assert.strictEqual(resOverride.allowed, false);
+
+    // 4. Accept verified local development database
+    const resLocal = validateBootstrapTarget(
+      "postgresql://user:pass@localhost:5432/mqtech_dev",
+      false,
+      false
+    );
+    assert.strictEqual(resLocal.allowed, true);
+    assert.strictEqual(resLocal.details?.host, "localhost:5432");
+    assert.strictEqual(resLocal.details?.dbName, "mqtech_dev");
+
+    // 5. Reject missing DATABASE_URL if --dev is not passed
+    const resNoDev = validateBootstrapTarget(undefined, false, false);
+    assert.strictEqual(resNoDev.allowed, false);
+    assert.match(resNoDev.reason, /bắt buộc phải truyền cờ '--dev'/);
+
+    // 6. Accept in-memory store only when --dev is passed in non-production
+    const resWithDev = validateBootstrapTarget(undefined, true, false);
+    assert.strictEqual(resWithDev.allowed, true);
+  });
+
+  // --- Fix D: CSRF / Origin Protection Strategy ---
+
+  test("guardApiRoute: strictly blocks cross-origin and cross-site state-changing requests", () => {
+    // 1. Sec-Fetch-Site: cross-site -> 403 Forbidden
+    const crossSiteReq = createMockReq(
+      "http://localhost:3000/api/admin/requests/test-id",
+      "PATCH",
+      { status: "CONFIRMED" },
+      { "sec-fetch-site": "cross-site" }
+    );
+    const guardCrossSite = guardApiRoute(crossSiteReq, { checkOrigin: true });
+    assert.strictEqual(guardCrossSite.allowed, false);
+    assert.strictEqual(guardCrossSite.response?.status, 403);
+
+    // 2. Origin mismatch (evil.com attacking localhost:3000) -> 403 Forbidden
+    const mismatchReq = createMockReq(
+      "http://localhost:3000/api/admin/requests/test-id",
+      "PATCH",
+      { status: "CONFIRMED" },
+      { origin: "https://evil-phishing-site.com" }
+    );
+    const guardMismatch = guardApiRoute(mismatchReq, { checkOrigin: true });
+    assert.strictEqual(guardMismatch.allowed, false);
+    assert.strictEqual(guardMismatch.response?.status, 403);
+
+    // 3. Same-origin request -> Allowed
+    const sameOriginReq = createMockReq(
+      "http://localhost:3000/api/admin/requests/test-id",
+      "PATCH",
+      { status: "CONFIRMED" },
+      { origin: "http://localhost:3000" }
+    );
+    const guardSameOrigin = guardApiRoute(sameOriginReq, { checkOrigin: true });
+    assert.strictEqual(guardSameOrigin.allowed, true);
+  });
+
+  // --- Task 8: Migration Runner Checksum & Target Safety ---
+
+  test("Migration Runner: verifies deterministic SHA256 checksums and target safety", () => {
+    const checksum1 = computeChecksum("CREATE TABLE test (id INT);");
+    const checksum2 = computeChecksum("CREATE TABLE test (id INT);");
+    assert.strictEqual(checksum1, checksum2);
+
+    // Target validation for migration runner
+    const targetDryRun = validateMigrationTarget(undefined, true);
+    assert.strictEqual(targetDryRun.allowed, true);
+
+    const targetCloudRejected = validateMigrationTarget(
+      "postgresql://user:pass@fly.dev:5432/mqtech_production",
+      false
+    );
+    assert.strictEqual(targetCloudRejected.allowed, false);
   });
 });

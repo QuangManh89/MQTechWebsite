@@ -1,7 +1,13 @@
 import { getAdminSessionFromRequest } from "../../../../lib/auth/session.ts";
 import { serviceRequestRepo } from "../../../../lib/db/repository.ts";
+import { guardApiRoute } from "../../../../lib/security/request-guard.ts";
 
 export async function GET(req: Request) {
+  const guard = guardApiRoute(req);
+  if (!guard.allowed && guard.response) {
+    return guard.response;
+  }
+
   const session = getAdminSessionFromRequest(req);
   if (!session) {
     return Response.json(

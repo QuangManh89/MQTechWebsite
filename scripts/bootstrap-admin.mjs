@@ -6,7 +6,9 @@
  * - Passwords are NEVER accepted as command-line arguments (prevents shell history and process inspection exposure).
  * - Passwords are NEVER hardcoded.
  * - Password input is masked in the terminal.
- * - Confirms target database and checks if the account already exists.
+ * - Target database verification: permits ONLY authorized local/disposable targets in this phase.
+ * - Rejects remote, cloud, or production-like database targets even if --dev is passed.
+ * - Confirms existing account status before modifications.
  * 
  * Usage:
  *   node scripts/bootstrap-admin.mjs [username] [--dev]
@@ -18,6 +20,97 @@ import readline from "node:readline";
 import { hashPassword } from "../src/lib/auth/password.ts";
 import { adminService } from "../src/lib/auth/admin-service.ts";
 import { getAppConfig } from "../src/lib/env.ts";
+
+const ALLOWED_LOCAL_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "0.0.0.0",
+]);
+
+const FORBIDDEN_DB_SUBSTRINGS = [
+  "prod",
+  "production",
+  "live",
+  "openwebui",
+  "fly.dev",
+];
+
+export function validateBootstrapTarget(
+  databaseUrl,
+  isDevFlag,
+  isProduction
+) {
+  // 1. If DATABASE_URL is configured, rigorously validate host and database name
+  if (databaseUrl) {
+    let parsed;
+    try {
+      parsed = new URL(databaseUrl);
+    } catch {
+      return {
+        allowed: false,
+        reason: "DATABASE_URL không đúng định dạng URL hợp lệ.",
+      };
+    }
+
+    const host = parsed.hostname.toLowerCase();
+    const dbName = parsed.pathname.replace(/^\//, "").toLowerCase();
+
+    // Check for forbidden production keywords in hostname or db name
+    for (const forbidden of FORBIDDEN_DB_SUBSTRINGS) {
+      if (host.includes(forbidden) || dbName.includes(forbidden)) {
+        return {
+          allowed: false,
+          reason: `Phát hiện mục tiêu cơ sở dữ liệu có dấu hiệu môi trường thật/sản xuất ("${forbidden}"). Nghiêm cấm thực thi trong pha P4.`,
+        };
+      }
+    }
+
+    // Permit ONLY authorized local development hosts in this phase
+    if (!ALLOWED_LOCAL_HOSTS.has(host)) {
+      return {
+        allowed: false,
+        reason: `Máy chủ cơ sở dữ liệu "${host}" không phải là máy chủ cục bộ (localhost/127.0.0.1). Trong pha này, chỉ cho phép kết nối cơ sở dữ liệu phát triển cục bộ.`,
+      };
+    }
+
+    parsed.password = "***";
+    return {
+      allowed: true,
+      details: {
+        host: parsed.host,
+        dbName,
+        maskedUrl: parsed.toString(),
+      },
+    };
+  }
+
+  // 2. If DATABASE_URL is omitted:
+  if (isProduction) {
+    return {
+      allowed: false,
+      reason:
+        "Trong môi trường sản xuất, bắt buộc phải có DATABASE_URL hợp lệ. Không được phép chạy khởi tạo trên bộ nhớ tạm.",
+    };
+  }
+
+  if (!isDevFlag) {
+    return {
+      allowed: false,
+      reason:
+        "Chưa thiết lập DATABASE_URL. Để thực thi với bộ nhớ phát triển cục bộ (In-Memory Development Store), bắt buộc phải truyền cờ '--dev'.",
+    };
+  }
+
+  return {
+    allowed: true,
+    details: {
+      host: "in-memory-dev",
+      dbName: "volatile",
+      maskedUrl: "In-Memory Development Store",
+    },
+  };
+}
 
 function askQuestion(query) {
   const rl = readline.createInterface({
@@ -39,7 +132,6 @@ function askSecret(query) {
       output: process.stdout,
     });
 
-    // If non-interactive stdin, fall back to standard line reading
     if (!process.stdin.isTTY) {
       rl.question(query, (ans) => {
         rl.close();
@@ -65,10 +157,8 @@ function askSecret(query) {
         process.stdout.write("\n");
         resolve(secret);
       } else if (char === "\u0003") {
-        // Ctrl+C
         process.exit(1);
       } else if (char === "\u007f" || char === "\b") {
-        // Backspace
         if (secret.length > 0) {
           secret = secret.slice(0, -1);
           process.stdout.write("\b \b");
@@ -81,16 +171,6 @@ function askSecret(query) {
 
     stdin.on("data", onData);
   });
-}
-
-function maskDatabaseUrl(url) {
-  try {
-    const parsed = new URL(url);
-    parsed.password = "***";
-    return parsed.toString();
-  } catch {
-    return "[Invalid URL]";
-  }
 }
 
 async function main() {
@@ -119,24 +199,26 @@ async function main() {
   console.log("       MQTech Administrator Account Bootstrapper       ");
   console.log("=======================================================\n");
 
-  // Security Check 2: Database Target Verification
-  if (config.databaseUrl) {
-    console.log(`[Cơ sở dữ liệu đích]: ${maskDatabaseUrl(config.databaseUrl)}`);
-  } else if (isDevFlag || !config.isProduction) {
-    console.log(
-      "[Cơ sở dữ liệu đích]: Bộ nhớ phát triển cục bộ (In-Memory Development Store)"
-    );
-  } else {
-    console.error(
-      "[BẢO MẬT] LỖI: Thiếu DATABASE_URL trong môi trường sản xuất. Không thể khởi tạo quản trị viên."
-    );
+  // Security Check 2: Strict Target Verification
+  const targetCheck = validateBootstrapTarget(
+    config.databaseUrl,
+    isDevFlag,
+    config.isProduction
+  );
+
+  if (!targetCheck.allowed) {
+    console.error(`\n[LỖI TỪ CHỐI THỰC THI]: ${targetCheck.reason}\n`);
     process.exit(1);
   }
+
+  console.log(`[Cơ sở dữ liệu đích]: ${targetCheck.details.maskedUrl}`);
+  console.log(`[Máy chủ]: ${targetCheck.details.host}`);
+  console.log(`[Tên CSDL]: ${targetCheck.details.dbName}\n`);
 
   // Security Check 3: Check Existing Account Status
   const existingUser = await adminService.findByUsername(username);
   if (existingUser) {
-    console.log(`\n[Thông báo]: Tài khoản quản trị "${username}" ĐÃ TỒN TẠI.`);
+    console.log(`[Thông báo]: Tài khoản quản trị "${username}" ĐÃ TỒN TẠI.`);
     const confirmUpdate = await askQuestion(
       "Bạn có muốn cập nhật lại mật khẩu cho tài khoản này không? (y/N): "
     );
@@ -145,7 +227,7 @@ async function main() {
       process.exit(0);
     }
   } else {
-    console.log(`\n[Khởi tạo]: Tiến hành tạo mới tài khoản quản trị "${username}".`);
+    console.log(`[Khởi tạo]: Tiến hành tạo mới tài khoản quản trị "${username}".`);
   }
 
   // Security Check 4: Password Collection via Masked Input or Environment Variable
@@ -164,15 +246,16 @@ async function main() {
     console.error("\n[LỖI]: Mật khẩu quản trị phải có ít nhất 10 ký tự!");
     process.exit(1);
   }
-  if (password.toLowerCase() === username.toLowerCase() || password === "MQTechAdmin2026!") {
+  if (
+    password.toLowerCase() === username.toLowerCase() ||
+    password === "MQTechAdmin2026!"
+  ) {
     console.error("\n[LỖI]: Mật khẩu quá yếu hoặc sử dụng mật khẩu mẫu mặc định!");
     process.exit(1);
   }
 
-  // Generate cryptographic scrypt hash
   await hashPassword(password);
 
-  // Set environment variable in-process for adminService to persist
   process.env.ADMIN_INIT_USERNAME = username;
   process.env.ADMIN_INIT_PASSWORD = password;
 
@@ -186,7 +269,14 @@ async function main() {
   );
 }
 
-main().catch((err) => {
-  console.error("\n[MQTech Bootstrap Error]:", err.message || err);
-  process.exit(1);
-});
+// Only execute main if invoked directly from CLI
+if (
+  process.argv[1] &&
+  (process.argv[1].endsWith("bootstrap-admin.mjs") ||
+    process.argv[1].endsWith("bootstrap-admin"))
+) {
+  main().catch((err) => {
+    console.error("\n[MQTech Bootstrap Error]:", err.message || err);
+    process.exit(1);
+  });
+}

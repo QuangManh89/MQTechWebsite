@@ -1,11 +1,17 @@
 import { getAdminSessionFromRequest } from "../../../../../lib/auth/session.ts";
 import { serviceRequestRepo } from "../../../../../lib/db/repository.ts";
 import type { RequestStatus } from "../../../../../lib/db/types.ts";
+import { guardApiRoute } from "../../../../../lib/security/request-guard.ts";
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = guardApiRoute(req);
+  if (!guard.allowed && guard.response) {
+    return guard.response;
+  }
+
   const session = getAdminSessionFromRequest(req);
   if (!session) {
     return Response.json(
@@ -38,6 +44,11 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = guardApiRoute(req, { checkOrigin: true });
+  if (!guard.allowed && guard.response) {
+    return guard.response;
+  }
+
   const session = getAdminSessionFromRequest(req);
   if (!session) {
     return Response.json(

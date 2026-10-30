@@ -14,9 +14,17 @@ export interface AppConfig {
 
 export function getAppConfig(): AppConfig {
   const isProduction = process.env.NODE_ENV === "production";
-  // In-memory store is strictly prohibited in production unless explicitly permitted for synthetic tests
-  const allowMemoryStore =
-    !isProduction || process.env.ALLOW_MEMORY_STORE === "true";
+  const isTest = process.env.NODE_ENV === "test";
+
+  // Production must ALWAYS use PostgreSQL. ALLOW_MEMORY_STORE is unconditionally FALSE in production.
+  // Test environments may use isolated in-memory storage.
+  // Development environments may use in-memory storage when running locally without a database.
+  const allowMemoryStore = isProduction
+    ? false
+    : isTest ||
+      process.env.ALLOW_MEMORY_STORE === "true" ||
+      process.env.NODE_ENV === "development" ||
+      !process.env.NODE_ENV;
 
   return {
     appUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
@@ -32,14 +40,23 @@ export function getAppConfig(): AppConfig {
 
 /**
  * Validates that critical server secrets and database configuration exist in production.
- * Throws in production if missing or malformed.
+ * Throws in production if missing, malformed, or if memory store is requested.
  */
 export function validateServerEnv(): void {
-  const config = getAppConfig();
+  const isProduction = process.env.NODE_ENV === "production";
 
-  if (config.isProduction) {
+  if (isProduction) {
+    // 1. Explicitly forbid any attempt to bypass database persistence in production
+    if (process.env.ALLOW_MEMORY_STORE === "true") {
+      throw new Error(
+        "CRITICAL SECURITY VIOLATION: ALLOW_MEMORY_STORE=true is strictly forbidden in production."
+      );
+    }
+
+    const config = getAppConfig();
     const missing: string[] = [];
 
+    // 2. Validate mandatory PostgreSQL connection URL
     if (!config.databaseUrl) {
       missing.push("DATABASE_URL");
     } else if (
@@ -51,6 +68,7 @@ export function validateServerEnv(): void {
       );
     }
 
+    // 3. Validate mandatory administrative session signing secret
     if (!config.adminSessionSecret) {
       missing.push("ADMIN_SESSION_SECRET");
     } else if (config.adminSessionSecret.length < 32) {
