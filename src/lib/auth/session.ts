@@ -137,10 +137,16 @@ export async function getAdminSessionFromRequest(
     }
 
     if (user.tokenVersion !== session.tokenVersion) {
-      return null; // Token version mismatch (revoked by logout or password change)
+      return null; // Token version mismatch (revoked by logout, password change, or role change)
     }
 
-    return session;
+    return {
+      username: user.username,
+      fullName: user.fullName,
+      role: user.role, // Always use authoritative database role
+      tokenVersion: user.tokenVersion,
+      expiresAt: session.expiresAt,
+    };
   } catch {
     // Fail closed on database or lookup failure
     return null;

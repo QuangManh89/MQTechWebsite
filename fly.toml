@@ -1,0 +1,60 @@
+# ==============================================================================
+# Fly.io Deployment Configuration Template: MQTech Web Application
+# 
+# SAFETY NOTICE:
+# - Application name is "mqtech-web" (dedicated isolated application).
+# - NEVER point this configuration to "openwebui-mqtech", machine 2871574ae574e8,
+#   volume vol_4m3m9jdgen55793v, or any existing production resource.
+# - DO NOT run `fly deploy` without explicit user authorization in Phase P5.
+# ==============================================================================
+
+app = "mqtech-web"
+primary_region = "sin"
+kill_signal = "SIGTERM"
+kill_timeout = "10s"
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  # Traffic Routing Readiness Check:
+  # Load balancer only routes customer requests when the app is ready and PostgreSQL is reachable.
+  # If database connectivity is interrupted, instances return HTTP 503 and are temporarily
+  # taken out of the active routing pool without restarting the underlying machine/container.
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/api/ready"
+    protocol = "http"
+    timeout = "5s"
+    tls_skip_verify = false
+
+# Process Liveness Healthcheck:
+# Verifies that the internal Node.js HTTP server process is responsive.
+# If process deadlocks or crashes, the supervisor restarts the machine.
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+
+  [[services.http_checks]]
+    interval = "30s"
+    grace_period = "15s"
+    method = "GET"
+    path = "/api/health"
+    protocol = "http"
+    timeout = "5s"
+    restart_limit = 3

@@ -6,6 +6,7 @@ export interface GuardResult {
 }
 
 const LOCAL_DEV_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
+const SAFE_HTTP_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
  * Validates server environment and enforces strict CSRF & Trusted Origin protection.
@@ -40,9 +41,11 @@ export function guardApiRoute(
   }
 
   // 2. CSRF & Trusted Origin Validation on Unsafe (State-Changing) Methods
-  if (req && options.checkOrigin) {
+  // Explicit safe-method allowlist: GET, HEAD, OPTIONS are exempt from origin mutation checks.
+  // Every other HTTP method (POST, PATCH, PUT, DELETE, and any custom method) must pass CSRF validation.
+  if (req && options.checkOrigin !== false) {
     const method = (req.method || "GET").toUpperCase();
-    const isUnsafeMethod = ["POST", "PATCH", "PUT", "DELETE"].includes(method);
+    const isUnsafeMethod = !SAFE_HTTP_METHODS.has(method);
 
     if (isUnsafeMethod && req.headers) {
       // 2a. Fetch Metadata: Reject cross-site requests immediately

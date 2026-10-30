@@ -267,7 +267,7 @@ export function AdminDashboardClient({
               type="button"
               onClick={handleLogout}
               className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3.5 py-1.5 text-[12px] font-medium text-red-400 hover:bg-red-500/20 transition"
-              title="Đăng xuất khỏi hệ thống"
+              title="Đăng xuất khỏi hệ thống (thu hồi phiên trên tất cả thiết bị)"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Đăng xuất</span>

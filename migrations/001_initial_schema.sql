@@ -18,12 +18,12 @@ CREATE TABLE IF NOT EXISTS service_categories (
 -- Seed confirmed 6 service categories if empty
 INSERT INTO service_categories (id, title, slug, description, delivery_modes, active)
 VALUES 
-    ('svc_desktop_laptop', 'Sửa chữa máy tính bàn & Laptop', 'sua-chua-may-tinh-laptop', 'Khắc phục các sự cố phần cứng, nguồn, màn hình, bàn phím và nâng cấp linh kiện.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
-    ('svc_os_software', 'Cài đặt hệ điều hành & Phần mềm', 'cai-dat-he-dieu-hanh-phan-mem', 'Cài đặt Windows, macOS, phần mềm văn phòng, đồ họa và sao lưu dữ liệu an toàn.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
-    ('svc_maintenance', 'Vệ sinh & Bảo dưỡng thiết bị', 've-sinh-bao-duong-thiet-bi', 'Vệ sinh bụi bẩn, tra keo tản nhiệt cao cấp, tối ưu luồng gió làm mát thiết bị.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
-    ('svc_printer', 'Sửa chữa & Nạp mực máy in', 'sua-chua-nap-muc-may-in', 'Khắc phục sự cố kẹt giấy, bản in mờ, lỗi kết nối và thay mực tận nơi tại Buôn Ma Thuột.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
-    ('svc_network', 'Thi công & Sửa chữa mạng nội bộ', 'thi-cong-sua-chua-mang-noi-bo', 'Xử lý mất kết nối Internet, cấu hình Wi-Fi, modem, router và bấm đầu dây mạng.', ARRAY['ON_SITE'], TRUE),
-    ('svc_data_recovery', 'Cứu dữ liệu & Phục hồi ổ cứng', 'cuu-du-lieu-phuc-hoi-o-cung', 'Cứu dữ liệu từ ổ cứng bad sector, xóa nhầm, format hoặc lỗi phân vùng.', ARRAY['IN_STORE'], TRUE)
+    ('svc_desktop_laptop', 'Sửa Chữa Laptop & PC', 'sua-chua-laptop-pc', 'Chẩn đoán lỗi mất nguồn, màn hình, bàn phím, quạt tản nhiệt, bản lề và linh kiện cho mọi dòng máy tính bàn và laptop.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
+    ('svc_windows_software', 'Cài Đặt Windows & Phần Mềm', 'cai-dat-windows-phan-mem', 'Cài đặt hệ điều hành Windows chuẩn, cập nhật driver đầy đủ, diệt virus và tối ưu tốc độ máy hoạt động mượt mà.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
+    ('svc_hardware_upgrade', 'Chẩn Đoán & Nâng Cấp Phần Cứng', 'chan-doan-nang-cap-phan-cung', 'Nâng cấp ổ cứng SSD tốc độ cao, mở rộng dung lượng RAM, thay keo tản nhiệt chuyên dụng và vệ sinh hệ thống làm mát.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
+    ('svc_printer_service', 'Dịch Vụ Máy In Văn Phòng', 'dich-vu-may-in', 'Sửa chữa máy in kẹt giấy, không in được, cài đặt chia sẻ máy in qua mạng LAN và bảo dưỡng hộp mực văn phòng.', ARRAY['IN_STORE', 'ON_SITE'], TRUE),
+    ('svc_network_wifi', 'Mạng LAN & Wi-Fi Nội Bộ', 'thi-cong-xu-ly-mang-lan-wifi', 'Thi công bấm đầu dây mạng, cấu hình modem Wi-Fi, khắc phục rớt mạng và mở rộng vùng phủ sóng cho nhà ở và văn phòng.', ARRAY['ON_SITE'], TRUE),
+    ('svc_business_it', 'Hỗ Trợ IT Doanh Nghiệp', 'ho-tro-it-doanh-nghiep', 'Gói dịch vụ bảo trì định kỳ, hỗ trợ kỹ thuật máy tính, sao lưu dữ liệu và xử lý sự cố công nghệ thông tin cho doanh nghiệp.', ARRAY['ON_SITE'], TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Service Requests Table

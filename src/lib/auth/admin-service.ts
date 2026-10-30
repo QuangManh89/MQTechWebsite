@@ -217,6 +217,43 @@ export class AdminService {
   }
 
   /**
+   * Updates account role.
+   * Role modification immediately increments token_version to invalidate existing sessions across all devices.
+   */
+  async updateRole(
+    username: string,
+    newRole: "ADMIN" | "STAFF"
+  ): Promise<boolean> {
+    const config = getAppConfig();
+    const user = await this.findByUsername(username);
+    if (!user) return false;
+
+    if (db.isConfigured) {
+      try {
+        await db.query(
+          "UPDATE admin_users SET role = $1, token_version = token_version + 1 WHERE username = $2;",
+          [newRole, user.username]
+        );
+        user.role = newRole;
+        user.tokenVersion += 1;
+        return true;
+      } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error("Lỗi cập nhật vai trò tài khoản cơ sở dữ liệu.");
+        }
+        console.warn("PostgreSQL role update failed:", err);
+      }
+    } else if (!config.allowMemoryStore) {
+      throw new Error("Yêu cầu cơ sở dữ liệu trong môi trường này.");
+    }
+
+    user.role = newRole;
+    user.tokenVersion += 1;
+    adminStore.set(user.username, user);
+    return true;
+  }
+
+  /**
    * Sets account active state (account disablement).
    * Disabling an account immediately revokes all active session tokens.
    */

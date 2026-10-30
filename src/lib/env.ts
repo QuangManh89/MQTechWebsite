@@ -26,15 +26,16 @@ export function getAppConfig(): AppConfig {
 
   // Strict Policy:
   // - test: isolated in-memory storage permitted
-  // - development: permitted under explicit development configuration
+  // - development: memory storage permitted ONLY when ALLOW_MEMORY_STORE=true is explicitly configured.
+  //   Missing DATABASE_URL does NOT silently imply permission to use in-memory storage.
+  // - staging: ALWAYS FORBIDDEN
   // - production: ALWAYS FORBIDDEN
-  // - staging / unknown: ALWAYS FORBIDDEN by default
+  // - unknown: ALWAYS FORBIDDEN
   let allowMemoryStore = false;
   if (environment === "test") {
     allowMemoryStore = true;
   } else if (environment === "development") {
-    allowMemoryStore =
-      process.env.ALLOW_MEMORY_STORE === "true" || !process.env.DATABASE_URL;
+    allowMemoryStore = process.env.ALLOW_MEMORY_STORE === "true";
   } else {
     // production, staging, and unknown environments unconditionally forbid in-memory fallback
     allowMemoryStore = false;
@@ -77,7 +78,16 @@ export function validateServerEnv(): void {
     }
   }
 
-  // 2. Strict validation in production
+  // 2. Strict development check: missing DATABASE_URL requires explicit ALLOW_MEMORY_STORE=true
+  if (env === "development") {
+    if (!config.databaseUrl && !config.allowMemoryStore) {
+      throw new Error(
+        "In development, either DATABASE_URL must be configured or ALLOW_MEMORY_STORE=true must be explicitly set. In-memory storage is never implicitly assumed."
+      );
+    }
+  }
+
+  // 3. Strict validation in production
   if (env === "production") {
     const missing: string[] = [];
 

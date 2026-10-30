@@ -26,7 +26,10 @@ export async function POST(req?: Request) {
   }`;
 
   return new Response(
-    JSON.stringify({ success: true, message: "Đăng xuất thành công." }),
+    JSON.stringify({
+      success: true,
+      message: "Đăng xuất thành công và đã thu hồi phiên làm việc trên mọi thiết bị.",
+    }),
     {
       status: 200,
       headers: {
