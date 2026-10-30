@@ -2,12 +2,18 @@
 # ==============================================================================
 # MQTech PostgreSQL Restore Engine
 # 
-# SAFETY BOUNDARIES:
-# - STRICTLY FORBIDDEN on production databases.
-# - Requires explicit CONFIRM_DESTRUCTIVE_RESTORE=true.
-# - Rejects target URLs containing 'prod', 'production', 'live', 'openwebui', 'fly.dev'.
-# - Verifies SHA-256 integrity checksum before restoration if checksum file exists.
-# - Credentials read strictly from environment variable TARGET_DATABASE_URL.
+# SAFETY SAFEGUARDS (P4.1.2):
+# 1. Approved Target Host Allowlist: Rejects all remote/unknown hosts by default.
+#    Only approved local loopback or designated disposable test hosts are accepted.
+# 2. Disposable Database Name Enforcement: Target DB name must contain a disposable
+#    test marker (_dev, _test, _disposable, _restore_test).
+# 3. Source & Destination Identity Conflict: Strictly rejects restoring into the
+#    same database as the source (prevents accidental self-clobbering).
+# 4. Two-Factor Operator Confirmation:
+#    - CONFIRM_DESTRUCTIVE_RESTORE=true
+#    - CONFIRM_RESTORE_DB_NAME="<exact_target_db_name>"
+# 5. Masked Credential Logging: Never prints passwords or raw connection strings.
+# 6. Encryption Status: At-rest encryption remains NOT IMPLEMENTED internally.
 # ==============================================================================
 
 set -euo pipefail
@@ -18,9 +24,14 @@ echo "======================================================="
 echo "       MQTech PostgreSQL Database Restore Engine       "
 echo "======================================================="
 
+# --- Step 1: Input Validation ---
 if [ -z "${BACKUP_FILE}" ]; then
   echo "[LỖI]: Thiếu đường dẫn tệp sao lưu."
-  echo "Cách dùng: CONFIRM_DESTRUCTIVE_RESTORE=true TARGET_DATABASE_URL=... ./scripts/restore.sh <path-to-dump-file>"
+  echo "Cách dùng:"
+  echo "  CONFIRM_DESTRUCTIVE_RESTORE=true \\"
+  echo "  CONFIRM_RESTORE_DB_NAME=\"<target_db_name>\" \\"
+  echo "  TARGET_DATABASE_URL=\"postgresql://user:pass@localhost:5432/<target_db_name>\" \\"
+  echo "  ./scripts/restore.sh <path-to-dump-file>"
   exit 1
 fi
 
@@ -34,24 +45,22 @@ if [ -z "${TARGET_DATABASE_URL:-}" ]; then
   exit 1
 fi
 
-# 1. Target Safety Validation: Reject any production-like keywords
-FORBIDDEN_KEYWORDS="prod production live openwebui fly.dev"
-for kw in ${FORBIDDEN_KEYWORDS}; do
-  if echo "${TARGET_DATABASE_URL}" | grep -qi "${kw}"; then
-    echo "[TỪ CHỐI BẢO MẬT]: TARGET_DATABASE_URL chứa từ khóa cấm ('${kw}')."
-    echo "Nghiêm cấm thực thi phục hồi phá hủy (destructive restore) lên môi trường sản xuất!"
-    exit 1
-  fi
-done
-
-# 2. Enforce explicit confirmation flag
-if [ "${CONFIRM_DESTRUCTIVE_RESTORE:-}" != "true" ]; then
-  echo "[CẢNH BÁO BẢO VỆ DỮ LIỆU]: Thao tác phục hồi có tính chất ghi đè dữ liệu đích."
-  echo "Để xác nhận, vui lòng đặt biến môi trường: CONFIRM_DESTRUCTIVE_RESTORE=true"
+# --- Step 2: Validate Target Safety via Restore Guard Engine ---
+GUARD_OUTPUT="$(node scripts/restore-guard.mjs 2>&1)" || {
+  echo "${GUARD_OUTPUT}"
   exit 1
-fi
+}
 
-# 3. Integrity Verification (if .sha256 file exists)
+TARGET_HOST="$(echo "${GUARD_OUTPUT}" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0, "utf-8")).host);')"
+TARGET_DB_NAME="$(echo "${GUARD_OUTPUT}" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0, "utf-8")).dbName);')"
+MASKED_TARGET_URL="$(echo "${GUARD_OUTPUT}" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0, "utf-8")).maskedUrl);')"
+
+echo "[Mục tiêu phục hồi]: ${MASKED_TARGET_URL}"
+echo "[Máy chủ đích]: ${TARGET_HOST}"
+echo "[Tên CSDL đích]: ${TARGET_DB_NAME}"
+echo ""
+
+# --- Step 7: Integrity Verification ---
 CHECKSUM_FILE="${BACKUP_FILE}.sha256"
 if [ -f "${CHECKSUM_FILE}" ]; then
   echo "[Kiểm tra]: Đang xác thực chữ ký toàn vẹn SHA-256..."
@@ -65,7 +74,9 @@ else
   echo "[CẢNH BÁO]: Không tìm thấy tệp chữ ký ${CHECKSUM_FILE}. Bỏ qua kiểm tra toàn vẹn tự động."
 fi
 
-echo "[Thực thi]: Bắt đầu phục hồi cấu trúc và dữ liệu vào mục tiêu kiểm thử..."
+echo "[MÃ HÓA NGHỈ]: NOT IMPLEMENTED (Tệp dump phải ở dạng nhị phân hợp lệ hoặc đã được giải mã bên ngoài trước khi truyền vào script này)."
+echo ""
+echo "[Thực thi]: Bắt đầu phục hồi cấu trúc và dữ liệu vào mục tiêu kiểm thử '${TARGET_DB_NAME}'..."
 
 pg_restore \
   --dbname="${TARGET_DATABASE_URL}" \

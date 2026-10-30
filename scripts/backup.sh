@@ -22,6 +22,7 @@ BACKUP_FILEPATH="${BACKUP_DIR}/${BACKUP_FILENAME}"
 CHECKSUM_FILEPATH="${BACKUP_FILEPATH}.sha256"
 
 mkdir -p "${BACKUP_DIR}"
+chmod 700 "${BACKUP_DIR}"
 
 echo "======================================================="
 echo "       MQTech PostgreSQL Database Backup Engine        "
@@ -34,6 +35,7 @@ if [ -z "${DATABASE_URL:-}" ]; then
 fi
 
 echo "[Khởi tạo]: Đang tiến hành sao lưu cấu trúc và dữ liệu..."
+echo "[Mã hóa nghỉ]: NOT IMPLEMENTED (Bản nén nguyên bản; yêu cầu mã hóa ngoài trước khi tải lên kho lưu trữ)"
 echo "[Tệp xuất]: ${BACKUP_FILEPATH}"
 
 # Execute pg_dump using native environment credential resolution

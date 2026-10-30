@@ -130,11 +130,152 @@ export function loadMigrationFiles() {
   });
 }
 
+export const REQUIRED_SCHEMA_OBJECTS = {
+  tables: [
+    "service_categories",
+    "service_requests",
+    "request_status_history",
+    "admin_users",
+  ],
+  columns: {
+    service_categories: [
+      { name: "id", nullable: "NO" },
+      { name: "title", nullable: "NO" },
+      { name: "slug", nullable: "NO" },
+      { name: "description", nullable: "NO" },
+      { name: "delivery_modes", nullable: "NO" },
+      { name: "active", nullable: "NO" },
+      { name: "created_at", nullable: "NO" },
+    ],
+    service_requests: [
+      { name: "id", nullable: "NO" },
+      { name: "reference_code", nullable: "NO" },
+      { name: "customer_name", nullable: "NO" },
+      { name: "customer_phone", nullable: "NO" },
+      { name: "service_mode", nullable: "NO" },
+      { name: "device_category", nullable: "NO" },
+      { name: "service_category_id", nullable: "NO" },
+      { name: "issue_description", nullable: "NO" },
+      { name: "status", nullable: "NO" },
+      { name: "created_at", nullable: "NO" },
+      { name: "updated_at", nullable: "NO" },
+    ],
+    request_status_history: [
+      { name: "id", nullable: "NO" },
+      { name: "request_id", nullable: "NO" },
+      { name: "from_status", nullable: "NO" },
+      { name: "to_status", nullable: "NO" },
+      { name: "changed_by", nullable: "NO" },
+      { name: "created_at", nullable: "NO" },
+    ],
+    admin_users: [
+      { name: "id", nullable: "NO" },
+      { name: "username", nullable: "NO" },
+      { name: "password_hash", nullable: "NO" },
+      { name: "full_name", nullable: "NO" },
+      { name: "role", nullable: "NO" },
+      { name: "token_version", nullable: "NO" },
+      { name: "is_active", nullable: "NO" },
+      { name: "created_at", nullable: "NO" },
+    ],
+  },
+  indexes: [
+    "idx_service_requests_status",
+    "idx_service_requests_created_at",
+    "idx_service_requests_ref_code",
+    "idx_service_requests_phone",
+    "idx_status_history_request_id",
+  ],
+  serviceCategories: [
+    "svc_desktop_laptop",
+    "svc_windows_software",
+    "svc_hardware_upgrade",
+    "svc_printer_service",
+    "svc_network_wifi",
+    "svc_business_it",
+  ],
+};
+
+/**
+ * Validates the complete existing schema on a PostgreSQL client.
+ * Aborts baselining if any table, column, constraint, index, or seed is missing.
+ */
+export async function verifyCompleteSchema(client) {
+  const errors = [];
+
+  // 1. Check Tables
+  const tableRows = await client.query(
+    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
+  );
+  const foundTables = new Set(tableRows.map((r) => r.table_name || r.TABLE_NAME));
+  for (const tbl of REQUIRED_SCHEMA_OBJECTS.tables) {
+    if (!foundTables.has(tbl)) {
+      errors.push(`Bảng bắt buộc còn thiếu: "${tbl}"`);
+    }
+  }
+
+  // 2. Check Columns and Nullability
+  const colRows = await client.query(
+    "SELECT table_name, column_name, is_nullable FROM information_schema.columns WHERE table_schema = 'public';"
+  );
+  const colMap = new Map();
+  for (const r of colRows) {
+    const tbl = r.table_name || r.TABLE_NAME;
+    const col = r.column_name || r.COLUMN_NAME;
+    const isNull = r.is_nullable || r.IS_NULLABLE;
+    if (!colMap.has(tbl)) colMap.set(tbl, new Map());
+    colMap.get(tbl).set(col, isNull);
+  }
+
+  for (const [tbl, expectedCols] of Object.entries(REQUIRED_SCHEMA_OBJECTS.columns)) {
+    const tableCols = colMap.get(tbl);
+    if (!tableCols) continue; // Already reported missing table
+    for (const ec of expectedCols) {
+      if (!tableCols.has(ec.name)) {
+        errors.push(`Cột bắt buộc còn thiếu: "${tbl}.${ec.name}"`);
+      } else if (ec.nullable && tableCols.get(ec.name) !== ec.nullable) {
+        errors.push(
+          `Tính bắt buộc (nullability) sai khác trên "${tbl}.${ec.name}": mong đợi ${ec.nullable}, thực tế ${tableCols.get(ec.name)}`
+        );
+      }
+    }
+  }
+
+  // 3. Check Indexes
+  const idxRows = await client.query(
+    "SELECT indexname FROM pg_indexes WHERE schemaname = 'public';"
+  );
+  const foundIndexes = new Set(idxRows.map((r) => r.indexname || r.INDEXNAME));
+  for (const idx of REQUIRED_SCHEMA_OBJECTS.indexes) {
+    if (!foundIndexes.has(idx)) {
+      errors.push(`Index bắt buộc còn thiếu: "${idx}"`);
+    }
+  }
+
+  // 4. Check 6 Service Categories Seed Records
+  try {
+    const catRows = await client.query("SELECT id FROM service_categories;");
+    const foundCatIds = new Set(catRows.map((r) => r.id));
+    for (const catId of REQUIRED_SCHEMA_OBJECTS.serviceCategories) {
+      if (!foundCatIds.has(catId)) {
+        errors.push(`Dữ liệu danh mục dịch vụ mẫu (seed) còn thiếu mã: "${catId}"`);
+      }
+    }
+  } catch (err) {
+    errors.push(`Không thể truy vấn dữ liệu service_categories: ${err.message}`);
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
 /**
  * Core migration engine operating on a single pinned database client connection.
  */
 export async function executeMigrationsOnConnection(client, options = {}) {
-  const { isDryRun = false, isBaseline = false } = options;
+  const { isDryRun = false, isBaseline = false, confirmBaseline = false } = options;
   const migrations = loadMigrationFiles();
 
   if (isDryRun) {
@@ -183,6 +324,19 @@ export async function executeMigrationsOnConnection(client, options = {}) {
 
       // If --baseline flag is passed for an already-initialized database:
       if (isBaseline && m.version === "001") {
+        if (!confirmBaseline && process.env.CONFIRM_BASELINE !== "true") {
+          throw new Error(
+            "BASELINE ABORTED: Baselining requires explicit operator confirmation via '--confirm-baseline' or 'CONFIRM_BASELINE=true'."
+          );
+        }
+
+        const schemaCheck = await verifyCompleteSchema(client);
+        if (!schemaCheck.valid) {
+          throw new Error(
+            `BASELINE ABORTED: Database schema does not match expected MQTech 001 structure:\n- ${schemaCheck.errors.join("\n- ")}`
+          );
+        }
+
         await client.query(
           "INSERT INTO schema_migrations (version, name, checksum) VALUES ($1, $2, $3);",
           [m.version, m.name, m.checksum]
@@ -224,6 +378,8 @@ async function main() {
   const args = process.argv.slice(2);
   const isDryRun = args.includes("--dry-run");
   const isStatusOnly = args.includes("--status");
+  const isBaseline = args.includes("--baseline");
+  const confirmBaseline = args.includes("--confirm-baseline");
   const config = getAppConfig();
 
   console.log("\n=======================================================");
@@ -253,6 +409,11 @@ async function main() {
     console.log(
       "\n[CHẾ ĐỘ KIỂM TRA (DRY-RUN)]: Đã kiểm tra tính toàn vẹn và cú pháp của tệp migration."
     );
+    if (isBaseline) {
+      console.log(
+        `[CHẾ ĐỘ BASELINE]: Xác thực toàn diện cấu trúc cơ sở dữ liệu trước khi đánh dấu (xác nhận: ${confirmBaseline ? "có" : "chưa"}).`
+      );
+    }
     console.log(
       "[BẢO VỆ AN TOÀN]: Chưa có lệnh SQL nào được thực thi lên cơ sở dữ liệu thật.\n"
     );
