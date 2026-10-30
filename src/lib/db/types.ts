@@ -52,5 +52,7 @@ export interface AdminUser {
   passwordHash: string;
   fullName: string;
   role: "ADMIN" | "STAFF";
+  tokenVersion: number;
+  isActive: boolean;
   createdAt: Date;
 }

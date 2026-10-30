@@ -4,12 +4,14 @@
  * Capabilities:
  * - Fail-closed database target validation (prevents execution on unknown/production databases).
  * - Tracks applied migrations with SHA-256 checksums in schema_migrations table.
- * - Transactional execution (rolls back on any error).
- * - Advisory locking against concurrent migration execution.
- * - Supports --dry-run and --status flags.
+ * - Single pinned client connection: BEGIN, DDL execution, checksum recording, COMMIT on same session.
+ * - Automatic ROLLBACK on any migration error.
+ * - Session-level advisory locking (pg_advisory_lock) against concurrent migration runs.
+ * - Detects tampering/modification of previously applied migrations.
+ * - Supports --dry-run, --status, and --baseline flags.
  * 
  * Usage:
- *   node scripts/migrate.mjs [--dry-run] [--status]
+ *   node scripts/migrate.mjs [--dry-run] [--status] [--baseline]
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -20,6 +22,9 @@ import { getAppConfig } from "../src/lib/env.ts";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const MIGRATIONS_DIR = path.resolve(__dirname, "../migrations");
+
+// Advisory lock key dedicated to MQTech migrations
+const MIGRATION_ADVISORY_LOCK_ID = 20261030;
 
 const ALLOWED_LOCAL_HOSTS = new Set([
   "localhost",
@@ -125,6 +130,96 @@ export function loadMigrationFiles() {
   });
 }
 
+/**
+ * Core migration engine operating on a single pinned database client connection.
+ */
+export async function executeMigrationsOnConnection(client, options = {}) {
+  const { isDryRun = false, isBaseline = false } = options;
+  const migrations = loadMigrationFiles();
+
+  if (isDryRun) {
+    return {
+      applied: [],
+      pending: migrations.map((m) => m.version),
+      dryRun: true,
+    };
+  }
+
+  // 1. Acquire session-level advisory lock on the pinned connection
+  await client.query("SELECT pg_advisory_lock($1);", [MIGRATION_ADVISORY_LOCK_ID]);
+
+  try {
+    // 2. Ensure schema_migrations table exists
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        version VARCHAR(128) PRIMARY KEY,
+        name VARCHAR(256) NOT NULL,
+        checksum VARCHAR(64) NOT NULL,
+        applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+      );
+    `);
+
+    // 3. Query already applied migrations
+    const appliedRows = await client.query(
+      "SELECT version, checksum FROM schema_migrations ORDER BY version ASC;"
+    );
+    const appliedMap = new Map(
+      appliedRows.map((r) => [String(r.version), String(r.checksum)])
+    );
+
+    const newlyApplied = [];
+
+    // 4. Validate applied checksums & execute pending migrations
+    for (const m of migrations) {
+      if (appliedMap.has(m.version)) {
+        const recordedChecksum = appliedMap.get(m.version);
+        if (recordedChecksum !== m.checksum) {
+          throw new Error(
+            `MIGRATION TAMPERING DETECTED: Checksum mismatch for migration "${m.filename}". Recorded: ${recordedChecksum}, Computed: ${m.checksum}.`
+          );
+        }
+        continue;
+      }
+
+      // If --baseline flag is passed for an already-initialized database:
+      if (isBaseline && m.version === "001") {
+        await client.query(
+          "INSERT INTO schema_migrations (version, name, checksum) VALUES ($1, $2, $3);",
+          [m.version, m.name, m.checksum]
+        );
+        newlyApplied.push(m.version);
+        continue;
+      }
+
+      // 5. Execute on single pinned connection inside transaction
+      await client.query("BEGIN;");
+      try {
+        await client.query(m.content);
+        await client.query(
+          "INSERT INTO schema_migrations (version, name, checksum) VALUES ($1, $2, $3);",
+          [m.version, m.name, m.checksum]
+        );
+        await client.query("COMMIT;");
+        newlyApplied.push(m.version);
+      } catch (err) {
+        await client.query("ROLLBACK;");
+        throw new Error(
+          `Migration failed and was rolled back [${m.filename}]: ${err.message}`
+        );
+      }
+    }
+
+    return {
+      applied: newlyApplied,
+      pending: [],
+      dryRun: false,
+    };
+  } finally {
+    // 6. Always release advisory lock on the pinned connection
+    await client.query("SELECT pg_advisory_unlock($1);", [MIGRATION_ADVISORY_LOCK_ID]);
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const isDryRun = args.includes("--dry-run");
@@ -164,7 +259,6 @@ async function main() {
     process.exit(0);
   }
 
-  // Live execution requires an actual authorized database connection
   console.log(
     "\n[THÔNG BÁO]: Thực thi trực tiếp đòi hỏi kết nối PostgreSQL cục bộ khả dụng trong pha P4."
   );

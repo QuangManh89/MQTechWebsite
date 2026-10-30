@@ -6,6 +6,7 @@ describe("Service Request Repository Verification", () => {
   let repo;
 
   beforeEach(() => {
+    process.env.NODE_ENV = "test";
     repo = new ServiceRequestRepository();
     repo.clearDevStore();
   });

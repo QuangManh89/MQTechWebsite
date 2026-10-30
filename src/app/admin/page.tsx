@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session.ts";
+import { adminService } from "@/lib/auth/admin-service.ts";
 import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient.tsx";
 
 export const metadata = {
@@ -22,6 +23,11 @@ async function AdminProtectedShell() {
 
   const session = verifySessionToken(sessionCookie.value);
   if (!session) {
+    redirect("/admin/login");
+  }
+
+  const user = await adminService.findByUsername(session.username);
+  if (!user || !user.isActive || user.tokenVersion !== session.tokenVersion) {
     redirect("/admin/login");
   }
 

@@ -1,4 +1,4 @@
-import { test, describe } from "node:test";
+import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import {
   createSessionToken,
@@ -6,12 +6,19 @@ import {
   getAdminSessionFromRequest,
   ADMIN_COOKIE_NAME,
 } from "../src/lib/auth/session.ts";
+import { adminService } from "../src/lib/auth/admin-service.ts";
 
 describe("Administrator Session Token & Cookie Security", () => {
+  beforeEach(() => {
+    process.env.NODE_ENV = "test";
+    adminService.clearDevStore();
+  });
+
   const mockUser = {
     username: "admin_test",
     fullName: "Quản Trị Viên Test",
     role: "ADMIN",
+    tokenVersion: 1,
   };
 
   test("should create and verify valid session token", () => {
@@ -56,27 +63,31 @@ describe("Administrator Session Token & Cookie Security", () => {
     assert.strictEqual(session, null, "Expired token must be rejected");
   });
 
-  test("should extract session from Request Cookie header", () => {
-    const token = createSessionToken(mockUser, 1);
+  test("should extract session from Request Cookie header", async () => {
+    process.env.ADMIN_INIT_PASSWORD = "TestPassword123!";
+    await adminService.ensureInitialAdmin();
+    const user = await adminService.findByUsername("admin");
+    assert.ok(user);
+    const token = createSessionToken(user, 1);
     const req = new Request("http://localhost:3000/api/admin/me", {
       headers: {
         cookie: `other_cookie=123; ${ADMIN_COOKIE_NAME}=${token}; test=abc`,
       },
     });
 
-    const session = getAdminSessionFromRequest(req);
+    const session = await getAdminSessionFromRequest(req);
     assert.ok(session);
-    assert.strictEqual(session?.username, "admin_test");
+    assert.strictEqual(session?.username, "admin");
   });
 
-  test("should return null if session cookie is absent", () => {
+  test("should return null if session cookie is absent", async () => {
     const req = new Request("http://localhost:3000/api/admin/me", {
       headers: {
         cookie: "other_cookie=123",
       },
     });
 
-    const session = getAdminSessionFromRequest(req);
+    const session = await getAdminSessionFromRequest(req);
     assert.strictEqual(session, null);
   });
 });

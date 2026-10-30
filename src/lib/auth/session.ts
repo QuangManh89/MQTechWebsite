@@ -1,10 +1,12 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getAppConfig } from "../env.ts";
+import { adminService } from "./admin-service.ts";
 
 export interface AdminSession {
   username: string;
   fullName: string;
   role: "ADMIN" | "STAFF";
+  tokenVersion: number;
   expiresAt: number;
 }
 
@@ -28,10 +30,15 @@ function getSecret(): string {
 }
 
 /**
- * Creates an HMAC-SHA256 signed session token.
+ * Creates an HMAC-SHA256 signed session token containing the user's tokenVersion.
  */
 export function createSessionToken(
-  user: { username: string; fullName: string; role: "ADMIN" | "STAFF" },
+  user: {
+    username: string;
+    fullName: string;
+    role: "ADMIN" | "STAFF";
+    tokenVersion?: number;
+  },
   durationHours = DEFAULT_SESSION_DURATION_HOURS
 ): string {
   const expiresAt = Date.now() + durationHours * 60 * 60 * 1000;
@@ -39,6 +46,7 @@ export function createSessionToken(
     username: user.username,
     fullName: user.fullName,
     role: user.role,
+    tokenVersion: user.tokenVersion || 1,
     expiresAt,
   };
 
@@ -51,8 +59,8 @@ export function createSessionToken(
 }
 
 /**
- * Verifies an HMAC-SHA256 signed session token.
- * Returns decoded session if valid and unexpired; null otherwise.
+ * Verifies HMAC-SHA256 signature and expiration of session token.
+ * Returns decoded session if cryptographically valid and unexpired; null otherwise.
  */
 export function verifySessionToken(token: string): AdminSession | null {
   if (!token || !token.includes(".")) {
@@ -94,8 +102,12 @@ export function verifySessionToken(token: string): AdminSession | null {
 
 /**
  * Extracts and verifies the admin session from a Request's Cookie header.
+ * Validates cryptographic signature, expiration, active account state, and matching tokenVersion.
+ * Fails closed on any database or lookup error.
  */
-export function getAdminSessionFromRequest(req: Request): AdminSession | null {
+export async function getAdminSessionFromRequest(
+  req: Request
+): Promise<AdminSession | null> {
   const cookieHeader = req.headers.get("cookie");
   if (!cookieHeader) return null;
 
@@ -109,5 +121,28 @@ export function getAdminSessionFromRequest(req: Request): AdminSession | null {
   const token = cookies[ADMIN_COOKIE_NAME];
   if (!token) return null;
 
-  return verifySessionToken(token);
+  // 1. Verify cryptographic HMAC signature & expiry
+  const session = verifySessionToken(token);
+  if (!session) return null;
+
+  // 2. Fail-closed account state and token_version check
+  try {
+    const user = await adminService.findByUsername(session.username);
+    if (!user) {
+      return null; // Account no longer exists
+    }
+
+    if (!user.isActive) {
+      return null; // Account is disabled
+    }
+
+    if (user.tokenVersion !== session.tokenVersion) {
+      return null; // Token version mismatch (revoked by logout or password change)
+    }
+
+    return session;
+  } catch {
+    // Fail closed on database or lookup failure
+    return null;
+  }
 }

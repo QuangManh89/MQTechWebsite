@@ -37,15 +37,18 @@ describe("Administrative API Security & Management Verification", () => {
     username: "admin",
     fullName: "Quản Trị Viên MQTech",
     role: "ADMIN",
+    tokenVersion: 1,
   };
   const validAdminToken = createSessionToken(adminUser, 4);
   const authHeaders = {
     cookie: `${ADMIN_COOKIE_NAME}=${validAdminToken}`,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    process.env.NODE_ENV = "test";
     serviceRequestRepo.clearDevStore();
     adminService.clearDevStore();
+    await adminService.ensureInitialAdmin();
     adminLoginLimiter.reset();
   });
 

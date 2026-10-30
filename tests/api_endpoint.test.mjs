@@ -21,6 +21,7 @@ function createMockRequest(body, headers = {}) {
 
 describe("POST /api/service-requests API Endpoint Verification", () => {
   beforeEach(() => {
+    process.env.NODE_ENV = "test";
     serviceRequestRepo.clearDevStore();
     intakeRateLimiter.reset();
   });

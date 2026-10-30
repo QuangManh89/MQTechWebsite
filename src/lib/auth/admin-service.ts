@@ -56,20 +56,24 @@ export class AdminService {
         passwordHash,
         fullName: "Quản Trị Viên MQTech",
         role: "ADMIN",
+        tokenVersion: 1,
+        isActive: true,
         createdAt: new Date(),
       };
 
       if (db.isConfigured) {
         try {
           await db.query(
-            `INSERT INTO admin_users (id, username, password_hash, full_name, role, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6);`,
+            `INSERT INTO admin_users (id, username, password_hash, full_name, role, token_version, is_active, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`,
             [
               initialAdmin.id,
               initialAdmin.username,
               initialAdmin.passwordHash,
               initialAdmin.fullName,
               initialAdmin.role,
+              initialAdmin.tokenVersion,
+              initialAdmin.isActive,
               initialAdmin.createdAt,
             ]
           );
@@ -111,6 +115,11 @@ export class AdminService {
             passwordHash: String(row.password_hash),
             fullName: String(row.full_name),
             role: row.role as "ADMIN" | "STAFF",
+            tokenVersion:
+              typeof row.token_version === "number"
+                ? row.token_version
+                : parseInt(String(row.token_version || "1"), 10),
+            isActive: row.is_active !== false,
             createdAt: new Date(String(row.created_at)),
           };
         }
@@ -133,17 +142,134 @@ export class AdminService {
   }
 
   /**
+   * Updates an administrator's password and transactionally increments tokenVersion.
+   * Instantly invalidates all pre-existing session tokens for this administrator.
+   */
+  async updatePassword(
+    username: string,
+    newPassword: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const config = getAppConfig();
+    const user = await this.findByUsername(username);
+    if (!user) {
+      return { success: false, error: "Không tìm thấy người dùng." };
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+
+    if (db.isConfigured) {
+      try {
+        await db.transaction(async (tx) => {
+          await tx.query(
+            "UPDATE admin_users SET password_hash = $1, token_version = token_version + 1 WHERE username = $2;",
+            [passwordHash, user.username]
+          );
+        });
+        user.passwordHash = passwordHash;
+        user.tokenVersion += 1;
+        return { success: true };
+      } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error("Lỗi cập nhật mật khẩu cơ sở dữ liệu.");
+        }
+        console.warn("PostgreSQL password update failed:", err);
+      }
+    } else if (!config.allowMemoryStore) {
+      throw new Error("Yêu cầu cơ sở dữ liệu trong môi trường này.");
+    }
+
+    // In-memory update
+    user.passwordHash = passwordHash;
+    user.tokenVersion += 1;
+    adminStore.set(user.username, user);
+    return { success: true };
+  }
+
+  /**
+   * Revokes all active session tokens for the given administrator by incrementing tokenVersion.
+   */
+  async revokeAllSessions(username: string): Promise<boolean> {
+    const config = getAppConfig();
+    const user = await this.findByUsername(username);
+    if (!user) return false;
+
+    if (db.isConfigured) {
+      try {
+        await db.query(
+          "UPDATE admin_users SET token_version = token_version + 1 WHERE username = $1;",
+          [user.username]
+        );
+        user.tokenVersion += 1;
+        return true;
+      } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error("Lỗi thu hồi phiên làm việc trong cơ sở dữ liệu.");
+        }
+        console.warn("PostgreSQL token revocation failed:", err);
+      }
+    } else if (!config.allowMemoryStore) {
+      throw new Error("Yêu cầu cơ sở dữ liệu trong môi trường này.");
+    }
+
+    user.tokenVersion += 1;
+    adminStore.set(user.username, user);
+    return true;
+  }
+
+  /**
+   * Sets account active state (account disablement).
+   * Disabling an account immediately revokes all active session tokens.
+   */
+  async setAccountActive(
+    username: string,
+    isActive: boolean
+  ): Promise<boolean> {
+    const config = getAppConfig();
+    const user = await this.findByUsername(username);
+    if (!user) return false;
+
+    if (db.isConfigured) {
+      try {
+        await db.query(
+          "UPDATE admin_users SET is_active = $1, token_version = token_version + 1 WHERE username = $2;",
+          [isActive, user.username]
+        );
+        user.isActive = isActive;
+        user.tokenVersion += 1;
+        return true;
+      } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error("Lỗi cập nhật trạng thái tài khoản cơ sở dữ liệu.");
+        }
+        console.warn("PostgreSQL account state update failed:", err);
+      }
+    } else if (!config.allowMemoryStore) {
+      throw new Error("Yêu cầu cơ sở dữ liệu trong môi trường này.");
+    }
+
+    user.isActive = isActive;
+    user.tokenVersion += 1;
+    adminStore.set(user.username, user);
+    return true;
+  }
+
+  /**
    * Authenticates administrator credentials.
-   * Never leaks whether the username exists versus an incorrect password.
+   * Rejects disabled accounts and never leaks username existence.
    */
   async authenticate(
     username: string,
     password: string
-  ): Promise<{ username: string; fullName: string; role: "ADMIN" | "STAFF" } | null> {
+  ): Promise<{
+    username: string;
+    fullName: string;
+    role: "ADMIN" | "STAFF";
+    tokenVersion: number;
+  } | null> {
     await this.ensureInitialAdmin();
 
     const user = await this.findByUsername(username);
-    if (!user) {
+    if (!user || !user.isActive) {
       // Run dummy hash check to prevent timing attacks
       await verifyPassword("dummy", "00000000000000000000000000000000:0000");
       return null;
@@ -158,6 +284,7 @@ export class AdminService {
       username: user.username,
       fullName: user.fullName,
       role: user.role,
+      tokenVersion: user.tokenVersion,
     };
   }
 

@@ -50,6 +50,7 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
     delete process.env.DATABASE_URL;
     delete process.env.ADMIN_SESSION_SECRET;
     delete process.env.ALLOW_MEMORY_STORE;
+    delete process.env.ADMIN_INIT_USERNAME;
   });
 
   // --- Fix A: Unconditional Prohibition of Memory Store in Production ---
@@ -221,11 +222,12 @@ describe("P4 Production Security Boundary & Failure Behavior Verification", () =
       issueDescription: "Vệ sinh tra keo tản nhiệt máy tính định kỳ",
     });
 
-    const token = createSessionToken({
-      username: "actual_admin",
-      fullName: "Kỹ Thuật Viên Chính Thức",
-      role: "ADMIN",
-    });
+    process.env.ADMIN_INIT_USERNAME = "actual_admin";
+    await adminService.ensureInitialAdmin();
+    const adminUser = await adminService.findByUsername("actual_admin");
+    assert.ok(adminUser);
+
+    const token = createSessionToken(adminUser);
 
     const patchReq = createMockReq(
       `http://localhost:3000/api/admin/requests/${req.id}`,

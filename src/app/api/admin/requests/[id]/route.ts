@@ -12,7 +12,7 @@ export async function GET(
     return guard.response;
   }
 
-  const session = getAdminSessionFromRequest(req);
+  const session = await getAdminSessionFromRequest(req);
   if (!session) {
     return Response.json(
       { success: false, error: "Yêu cầu đăng nhập quản trị." },
@@ -49,7 +49,7 @@ export async function PATCH(
     return guard.response;
   }
 
-  const session = getAdminSessionFromRequest(req);
+  const session = await getAdminSessionFromRequest(req);
   if (!session) {
     return Response.json(
       { success: false, error: "Yêu cầu đăng nhập quản trị." },
