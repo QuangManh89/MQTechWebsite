@@ -18,10 +18,14 @@ describe("PostgreSQL Relational Schema Boundary Verification", () => {
     );
   });
 
-  test("should enforce AWAITING_CONFIRMATION as default request status", () => {
+  test("should enforce AWAITING_CONFIRMATION as default request status and include all valid statuses", () => {
     assert.ok(
       schemaSql.includes("status VARCHAR(32) DEFAULT 'AWAITING_CONFIRMATION' NOT NULL"),
       "Default status must be AWAITING_CONFIRMATION"
+    );
+    assert.ok(
+      schemaSql.includes("WAITING_FOR_APPROVAL"),
+      "WAITING_FOR_APPROVAL status must be included in CHECK constraint"
     );
   });
 

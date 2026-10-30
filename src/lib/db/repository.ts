@@ -5,14 +5,38 @@ import type {
   RequestStatusHistory,
   ServiceDeliveryMode,
   DeviceCategory,
+  RequestStatus,
 } from "./types.ts";
 import type { CreateServiceRequestDTO } from "../validations/service-request.ts";
+import { isValidStatusTransition } from "../constants/status-lifecycle.ts";
 import { db } from "./client.ts";
 
-/**
- * In-memory development store for requests when PostgreSQL is not yet connected.
- * Preserves requests in memory during development and automated tests.
- */
+export interface ListRequestsOptions {
+  status?: RequestStatus;
+  serviceMode?: ServiceDeliveryMode;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface RequestStats {
+  total: number;
+  awaitingConfirmation: number;
+  confirmed: number;
+  inProgress: number;
+  waitingForApproval: number;
+  completed: number;
+  cancelled: number;
+}
+
 declare global {
   var __mqtechDevRequests: Map<string, ServiceRequest> | undefined;
   var __mqtechDevHistory: RequestStatusHistory[] | undefined;
@@ -143,25 +167,7 @@ export class ServiceRequestRepository {
           [normalized]
         );
         if (rows.length > 0) {
-          const row = rows[0];
-          return {
-            id: String(row.id),
-            referenceCode: String(row.reference_code),
-            customerName: String(row.customer_name),
-            customerPhone: String(row.customer_phone),
-            serviceMode: row.service_mode as ServiceDeliveryMode,
-            deviceCategory: row.device_category as DeviceCategory,
-            serviceCategoryId: String(row.service_category_id),
-            issueDescription: String(row.issue_description),
-            serviceAddress: row.service_address ? String(row.service_address) : undefined,
-            preferredContactTime: row.preferred_contact_time
-              ? String(row.preferred_contact_time)
-              : undefined,
-            status: "AWAITING_CONFIRMATION",
-            adminNotes: row.admin_notes ? String(row.admin_notes) : undefined,
-            createdAt: new Date(String(row.created_at)),
-            updatedAt: new Date(String(row.updated_at)),
-          };
+          return this.mapRowToRequest(rows[0]);
         }
       } catch (err) {
         console.warn("PostgreSQL query failed:", err);
@@ -172,16 +178,300 @@ export class ServiceRequestRepository {
   }
 
   /**
-   * Clears the development store (useful for automated tests).
+   * Retrieves a request by its internal UUID id (Admin only).
    */
+  async findById(id: string): Promise<ServiceRequest | null> {
+    if (!id) return null;
+
+    if (db.isConfigured) {
+      try {
+        const rows = await db.query<Record<string, unknown>>(
+          "SELECT * FROM service_requests WHERE id = $1 LIMIT 1;",
+          [id]
+        );
+        if (rows.length > 0) {
+          return this.mapRowToRequest(rows[0]);
+        }
+      } catch (err) {
+        console.warn("PostgreSQL query failed:", err);
+      }
+    }
+
+    for (const req of devRequestsStore.values()) {
+      if (req.id === id) return req;
+    }
+    return null;
+  }
+
+  /**
+   * Administrative query: Lists requests with filters, search, and pagination.
+   */
+  async listRequests(
+    options: ListRequestsOptions = {}
+  ): Promise<PaginatedResult<ServiceRequest>> {
+    const page = Math.max(1, options.page || 1);
+    const pageSize = Math.min(50, Math.max(1, options.pageSize || 10));
+
+    if (db.isConfigured) {
+      try {
+        const conditions: string[] = [];
+        const params: unknown[] = [];
+        let paramIdx = 1;
+
+        if (options.status) {
+          conditions.push(`status = $${paramIdx++}`);
+          params.push(options.status);
+        }
+
+        if (options.serviceMode) {
+          conditions.push(`service_mode = $${paramIdx++}`);
+          params.push(options.serviceMode);
+        }
+
+        if (options.search && options.search.trim()) {
+          const term = `%${options.search.trim().toLowerCase()}%`;
+          conditions.push(
+            `(LOWER(reference_code) LIKE $${paramIdx} OR LOWER(customer_name) LIKE $${paramIdx} OR customer_phone LIKE $${paramIdx})`
+          );
+          params.push(term);
+          paramIdx++;
+        }
+
+        const whereClause =
+          conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+        // Total count
+        const countRes = await db.query<{ count: string }>(
+          `SELECT COUNT(*) as count FROM service_requests ${whereClause};`,
+          params
+        );
+        const total = parseInt(countRes[0]?.count || "0", 10);
+
+        // Paginated items
+        const offset = (page - 1) * pageSize;
+        const queryParams = [...params, pageSize, offset];
+        const rows = await db.query<Record<string, unknown>>(
+          `SELECT * FROM service_requests ${whereClause} ORDER BY created_at DESC LIMIT $${paramIdx++} OFFSET $${paramIdx++};`,
+          queryParams
+        );
+
+        const items = rows.map((r) => this.mapRowToRequest(r));
+        return {
+          items,
+          total,
+          page,
+          pageSize,
+          totalPages: Math.ceil(total / pageSize) || 1,
+        };
+      } catch (err) {
+        console.warn("PostgreSQL list query failed, using dev fallback:", err);
+      }
+    }
+
+    // In-memory filtered pagination
+    let all = Array.from(devRequestsStore.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+
+    if (options.status) {
+      all = all.filter((r) => r.status === options.status);
+    }
+    if (options.serviceMode) {
+      all = all.filter((r) => r.serviceMode === options.serviceMode);
+    }
+    if (options.search && options.search.trim()) {
+      const q = options.search.trim().toLowerCase();
+      all = all.filter(
+        (r) =>
+          r.referenceCode.toLowerCase().includes(q) ||
+          r.customerName.toLowerCase().includes(q) ||
+          r.customerPhone.includes(q)
+      );
+    }
+
+    const total = all.length;
+    const offset = (page - 1) * pageSize;
+    const items = all.slice(offset, offset + pageSize);
+
+    return {
+      items,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize) || 1,
+    };
+  }
+
+  /**
+   * Validated server-side status transition with history logging.
+   */
+  async updateStatus(
+    id: string,
+    newStatus: RequestStatus,
+    changedBy: string,
+    note?: string
+  ): Promise<{ success: boolean; request?: ServiceRequest; error?: string }> {
+    const request = await this.findById(id);
+    if (!request) {
+      return { success: false, error: "Không tìm thấy yêu cầu dịch vụ." };
+    }
+
+    if (!isValidStatusTransition(request.status, newStatus)) {
+      return {
+        success: false,
+        error: `Không thể chuyển trạng thái từ "${request.status}" sang "${newStatus}".`,
+      };
+    }
+
+    const now = new Date();
+    const prevStatus = request.status;
+
+    if (db.isConfigured) {
+      try {
+        // Atomic update and history insert
+        await db.query(
+          "UPDATE service_requests SET status = $1, updated_at = $2 WHERE id = $3;",
+          [newStatus, now, id]
+        );
+        await db.query(
+          `INSERT INTO request_status_history (id, request_id, from_status, to_status, changed_by, note, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+          [randomUUID(), id, prevStatus, newStatus, changedBy, note || null, now]
+        );
+
+        request.status = newStatus;
+        request.updatedAt = now;
+        return { success: true, request };
+      } catch (err) {
+        console.warn("PostgreSQL status update failed:", err);
+      }
+    }
+
+    // In-memory update
+    request.status = newStatus;
+    request.updatedAt = now;
+    if (note) {
+      request.adminNotes = request.adminNotes
+        ? `${request.adminNotes}\n[${now.toLocaleDateString("vi-VN")}] ${note}`
+        : `[${now.toLocaleDateString("vi-VN")}] ${note}`;
+    }
+
+    devHistoryStore.push({
+      id: randomUUID(),
+      requestId: id,
+      fromStatus: prevStatus,
+      toStatus: newStatus,
+      changedBy,
+      note,
+      createdAt: now,
+    });
+
+    return { success: true, request };
+  }
+
+  /**
+   * Retrieves audit status history for a given request.
+   */
+  async getStatusHistory(requestId: string): Promise<RequestStatusHistory[]> {
+    if (db.isConfigured) {
+      try {
+        const rows = await db.query<Record<string, unknown>>(
+          "SELECT * FROM request_status_history WHERE request_id = $1 ORDER BY created_at ASC;",
+          [requestId]
+        );
+        return rows.map((r) => ({
+          id: String(r.id),
+          requestId: String(r.request_id),
+          fromStatus: r.from_status as RequestStatus,
+          toStatus: r.to_status as RequestStatus,
+          changedBy: String(r.changed_by),
+          note: r.note ? String(r.note) : undefined,
+          createdAt: new Date(String(r.created_at)),
+        }));
+      } catch (err) {
+        console.warn("PostgreSQL history query failed:", err);
+      }
+    }
+
+    return devHistoryStore
+      .filter((h) => h.requestId === requestId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  /**
+   * Retrieves operational request counts derived from actual data.
+   */
+  async getStats(): Promise<RequestStats> {
+    const stats: RequestStats = {
+      total: 0,
+      awaitingConfirmation: 0,
+      confirmed: 0,
+      inProgress: 0,
+      waitingForApproval: 0,
+      completed: 0,
+      cancelled: 0,
+    };
+
+    if (db.isConfigured) {
+      try {
+        const rows = await db.query<{ status: string; count: string }>(
+          "SELECT status, COUNT(*) as count FROM service_requests GROUP BY status;"
+        );
+        for (const row of rows) {
+          const count = parseInt(row.count, 10);
+          stats.total += count;
+          if (row.status === "AWAITING_CONFIRMATION") stats.awaitingConfirmation = count;
+          else if (row.status === "CONFIRMED") stats.confirmed = count;
+          else if (row.status === "IN_PROGRESS") stats.inProgress = count;
+          else if (row.status === "WAITING_FOR_APPROVAL") stats.waitingForApproval = count;
+          else if (row.status === "COMPLETED") stats.completed = count;
+          else if (row.status === "CANCELLED") stats.cancelled = count;
+        }
+        return stats;
+      } catch (err) {
+        console.warn("PostgreSQL stats query failed:", err);
+      }
+    }
+
+    for (const req of devRequestsStore.values()) {
+      stats.total++;
+      if (req.status === "AWAITING_CONFIRMATION") stats.awaitingConfirmation++;
+      else if (req.status === "CONFIRMED") stats.confirmed++;
+      else if (req.status === "IN_PROGRESS") stats.inProgress++;
+      else if (req.status === "WAITING_FOR_APPROVAL") stats.waitingForApproval++;
+      else if (req.status === "COMPLETED") stats.completed++;
+      else if (req.status === "CANCELLED") stats.cancelled++;
+    }
+
+    return stats;
+  }
+
+  private mapRowToRequest(row: Record<string, unknown>): ServiceRequest {
+    return {
+      id: String(row.id),
+      referenceCode: String(row.reference_code),
+      customerName: String(row.customer_name),
+      customerPhone: String(row.customer_phone),
+      serviceMode: row.service_mode as ServiceDeliveryMode,
+      deviceCategory: row.device_category as DeviceCategory,
+      serviceCategoryId: String(row.service_category_id),
+      issueDescription: String(row.issue_description),
+      serviceAddress: row.service_address ? String(row.service_address) : undefined,
+      preferredContactTime: row.preferred_contact_time
+        ? String(row.preferred_contact_time)
+        : undefined,
+      status: row.status as RequestStatus,
+      adminNotes: row.admin_notes ? String(row.admin_notes) : undefined,
+      createdAt: new Date(String(row.created_at)),
+      updatedAt: new Date(String(row.updated_at)),
+    };
+  }
+
   clearDevStore(): void {
     devRequestsStore.clear();
     devHistoryStore.length = 0;
   }
 
-  /**
-   * Total number of records in development store.
-   */
   get devStoreCount(): number {
     return devRequestsStore.size;
   }

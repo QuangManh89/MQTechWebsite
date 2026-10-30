@@ -15,6 +15,7 @@ export type RequestStatus =
   | "AWAITING_CONFIRMATION" // Initial submitted state (Chờ xác nhận)
   | "CONFIRMED"             // Confirmed by staff (Đã xác nhận)
   | "IN_PROGRESS"           // Under active repair (Đang xử lý)
+  | "WAITING_FOR_APPROVAL"  // Waiting for customer decision on quote/plan (Chờ khách duyệt)
   | "COMPLETED"             // Service completed and handed over (Hoàn thành)
   | "CANCELLED";            // Cancelled (Đã hủy)
 
@@ -38,7 +39,7 @@ export interface ServiceRequest {
 export interface RequestStatusHistory {
   id: string;
   requestId: string;
-  fromStatus: RequestStatus;
+  fromStatus: RequestStatus | "NONE";
   toStatus: RequestStatus;
   changedBy: string;
   note?: string;
