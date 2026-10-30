@@ -3,7 +3,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/home/Hero";
 import { ServicesSection } from "@/components/home/ServicesSection";
 import { WorkflowSection } from "@/components/home/WorkflowSection";
-import { IntakeShellSection } from "@/components/home/IntakeShellSection";
+import { TrustSection } from "@/components/home/TrustSection";
+import { IntakeSection } from "@/components/home/IntakeSection";
 import { Footer } from "@/components/layout/Footer";
 
 export default function HomePage() {
@@ -14,7 +15,7 @@ export default function HomePage() {
 
       {/* Main Content Sections */}
       <main className="flex-1">
-        {/* High-Impact Dark Hero with Ambient Lighting */}
+        {/* High-Impact Dark Hero with Ambient Lighting & Telemetry Console */}
         <Hero />
 
         {/* Light Daylight Canvas for Core Services (6 confirmed categories) */}
@@ -23,8 +24,11 @@ export default function HomePage() {
         {/* 4-Step Transparent Repair Workflow */}
         <WorkflowSection />
 
-        {/* Dark Intake & Guidance Console Shell */}
-        <IntakeShellSection />
+        {/* Principles & Privacy Commitments */}
+        <TrustSection />
+
+        {/* Dual-Mode Service Request Intake Flow */}
+        <IntakeSection />
       </main>
 
       {/* Authoritative Business Footer */}

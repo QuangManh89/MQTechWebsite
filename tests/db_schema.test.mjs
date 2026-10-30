@@ -25,6 +25,17 @@ describe("PostgreSQL Relational Schema Boundary Verification", () => {
     );
   });
 
+  test("should declare device_category and service_address columns", () => {
+    assert.ok(
+      schemaSql.includes("device_category VARCHAR(32) DEFAULT 'LAPTOP' NOT NULL"),
+      "device_category column must be declared"
+    );
+    assert.ok(
+      schemaSql.includes("service_address TEXT"),
+      "service_address column must be declared"
+    );
+  });
+
   test("should not include password fields in service_requests", () => {
     assert.ok(
       !schemaSql.includes("windows_password"),

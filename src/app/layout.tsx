@@ -19,6 +19,14 @@ export const metadata: Metadata = {
     "MQTech",
   ],
   authors: [{ name: "MQTech — Computer Service" }],
+  openGraph: {
+    title: "MQTech — Dịch Vụ Sửa Chữa Máy Tính & IT Chuyên Nghiệp | Buôn Ma Thuột",
+    description:
+      "MQTech cung cấp dịch vụ sửa chữa máy tính, laptop, phần cứng, mạng LAN/Wi-Fi và hỗ trợ IT doanh nghiệp uy tín tại Buôn Ma Thuột và lân cận.",
+    type: "website",
+    locale: "vi_VN",
+    siteName: "MQTech — Computer Service",
+  },
 };
 
 export default function RootLayout({

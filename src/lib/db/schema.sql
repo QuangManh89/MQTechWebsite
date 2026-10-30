@@ -28,8 +28,12 @@ CREATE TABLE IF NOT EXISTS service_requests (
     customer_name VARCHAR(128) NOT NULL,
     customer_phone VARCHAR(32) NOT NULL,
     service_mode VARCHAR(16) NOT NULL CHECK (service_mode IN ('IN_STORE', 'ON_SITE')),
+    device_category VARCHAR(32) DEFAULT 'LAPTOP' NOT NULL CHECK (
+        device_category IN ('LAPTOP', 'PC_DESKTOP', 'PRINTER', 'NETWORK', 'OTHER')
+    ),
     service_category_id VARCHAR(64) NOT NULL REFERENCES service_categories(id),
     issue_description TEXT NOT NULL,
+    service_address TEXT,
     preferred_contact_time VARCHAR(128),
     status VARCHAR(32) DEFAULT 'AWAITING_CONFIRMATION' NOT NULL CHECK (
         status IN ('AWAITING_CONFIRMATION', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED')

@@ -3,7 +3,7 @@ import { ShieldCheck, MapPin, Clock } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-[#0A0A0B] text-white">
+    <footer id="lien-he" className="border-t border-white/10 bg-[#0A0A0B] text-white">
       <div className="mx-auto max-w-[1280px] px-6 py-14 lg:px-8 lg:py-20">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           {/* Col 1: Brand & Identity */}

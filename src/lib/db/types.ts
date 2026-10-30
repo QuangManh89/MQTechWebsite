@@ -4,6 +4,13 @@
 
 export type ServiceDeliveryMode = "IN_STORE" | "ON_SITE";
 
+export type DeviceCategory =
+  | "LAPTOP"
+  | "PC_DESKTOP"
+  | "PRINTER"
+  | "NETWORK"
+  | "OTHER";
+
 export type RequestStatus =
   | "AWAITING_CONFIRMATION" // Initial submitted state (Chờ xác nhận)
   | "CONFIRMED"             // Confirmed by staff (Đã xác nhận)
@@ -17,8 +24,10 @@ export interface ServiceRequest {
   customerName: string;
   customerPhone: string;
   serviceMode: ServiceDeliveryMode;
+  deviceCategory: DeviceCategory;
   serviceCategoryId: string;
   issueDescription: string;
+  serviceAddress?: string; // Required for ON_SITE mode
   preferredContactTime?: string;
   status: RequestStatus;
   adminNotes?: string;

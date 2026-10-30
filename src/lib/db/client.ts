@@ -1,4 +1,4 @@
-import { getAppConfig } from "../env";
+import { getAppConfig } from "../env.ts";
 
 /**
  * PostgreSQL Database Client Boundary.

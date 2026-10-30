@@ -1,5 +1,6 @@
+"use client";
+
 import React from "react";
-import Link from "next/link";
 import {
   Laptop,
   Cpu,
@@ -22,6 +23,16 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function ServicesSection() {
+  const handleSelect = (serviceId: string, preferredMode: "IN_STORE" | "ON_SITE") => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("mqtech-select-service", {
+          detail: { serviceId, mode: preferredMode },
+        })
+      );
+    }
+  };
+
   return (
     <section id="dich-vu" className="bg-[#F5F5F7] text-[#0A0A0B] py-20 lg:py-28">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
@@ -43,7 +54,10 @@ export function ServicesSection() {
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {MQTECH_SERVICES.map((service: ServiceItem) => {
             const IconComponent = ICON_MAP[service.icon] || Laptop;
-            const isDeliveryDual = service.deliveryModes.includes("IN_STORE") && service.deliveryModes.includes("ON_SITE");
+            const isDeliveryDual =
+              service.deliveryModes.includes("IN_STORE") &&
+              service.deliveryModes.includes("ON_SITE");
+            const defaultMode = service.deliveryModes[0];
 
             return (
               <div
@@ -85,13 +99,14 @@ export function ServicesSection() {
                   <span className="text-[12px] font-medium text-[#0A0A0B]/50">
                     Báo giá trước khi làm
                   </span>
-                  <Link
-                    href="#yeu-cau-dich-vu"
-                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#3B82F6] hover:text-[#2563EB] transition-colors"
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(service.id, defaultMode)}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#3B82F6] hover:text-[#2563EB] transition-colors focus:outline-none focus:underline"
                   >
                     <span>Yêu cầu tư vấn</span>
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             );
