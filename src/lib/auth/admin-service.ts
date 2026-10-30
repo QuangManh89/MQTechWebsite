@@ -3,6 +3,7 @@ import { hashPassword, verifyPassword } from "./password.ts";
 import { db } from "../db/client.ts";
 import type { AdminUser } from "../db/types.ts";
 import { InMemoryRateLimiter } from "../utils/rate-limiter.ts";
+import { getAppConfig } from "../env.ts";
 
 export const adminLoginLimiter = new InMemoryRateLimiter(5, 15);
 
@@ -22,18 +23,33 @@ export class AdminService {
   /**
    * Initializes the initial administrator account securely.
    * If an admin account does not exist, it bootstraps the initial admin.
+   * In production, requires explicit ADMIN_INIT_PASSWORD (never uses a hardcoded default).
    */
   async ensureInitialAdmin(): Promise<void> {
+    const config = getAppConfig();
     if (this.bootstrapped && adminStore.size > 0) return;
 
     const username = process.env.ADMIN_INIT_USERNAME || "admin";
-    const initialPassword =
-      process.env.ADMIN_INIT_PASSWORD || "MQTechAdmin2026!";
+    const initialPassword = process.env.ADMIN_INIT_PASSWORD;
+
+    if (config.isProduction && !initialPassword) {
+      // In production, never create a silent default administrator
+      this.bootstrapped = true;
+      return;
+    }
+
+    const passwordToUse =
+      initialPassword || (!config.isProduction ? "MQTechAdmin2026!" : "");
+
+    if (!passwordToUse) {
+      this.bootstrapped = true;
+      return;
+    }
 
     // Check if admin already exists
     const existing = await this.findByUsername(username);
     if (!existing) {
-      const passwordHash = await hashPassword(initialPassword);
+      const passwordHash = await hashPassword(passwordToUse);
       const initialAdmin: AdminUser = {
         id: randomUUID(),
         username,
@@ -58,8 +74,17 @@ export class AdminService {
             ]
           );
         } catch (err) {
+          if (!config.allowMemoryStore) {
+            throw new Error(
+              "PostgreSQL admin insert failed and in-memory store is disallowed."
+            );
+          }
           console.warn("PostgreSQL admin insert failed, using fallback:", err);
         }
+      } else if (!config.allowMemoryStore) {
+        throw new Error(
+          "Admin initialization requires an active database connection in this environment."
+        );
       }
 
       adminStore.set(username, initialAdmin);
@@ -69,6 +94,7 @@ export class AdminService {
   }
 
   async findByUsername(username: string): Promise<AdminUser | null> {
+    const config = getAppConfig();
     const normalized = username.toLowerCase().trim();
 
     if (db.isConfigured) {
@@ -88,9 +114,19 @@ export class AdminService {
             createdAt: new Date(String(row.created_at)),
           };
         }
+        return null;
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "PostgreSQL admin query failed and in-memory store is disallowed."
+          );
+        }
         console.warn("PostgreSQL admin query failed:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Admin account lookup requires an active database connection in this environment."
+      );
     }
 
     return adminStore.get(normalized) || null;
@@ -125,6 +161,9 @@ export class AdminService {
     };
   }
 
+  /**
+   * Resets the in-memory admin store (test suite fixture helper).
+   */
   clearDevStore(): void {
     adminStore.clear();
     this.bootstrapped = false;

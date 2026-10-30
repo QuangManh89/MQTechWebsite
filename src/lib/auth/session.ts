@@ -13,6 +13,14 @@ const DEFAULT_SESSION_DURATION_HOURS = 8;
 
 function getSecret(): string {
   const config = getAppConfig();
+  if (config.isProduction) {
+    if (!config.adminSessionSecret || config.adminSessionSecret.length < 32) {
+      throw new Error(
+        "ADMIN_SESSION_SECRET must be configured with at least 32 characters in production."
+      );
+    }
+    return config.adminSessionSecret;
+  }
   return (
     config.adminSessionSecret ||
     "mqtech-default-dev-secret-do-not-use-in-production-32b"

@@ -188,6 +188,7 @@ export function AdminDashboardClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: targetStatus,
+          currentStatus: selectedRequest.status,
           note: statusNote.trim() || undefined,
         }),
       });

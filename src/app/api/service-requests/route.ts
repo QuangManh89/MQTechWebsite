@@ -1,9 +1,11 @@
 import { validateServiceRequestInput } from "../../../lib/validations/service-request.ts";
 import { serviceRequestRepo } from "../../../lib/db/repository.ts";
 import { intakeRateLimiter } from "../../../lib/utils/rate-limiter.ts";
+import { validateServerEnv } from "../../../lib/env.ts";
 
 export async function POST(req: Request) {
   try {
+    validateServerEnv();
     // 1. Identify client IP for rate-limiting
     const forwarded = req.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";

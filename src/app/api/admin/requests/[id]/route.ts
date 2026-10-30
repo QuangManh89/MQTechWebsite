@@ -59,6 +59,10 @@ export async function PATCH(
   }
 
   const status = body.status as RequestStatus;
+  const expectedCurrentStatus =
+    typeof body.currentStatus === "string"
+      ? (body.currentStatus as RequestStatus)
+      : undefined;
   const note = typeof body.note === "string" ? body.note.trim() : undefined;
 
   if (!status) {
@@ -72,7 +76,8 @@ export async function PATCH(
     id,
     status,
     session.username,
-    note
+    note,
+    expectedCurrentStatus
   );
 
   if (!result.success) {

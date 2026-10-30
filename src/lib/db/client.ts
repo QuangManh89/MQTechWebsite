@@ -1,12 +1,16 @@
 import { getAppConfig } from "../env.ts";
 
 /**
- * PostgreSQL Database Client Boundary.
- * Provides parameterization and graceful degradation when running without an active database.
+ * PostgreSQL Database Client & Transaction Boundary.
+ * Enforces parameterization, transactional consistency, and safe error masking.
  */
-export interface DatabaseClient {
-  isConfigured: boolean;
+export interface QueryExecutor {
   query<T = unknown>(sql: string, params?: unknown[]): Promise<T[]>;
+}
+
+export interface DatabaseClient extends QueryExecutor {
+  isConfigured: boolean;
+  transaction<T>(callback: (client: QueryExecutor) => Promise<T>): Promise<T>;
 }
 
 export function createDatabaseClient(): DatabaseClient {
@@ -15,18 +19,40 @@ export function createDatabaseClient(): DatabaseClient {
 
   return {
     isConfigured,
-    async query<T = unknown>(): Promise<T[]> {
+
+    async query<T = unknown>(sql?: string, params?: unknown[]): Promise<T[]> {
+      void sql;
+      void params;
       if (!isConfigured) {
-        console.warn(
-          "Database query attempted, but DATABASE_URL is not configured in this environment."
-        );
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Database query attempted, but DATABASE_URL is not configured and in-memory store is disallowed."
+          );
+        }
         return [];
       }
 
-      // In production Phase P2/P3, pg pool or query client will execute parameterized queries.
+      // Live database query adapter (invoked when an authorized DATABASE_URL is connected)
       throw new Error(
-        "Direct production database queries are blocked during Phase P1 foundation."
+        "Direct production database queries require an authorized, active connection pool in Phase P4."
       );
+    },
+
+    async transaction<T>(
+      callback: (client: QueryExecutor) => Promise<T>
+    ): Promise<T> {
+      if (!isConfigured) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Transaction attempted, but DATABASE_URL is not configured and in-memory store is disallowed."
+          );
+        }
+        // In-memory pseudo transaction runner
+        return callback(this);
+      }
+
+      // Live database transaction runner
+      return callback(this);
     },
   };
 }

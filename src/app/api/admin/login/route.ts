@@ -1,8 +1,10 @@
 import { adminService, adminLoginLimiter } from "../../../../lib/auth/admin-service.ts";
 import { createSessionToken, ADMIN_COOKIE_NAME } from "../../../../lib/auth/session.ts";
+import { validateServerEnv } from "../../../../lib/env.ts";
 
 export async function POST(req: Request) {
   try {
+    validateServerEnv();
     const forwarded = req.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : "127.0.0.1";
 

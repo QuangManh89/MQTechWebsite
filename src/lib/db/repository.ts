@@ -10,6 +10,7 @@ import type {
 import type { CreateServiceRequestDTO } from "../validations/service-request.ts";
 import { isValidStatusTransition } from "../constants/status-lifecycle.ts";
 import { db } from "./client.ts";
+import { getAppConfig } from "../env.ts";
 
 export interface ListRequestsOptions {
   status?: RequestStatus;
@@ -59,6 +60,7 @@ export class ServiceRequestRepository {
    * Automatically sets status to 'AWAITING_CONFIRMATION'.
    */
   async create(data: CreateServiceRequestDTO): Promise<ServiceRequest> {
+    const config = getAppConfig();
     const id = randomUUID();
     let referenceCode = generateReferenceCode("MQT");
 
@@ -87,54 +89,65 @@ export class ServiceRequestRepository {
 
     if (db.isConfigured) {
       try {
-        const insertSql = `
-          INSERT INTO service_requests (
-            id, reference_code, customer_name, customer_phone, service_mode,
-            device_category, service_category_id, issue_description,
-            service_address, preferred_contact_time, status, created_at, updated_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-          RETURNING *;
-        `;
-        const params = [
-          newRequest.id,
-          newRequest.referenceCode,
-          newRequest.customerName,
-          newRequest.customerPhone,
-          newRequest.serviceMode,
-          newRequest.deviceCategory,
-          newRequest.serviceCategoryId,
-          newRequest.issueDescription,
-          newRequest.serviceAddress || null,
-          newRequest.preferredContactTime || null,
-          newRequest.status,
-          newRequest.createdAt,
-          newRequest.updatedAt,
-        ];
-        await db.query(insertSql, params);
+        return await db.transaction(async (tx) => {
+          const insertSql = `
+            INSERT INTO service_requests (
+              id, reference_code, customer_name, customer_phone, service_mode,
+              device_category, service_category_id, issue_description,
+              service_address, preferred_contact_time, status, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            RETURNING *;
+          `;
+          const params = [
+            newRequest.id,
+            newRequest.referenceCode,
+            newRequest.customerName,
+            newRequest.customerPhone,
+            newRequest.serviceMode,
+            newRequest.deviceCategory,
+            newRequest.serviceCategoryId,
+            newRequest.issueDescription,
+            newRequest.serviceAddress || null,
+            newRequest.preferredContactTime || null,
+            newRequest.status,
+            newRequest.createdAt,
+            newRequest.updatedAt,
+          ];
+          await tx.query(insertSql, params);
 
-        // Record initial status history
-        const historySql = `
-          INSERT INTO request_status_history (
-            id, request_id, from_status, to_status, changed_by, note, created_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7);
-        `;
-        await db.query(historySql, [
-          randomUUID(),
-          newRequest.id,
-          "NONE",
-          "AWAITING_CONFIRMATION",
-          "CUSTOMER_WEB_INTAKE",
-          "Yêu cầu tiếp nhận qua biểu mẫu trực tuyến",
-          now,
-        ]);
+          // Record initial status history
+          const historySql = `
+            INSERT INTO request_status_history (
+              id, request_id, from_status, to_status, changed_by, note, created_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7);
+          `;
+          await tx.query(historySql, [
+            randomUUID(),
+            newRequest.id,
+            "NONE",
+            "AWAITING_CONFIRMATION",
+            "CUSTOMER_WEB_INTAKE",
+            "Yêu cầu tiếp nhận qua biểu mẫu trực tuyến",
+            now,
+          ]);
 
-        return newRequest;
+          return newRequest;
+        });
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Lưu trữ yêu cầu thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn(
           "PostgreSQL query failed, falling back to development store:",
           err
         );
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
     // Development/Test fallback store
@@ -142,7 +155,7 @@ export class ServiceRequestRepository {
     devHistoryStore.push({
       id: randomUUID(),
       requestId: newRequest.id,
-      fromStatus: "AWAITING_CONFIRMATION",
+      fromStatus: "NONE",
       toStatus: "AWAITING_CONFIRMATION",
       changedBy: "CUSTOMER_WEB_INTAKE",
       note: "Yêu cầu tiếp nhận qua biểu mẫu trực tuyến",
@@ -158,6 +171,7 @@ export class ServiceRequestRepository {
    */
   async findByReferenceCode(referenceCode: string): Promise<ServiceRequest | null> {
     if (!referenceCode) return null;
+    const config = getAppConfig();
     const normalized = referenceCode.toUpperCase().trim();
 
     if (db.isConfigured) {
@@ -169,9 +183,19 @@ export class ServiceRequestRepository {
         if (rows.length > 0) {
           return this.mapRowToRequest(rows[0]);
         }
+        return null;
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Truy vấn yêu cầu thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn("PostgreSQL query failed:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
     return devRequestsStore.get(normalized) || null;
@@ -182,6 +206,7 @@ export class ServiceRequestRepository {
    */
   async findById(id: string): Promise<ServiceRequest | null> {
     if (!id) return null;
+    const config = getAppConfig();
 
     if (db.isConfigured) {
       try {
@@ -192,9 +217,19 @@ export class ServiceRequestRepository {
         if (rows.length > 0) {
           return this.mapRowToRequest(rows[0]);
         }
+        return null;
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Truy vấn yêu cầu thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn("PostgreSQL query failed:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
     for (const req of devRequestsStore.values()) {
@@ -209,6 +244,7 @@ export class ServiceRequestRepository {
   async listRequests(
     options: ListRequestsOptions = {}
   ): Promise<PaginatedResult<ServiceRequest>> {
+    const config = getAppConfig();
     const page = Math.max(1, options.page || 1);
     const pageSize = Math.min(50, Math.max(1, options.pageSize || 10));
 
@@ -264,8 +300,17 @@ export class ServiceRequestRepository {
           totalPages: Math.ceil(total / pageSize) || 1,
         };
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Truy vấn danh sách yêu cầu thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn("PostgreSQL list query failed, using dev fallback:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
     // In-memory filtered pagination
@@ -303,17 +348,28 @@ export class ServiceRequestRepository {
   }
 
   /**
-   * Validated server-side status transition with history logging.
+   * Validated server-side status transition with transactional history logging
+   * and optimistic concurrency verification.
    */
   async updateStatus(
     id: string,
     newStatus: RequestStatus,
     changedBy: string,
-    note?: string
+    note?: string,
+    expectedCurrentStatus?: RequestStatus
   ): Promise<{ success: boolean; request?: ServiceRequest; error?: string }> {
+    const config = getAppConfig();
     const request = await this.findById(id);
     if (!request) {
       return { success: false, error: "Không tìm thấy yêu cầu dịch vụ." };
+    }
+
+    if (expectedCurrentStatus && request.status !== expectedCurrentStatus) {
+      return {
+        success: false,
+        error:
+          "Yêu cầu đã được cập nhật bởi một phiên làm việc khác. Vui lòng làm mới trang.",
+      };
     }
 
     if (!isValidStatusTransition(request.status, newStatus)) {
@@ -328,26 +384,54 @@ export class ServiceRequestRepository {
 
     if (db.isConfigured) {
       try {
-        // Atomic update and history insert
-        await db.query(
-          "UPDATE service_requests SET status = $1, updated_at = $2 WHERE id = $3;",
-          [newStatus, now, id]
-        );
-        await db.query(
-          `INSERT INTO request_status_history (id, request_id, from_status, to_status, changed_by, note, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7);`,
-          [randomUUID(), id, prevStatus, newStatus, changedBy, note || null, now]
-        );
+        return await db.transaction(async (tx) => {
+          // Concurrency safe update: checks status matches expected previous state
+          const updateRes = await tx.query<Record<string, unknown>>(
+            "UPDATE service_requests SET status = $1, updated_at = $2 WHERE id = $3 AND status = $4 RETURNING *;",
+            [newStatus, now, id, prevStatus]
+          );
 
-        request.status = newStatus;
-        request.updatedAt = now;
-        return { success: true, request };
+          if (updateRes.length === 0) {
+            return {
+              success: false,
+              error:
+                "Yêu cầu đã được cập nhật bởi một phiên làm việc khác. Vui lòng làm mới trang.",
+            };
+          }
+
+          await tx.query(
+            `INSERT INTO request_status_history (id, request_id, from_status, to_status, changed_by, note, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+            [randomUUID(), id, prevStatus, newStatus, changedBy, note || null, now]
+          );
+
+          request.status = newStatus;
+          request.updatedAt = now;
+          return { success: true, request };
+        });
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Cập nhật trạng thái thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn("PostgreSQL status update failed:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
-    // In-memory update
+    // In-memory update with concurrency verification
+    if (expectedCurrentStatus && request.status !== expectedCurrentStatus) {
+      return {
+        success: false,
+        error:
+          "Yêu cầu đã được cập nhật bởi một phiên làm việc khác. Vui lòng làm mới trang.",
+      };
+    }
+
     request.status = newStatus;
     request.updatedAt = now;
     if (note) {
@@ -373,6 +457,8 @@ export class ServiceRequestRepository {
    * Retrieves audit status history for a given request.
    */
   async getStatusHistory(requestId: string): Promise<RequestStatusHistory[]> {
+    const config = getAppConfig();
+
     if (db.isConfigured) {
       try {
         const rows = await db.query<Record<string, unknown>>(
@@ -389,8 +475,17 @@ export class ServiceRequestRepository {
           createdAt: new Date(String(r.created_at)),
         }));
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Truy vấn lịch sử thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn("PostgreSQL history query failed:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
     return devHistoryStore
@@ -402,6 +497,7 @@ export class ServiceRequestRepository {
    * Retrieves operational request counts derived from actual data.
    */
   async getStats(): Promise<RequestStats> {
+    const config = getAppConfig();
     const stats: RequestStats = {
       total: 0,
       awaitingConfirmation: 0,
@@ -429,8 +525,17 @@ export class ServiceRequestRepository {
         }
         return stats;
       } catch (err) {
+        if (!config.allowMemoryStore) {
+          throw new Error(
+            "Truy vấn thống kê thất bại và bộ nhớ tạm không được phép trong môi trường này."
+          );
+        }
         console.warn("PostgreSQL stats query failed:", err);
       }
+    } else if (!config.allowMemoryStore) {
+      throw new Error(
+        "Yêu cầu cấu hình cơ sở dữ liệu PostgreSQL trong môi trường sản xuất."
+      );
     }
 
     for (const req of devRequestsStore.values()) {
