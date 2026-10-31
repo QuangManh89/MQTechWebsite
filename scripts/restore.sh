@@ -2,9 +2,9 @@
 # ==============================================================================
 # MQTech PostgreSQL Restore Engine
 # 
-# SAFETY SAFEGUARDS (P4.1.2):
+# SAFETY SAFEGUARDS (P4.1.4):
 # 1. Approved Target Host Allowlist: Rejects all remote/unknown hosts by default.
-#    Only approved local loopback or designated disposable test hosts are accepted.
+#    Only approved local loopback interfaces are accepted.
 # 2. Disposable Database Name Enforcement: Target DB name must contain a disposable
 #    test marker (_dev, _test, _disposable, _restore_test).
 # 3. Source & Destination Identity Conflict: Strictly rejects restoring into the
@@ -13,7 +13,9 @@
 #    - CONFIRM_DESTRUCTIVE_RESTORE=true
 #    - CONFIRM_RESTORE_DB_NAME="<exact_target_db_name>"
 # 5. Masked Credential Logging: Never prints passwords or raw connection strings.
-# 6. Encryption Status: At-rest encryption remains NOT IMPLEMENTED internally.
+# 6. Supported libpq CLI Invocation: Uses --dbname="service=${PGSERVICE}" --no-password.
+#    (--service is NOT a supported flag in pg_restore).
+# 7. Encryption Status: At-rest encryption remains NOT IMPLEMENTED internally.
 # ==============================================================================
 
 set -euo pipefail
@@ -60,7 +62,7 @@ echo "[Máy chủ đích]: ${TARGET_HOST}"
 echo "[Tên CSDL đích]: ${TARGET_DB_NAME}"
 echo ""
 
-# --- Step 7: Integrity Verification ---
+# --- Step 3: Integrity Verification ---
 CHECKSUM_FILE="${BACKUP_FILE}.sha256"
 if [ -f "${CHECKSUM_FILE}" ]; then
   echo "[Kiểm tra]: Đang xác thực chữ ký toàn vẹn SHA-256..."
@@ -78,14 +80,24 @@ echo "[MÃ HÓA NGHỈ]: NOT IMPLEMENTED (Tệp dump phải ở dạng nhị ph�
 echo ""
 echo "[Thực thi]: Bắt đầu phục hồi cấu trúc và dữ liệu vào mục tiêu kiểm thử '${TARGET_DB_NAME}'..."
 
-# Establish private temporary credential directory (0700) with cleanup trap
-SECURE_TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_restore_cred')"
+# Establish private temporary credential directory (0700).
+# Prefer volatile tmpfs (/dev/shm or XDG_RUNTIME_DIR) when available.
+if [ -d "/dev/shm" ] && [ -w "/dev/shm" ]; then
+  SECURE_TMP_DIR="$(mktemp -d /dev/shm/mqtech_restore_cred_XXXXXX 2>/dev/null || mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_restore_cred')"
+elif [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -d "${XDG_RUNTIME_DIR}" ] && [ -w "${XDG_RUNTIME_DIR}" ]; then
+  SECURE_TMP_DIR="$(mktemp -d "${XDG_RUNTIME_DIR}/mqtech_restore_cred_XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_restore_cred')"
+else
+  SECURE_TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_restore_cred')"
+fi
 chmod 700 "${SECURE_TMP_DIR}"
 
+# Best-effort cleanup trap (cannot catch SIGKILL, kernel panic, or sudden power failure)
 cleanup() {
-  rm -rf "${SECURE_TMP_DIR}"
+  if [ -n "${SECURE_TMP_DIR:-}" ] && [ -d "${SECURE_TMP_DIR}" ]; then
+    rm -rf "${SECURE_TMP_DIR}"
+  fi
 }
-trap cleanup EXIT INT TERM QUIT
+trap cleanup EXIT INT TERM QUIT HUP
 
 export PGSERVICEFILE="${SECURE_TMP_DIR}/pg_service.conf"
 export PGSERVICE="mqtech_restore"
@@ -93,8 +105,11 @@ node scripts/credential-helper.mjs write-service "${PGSERVICE}" "${PGSERVICEFILE
 
 echo "[Bảo mật tiến trình]: Sử dụng PGSERVICEFILE (${PGSERVICEFILE}). Không truyền URL hay mật khẩu qua process argv."
 
+# Invoke pg_restore with supported libpq connection syntax: --dbname="service=${PGSERVICE}"
+# Note: --service is not a supported flag in pg_restore; --dbname="service=..." is the standard.
 pg_restore \
-  --service="${PGSERVICE}" \
+  --dbname="service=${PGSERVICE}" \
+  --no-password \
   --clean \
   --if-exists \
   --no-owner \

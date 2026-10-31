@@ -30,7 +30,6 @@ const ALLOWED_LOCAL_HOSTS = new Set([
   "localhost",
   "127.0.0.1",
   "::1",
-  "0.0.0.0",
 ]);
 
 const FORBIDDEN_DB_SUBSTRINGS = [
@@ -52,7 +51,10 @@ export function isPooledConnection(databaseUrl) {
       port === "6543" ||
       host.includes("pooler") ||
       host.includes("pgbouncer") ||
-      search.includes("pgbouncer=true")
+      host.includes("supavisor") ||
+      host.endsWith(".flycast") ||
+      search.includes("pgbouncer=true") ||
+      search.includes("pool_mode=")
     );
   } catch {
     return false;

@@ -94,7 +94,8 @@ describe("P4.1.3 Final Readiness: Credential Safety, MPG Connections & Migration
     assert.ok(!dumpArgs.some((arg) => arg.includes(secretPassword)), "Password must NOT be in dump args");
     assert.ok(!dumpArgs.some((arg) => arg.includes(rawDatabaseUrl)), "Raw URI must NOT be in dump args");
     assert.ok(!dumpArgs.some((arg) => arg.includes("postgresql://")), "Raw URI scheme must NOT be in dump args");
-    assert.ok(dumpArgs.includes("--service=mqtech_backup"), "Must use --service flag");
+    assert.ok(dumpArgs.includes("--dbname=service=mqtech_backup"), "Must use --dbname=service=... syntax");
+    assert.ok(dumpArgs.includes("--no-password"), "Must use --no-password flag");
     assert.ok(dumpArgs.includes("--format=c"));
 
     // 2. Safe Restore Args
@@ -105,7 +106,8 @@ describe("P4.1.3 Final Readiness: Credential Safety, MPG Connections & Migration
 
     assert.ok(!restoreArgs.some((arg) => arg.includes(secretPassword)), "Password must NOT be in restore args");
     assert.ok(!restoreArgs.some((arg) => arg.includes("postgresql://")), "Raw URI must NOT be in restore args");
-    assert.ok(restoreArgs.includes("--service=mqtech_restore"), "Must use --service flag");
+    assert.ok(restoreArgs.includes("--dbname=service=mqtech_restore"), "Must use --dbname=service=... syntax");
+    assert.ok(restoreArgs.includes("--no-password"), "Must use --no-password flag");
     assert.ok(restoreArgs.includes("--clean"));
   });
 

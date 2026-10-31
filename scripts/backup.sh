@@ -3,9 +3,11 @@
 # MQTech PostgreSQL Backup Script
 # 
 # SAFETY RULES:
-# - NEVER pass passwords as command-line arguments (prevents leakage via ps aux).
-# - Uses environment variables (DATABASE_URL or PGPASSWORD) for credentials.
+# - NEVER pass passwords or raw connection URIs as command-line arguments.
+# - Uses libpq PGSERVICEFILE and PGSERVICE environment variables.
+# - Invokes pg_dump with supported standard: --dbname="service=${PGSERVICE}" --no-password.
 # - Sets restrictive file permissions (umask 077 -> chmod 600).
+# - Prefers tmpfs (in-memory) for credential files; cleans up with trap on EXIT/signals.
 # - Computes SHA-256 integrity checksum.
 # - At-rest GPG/KMS envelope encryption is a documented mandatory external step.
 # ==============================================================================
@@ -38,31 +40,47 @@ echo "[Khởi tạo]: Đang tiến hành sao lưu cấu trúc và dữ liệu...
 echo "[Mã hóa nghỉ]: NOT IMPLEMENTED (Bản nén nguyên bản; yêu cầu mã hóa ngoài trước khi tải lên kho lưu trữ)"
 echo "[Tệp xuất]: ${BACKUP_FILEPATH}"
 
-# 1. Establish private temporary credential directory (0700) with automatic cleanup trap
-SECURE_TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_backup_cred')"
+# 1. Establish private temporary credential directory (0700).
+# Prefer volatile tmpfs (/dev/shm or XDG_RUNTIME_DIR) when available so credentials reside in RAM only.
+# NEVER place credential files inside the backup archive directory (${BACKUP_DIR}).
+if [ -d "/dev/shm" ] && [ -w "/dev/shm" ]; then
+  SECURE_TMP_DIR="$(mktemp -d /dev/shm/mqtech_backup_cred_XXXXXX 2>/dev/null || mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_backup_cred')"
+elif [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -d "${XDG_RUNTIME_DIR}" ] && [ -w "${XDG_RUNTIME_DIR}" ]; then
+  SECURE_TMP_DIR="$(mktemp -d "${XDG_RUNTIME_DIR}/mqtech_backup_cred_XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_backup_cred')"
+else
+  SECURE_TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_backup_cred')"
+fi
 chmod 700 "${SECURE_TMP_DIR}"
 
+# CLEANUP LIMITATIONS NOTE:
+# Traps provide BEST-EFFORT cleanup for normal exit and standard catchable signals (INT, TERM, QUIT, HUP).
+# Shell traps CANNOT guarantee cleanup after uncatchable SIGKILL (kill -9), kernel panic, or sudden power failure.
+# Using tmpfs (/dev/shm) ensures any uncleaned residual files vanish upon system reboot.
 cleanup() {
-  rm -rf "${SECURE_TMP_DIR}"
+  if [ -n "${SECURE_TMP_DIR:-}" ] && [ -d "${SECURE_TMP_DIR}" ]; then
+    rm -rf "${SECURE_TMP_DIR}"
+  fi
 }
-trap cleanup EXIT INT TERM QUIT
+trap cleanup EXIT INT TERM QUIT HUP
 
 # 2. Write protected pg_service.conf (0600) to isolate credentials from process arguments
 export PGSERVICEFILE="${SECURE_TMP_DIR}/pg_service.conf"
 export PGSERVICE="mqtech_backup"
 node scripts/credential-helper.mjs write-service "${PGSERVICE}" "${PGSERVICEFILE}"
 
-echo "[Bảo mật tiến trình]: Sử dụng PGSERVICEFILE (${PGSERVICEFILE}). Không truyền mật khẩu qua process argv."
+echo "[Bảo mật tiến trình]: Sử dụng PGSERVICEFILE (${PGSERVICEFILE}). Không truyền mật khẩu hay raw URI qua process argv."
 
-# 3. Execute pg_dump using --service (argv contains ONLY the service name)
+# 3. Execute pg_dump using documented libpq connection syntax: --dbname="service=${PGSERVICE}"
+# Note: --service is not a supported flag in pg_dump; --dbname="service=..." is the official standard.
 pg_dump \
-  --service="${PGSERVICE}" \
+  --dbname="service=${PGSERVICE}" \
+  --no-password \
   --format=c \
   --no-owner \
   --no-privileges \
   --file="${BACKUP_FILEPATH}"
 
-# Ensure restrictive permissions
+# Ensure restrictive permissions on generated dump
 chmod 600 "${BACKUP_FILEPATH}"
 
 # Compute SHA-256 integrity digest

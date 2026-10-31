@@ -1,25 +1,33 @@
 /**
- * MQTech PostgreSQL Restore Target Guard
+ * MQTech PostgreSQL Restore Target Guard (P4.1.4)
  * 
- * Enforces fail-closed target validation before any restore operation:
- * 1. Rejects non-allowlisted / unknown hosts.
- * 2. Rejects targets without explicit disposable markers (_dev, _test, _disposable, _restore_test, mqtech_test).
- * 3. Rejects source and target resolving to the exact same database (self-clobbering prevention).
- * 4. Requires two-factor confirmation: CONFIRM_DESTRUCTIVE_RESTORE=true and matching CONFIRM_RESTORE_DB_NAME.
+ * Enforces fail-closed target identity validation before any restore operation:
+ * 1. An explicitly approved destination host and database identity.
+ * 2. Strict host allowlist (strictly local loopback interfaces).
+ * 3. Rejection of production/live environment keywords.
+ * 4. Disposable database name marker requirement (_dev, _test, _disposable, etc.).
+ * 5. Explicit source identity and self-clobbering prevention (source !== destination).
+ * 6. Database server identity verification hook when available.
+ * 7. Exact two-factor operator confirmation:
+ *    - CONFIRM_DESTRUCTIVE_RESTORE=true
+ *    - CONFIRM_RESTORE_DB_NAME="<exact_target_db_name>"
+ * 
+ * IMPORTANT OPERATIONAL BOUNDARY ON TUNNELS & PROXIES:
+ * "localhost" DOES NOT guarantee the database is physically local.
+ * An SSH tunnel (e.g., ssh -L 5432:remote-db:5432) or local proxy forwarder (e.g., fly proxy 5432)
+ * exposes a remote database over localhost. Therefore, hostname checks alone are INSUFFICIENT.
+ * The system requires defense-in-depth: disposable name markers, explicit expected identity,
+ * source conflict rejection, and exact operator confirmation. Confirmation flags can NEVER
+ * override failed identity checks.
  */
 
-// Approved destination hosts: Strictly loopback interfaces.
-// 0.0.0.0 is explicitly removed as it can bind across all interfaces.
-// NOTE ON TUNNELS & PROXIES: "localhost" does not guarantee the database is physically local,
-// as an SSH tunnel (e.g. ssh -L 5432:remote-prod:5432) can proxy to remote servers.
-// Therefore, strict destination database naming and exact two-factor confirmation are mandatory.
-const DEFAULT_APPROVED_HOSTS = new Set([
+export const DEFAULT_APPROVED_HOSTS = new Set([
   "localhost",
   "127.0.0.1",
   "::1",
 ]);
 
-const FORBIDDEN_KEYWORDS = [
+export const FORBIDDEN_KEYWORDS = [
   "prod",
   "production",
   "live",
@@ -27,7 +35,7 @@ const FORBIDDEN_KEYWORDS = [
   "fly.dev",
 ];
 
-const DISPOSABLE_MARKERS = [
+export const DISPOSABLE_MARKERS = [
   "_dev",
   "_test",
   "_disposable",
@@ -38,13 +46,18 @@ const DISPOSABLE_MARKERS = [
 export function validateRestoreTarget(options = {}) {
   const {
     targetUrl,
-    sourceUrl,
-    confirmDestructiveRestore,
-    confirmRestoreDbName,
+    sourceUrl = process.env.SOURCE_DATABASE_URL || process.env.DATABASE_URL,
+    confirmDestructiveRestore = process.env.CONFIRM_DESTRUCTIVE_RESTORE,
+    confirmRestoreDbName = process.env.CONFIRM_RESTORE_DB_NAME,
+    expectedHost = process.env.EXPECTED_RESTORE_HOST,
+    expectedDbName = process.env.EXPECTED_RESTORE_DB_NAME,
+    expectedSystemIdentifier = process.env.EXPECTED_SYSTEM_IDENTIFIER,
+    serverIdentifier,
     approvedHosts = DEFAULT_APPROVED_HOSTS,
   } = options;
 
-  if (!targetUrl) {
+  // 1. Target URL Existence & Syntax Validation
+  if (!targetUrl || typeof targetUrl !== "string") {
     return {
       allowed: false,
       reason: "Thiếu TARGET_DATABASE_URL.",
@@ -61,6 +74,13 @@ export function validateRestoreTarget(options = {}) {
     };
   }
 
+  if (parsedTarget.protocol !== "postgres:" && parsedTarget.protocol !== "postgresql:") {
+    return {
+      allowed: false,
+      reason: `Giao thức không được hỗ trợ: ${parsedTarget.protocol}. Chỉ chấp nhận postgresql://.`,
+    };
+  }
+
   const targetHost = parsedTarget.hostname.toLowerCase();
   const targetPort = parsedTarget.port || "5432";
   const targetDbName = parsedTarget.pathname.replace(/^\//, "");
@@ -68,11 +88,11 @@ export function validateRestoreTarget(options = {}) {
   if (!targetDbName) {
     return {
       allowed: false,
-      reason: "TARGET_DATABASE_URL thiếu tên cơ sở dữ liệu.",
+      reason: "TARGET_DATABASE_URL thiếu tên cơ sở dữ liệu đích.",
     };
   }
 
-  // 1. Approved Host Allowlist
+  // 2. Approved Host Allowlist (Loopback only)
   const isHostApproved = approvedHosts.has(targetHost);
   if (!isHostApproved) {
     return {
@@ -81,7 +101,22 @@ export function validateRestoreTarget(options = {}) {
     };
   }
 
-  // 2. Keyword Blacklist Check (defense in depth)
+  // 3. Explicit Expected Destination Identity (if specified)
+  if (expectedHost && targetHost !== expectedHost.toLowerCase()) {
+    return {
+      allowed: false,
+      reason: `Máy chủ đích thực tế '${targetHost}' không khớp với máy chủ kỳ vọng '${expectedHost}'.`,
+    };
+  }
+
+  if (expectedDbName && targetDbName !== expectedDbName) {
+    return {
+      allowed: false,
+      reason: `Tên CSDL đích '${targetDbName}' không khớp với tên CSDL kỳ vọng '${expectedDbName}'.`,
+    };
+  }
+
+  // 4. Keyword Blacklist Check (Defense-in-depth against accidental production targeting)
   for (const kw of FORBIDDEN_KEYWORDS) {
     if (targetHost.includes(kw) || targetDbName.toLowerCase().includes(kw)) {
       return {
@@ -91,7 +126,8 @@ export function validateRestoreTarget(options = {}) {
     }
   }
 
-  // 3. Disposable Database Marker Check
+  // 5. Disposable Database Marker Check
+  // Note: Markers are necessary but NOT sufficient proof of safety.
   const hasDisposableMarker = DISPOSABLE_MARKERS.some((m) =>
     targetDbName.toLowerCase().includes(m)
   );
@@ -102,25 +138,52 @@ export function validateRestoreTarget(options = {}) {
     };
   }
 
-  // 4. Source and Destination Identity Conflict
+  // 6. Explicit Source Identity & Self-Clobbering Prevention
   if (sourceUrl) {
+    let parsedSource;
     try {
-      const parsedSource = new URL(sourceUrl);
-      const sourceHost = parsedSource.hostname.toLowerCase();
-      const sourceDbName = parsedSource.pathname.replace(/^\//, "");
-
-      if (sourceHost === targetHost && sourceDbName === targetDbName) {
-        return {
-          allowed: false,
-          reason: `Cơ sở dữ liệu đích trùng khớp hoàn toàn với nguồn dữ liệu gốc (${targetHost}/${targetDbName}). Ngăn chặn tự ghi đè.`,
-        };
-      }
+      parsedSource = new URL(sourceUrl);
     } catch {
-      // Ignore source parse errors
+      return {
+        allowed: false,
+        reason: "SOURCE_DATABASE_URL được cung cấp nhưng không đúng định dạng URL hợp lệ.",
+      };
+    }
+
+    const sourceHost = parsedSource.hostname.toLowerCase();
+    const sourcePort = parsedSource.port || "5432";
+    const sourceDbName = parsedSource.pathname.replace(/^\//, "");
+
+    if (
+      sourceHost === targetHost &&
+      sourcePort === targetPort &&
+      sourceDbName === targetDbName
+    ) {
+      return {
+        allowed: false,
+        reason: `Cơ sở dữ liệu đích trùng khớp hoàn toàn với nguồn dữ liệu gốc (${targetHost}:${targetPort}/${targetDbName}). Ngăn chặn tự ghi đè hủy diệt.`,
+      };
     }
   }
 
-  // 5. Explicit Destructive Confirmation Flag
+  // 7. Database Server Identity Verification (when available)
+  if (expectedSystemIdentifier) {
+    if (!serverIdentifier) {
+      return {
+        allowed: false,
+        reason: `Yêu cầu xác minh danh tính hệ thống máy chủ (System Identifier: '${expectedSystemIdentifier}') nhưng không lấy được định danh thực tế.`,
+      };
+    }
+    if (serverIdentifier !== expectedSystemIdentifier) {
+      return {
+        allowed: false,
+        reason: `Định danh hệ thống máy chủ đích ('${serverIdentifier}') không khớp với định danh kỳ vọng ('${expectedSystemIdentifier}').`,
+      };
+    }
+  }
+
+  // 8. Exact Operator Confirmation
+  // Critical: Confirmation flags alone can NEVER override failed identity validation above.
   if (confirmDestructiveRestore !== true && confirmDestructiveRestore !== "true") {
     return {
       allowed: false,
@@ -128,7 +191,6 @@ export function validateRestoreTarget(options = {}) {
     };
   }
 
-  // 6. Explicit Matching Database Name Confirmation
   if (confirmRestoreDbName !== targetDbName) {
     return {
       allowed: false,
@@ -160,6 +222,9 @@ if (
     sourceUrl: process.env.SOURCE_DATABASE_URL,
     confirmDestructiveRestore: process.env.CONFIRM_DESTRUCTIVE_RESTORE,
     confirmRestoreDbName: process.env.CONFIRM_RESTORE_DB_NAME,
+    expectedHost: process.env.EXPECTED_RESTORE_HOST,
+    expectedDbName: process.env.EXPECTED_RESTORE_DB_NAME,
+    expectedSystemIdentifier: process.env.EXPECTED_SYSTEM_IDENTIFIER,
   });
 
   if (!result.allowed) {
