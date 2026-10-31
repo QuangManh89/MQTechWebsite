@@ -1,21 +1,46 @@
 /**
- * MQTech PostgreSQL Credential Helper
+ * MQTech PostgreSQL Credential Helper (P4.1.5)
  * 
  * Generates secure libpq connection configuration files (pg_service.conf / .pgpass)
  * with restrictive file permissions (0600) inside private temporary directories (0700).
  * Prevents exposing database credentials or connection strings in process command-line arguments.
  * 
+ * Preserves security-relevant connection parameters (sslmode, sslrootcert, sslcert, sslkey,
+ * connect_timeout, target_session_attrs, application_name) in the libpq service file without
+ * silent downgrades.
+ * 
  * Supports standard PostgreSQL libpq connection service file format:
  * https://www.postgresql.org/docs/current/libpq-pgservice.html
- * 
- * PostgreSQL client tools (pg_dump, pg_restore, psql) invoke services using:
- * - Environment variable: PGSERVICEFILE and PGSERVICE
- * - Connection keyword: --dbname="service=<service_name>" (or -d "service=<service_name>")
- * Note: pg_dump and pg_restore do NOT have a standalone "--service" CLI flag.
+ * https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
  */
 
 import fs from "node:fs";
 import path from "node:path";
+
+/**
+ * Valid libpq sslmode settings in PostgreSQL.
+ * Silent downgrades (e.g. verify-full -> prefer) are strictly forbidden.
+ */
+export const VALID_SSL_MODES = new Set([
+  "disable",
+  "allow",
+  "prefer",
+  "require",
+  "verify-ca",
+  "verify-full",
+]);
+
+/**
+ * Valid target_session_attrs settings.
+ */
+export const VALID_TARGET_SESSION_ATTRS = new Set([
+  "any",
+  "read-write",
+  "read-only",
+  "primary",
+  "standby",
+  "prefer-standby",
+]);
 
 /**
  * Validates service name against INI injection.
@@ -63,17 +88,21 @@ export function escapeIniValue(val) {
   if (str.includes("'") && !str.includes('"')) {
     return `"${str}"`;
   }
-  // If it contains both, quote with double quotes and escape internal double quotes if needed, or single quotes
-  // Libpq parses single or double quotes around the whole value
   return `"${str.replace(/"/g, '\\"')}"`;
 }
 
 /**
- * Parses and validates PostgreSQL connection URL with robust percent-decoding.
+ * Parses and validates PostgreSQL connection URL with robust percent-decoding
+ * and preservation of TLS/connection security parameters.
  */
 export function parseDatabaseUrl(rawUrl) {
   if (!rawUrl || typeof rawUrl !== "string") {
     throw new Error("Missing database connection URL.");
+  }
+
+  // Strictly forbid raw newline characters in connection string
+  if (/[\r\n]/.test(rawUrl)) {
+    throw new Error("Phát hiện ký tự xuống dòng (newline) trong URL kết nối CSDL.");
   }
 
   let parsed;
@@ -112,32 +141,120 @@ export function parseDatabaseUrl(rawUrl) {
     throw new Error("Invalid host or port containing newline characters.");
   }
 
+  // Extract and validate security-relevant query parameters
+  const rawSslMode = parsed.searchParams.get("sslmode");
+  let sslmode;
+  if (rawSslMode !== null) {
+    const normalized = rawSslMode.toLowerCase();
+    if (!VALID_SSL_MODES.has(normalized)) {
+      throw new Error(
+        `Cấu hình sslmode không hợp lệ hoặc không an toàn: "${rawSslMode}". Chế độ hợp lệ: ${Array.from(
+          VALID_SSL_MODES
+        ).join(", ")}. Không chấp nhận cấu hình TLS mơ hồ hoặc tự ý hạ cấp.`
+      );
+    }
+    sslmode = normalized;
+  }
+
+  const sslrootcert = parsed.searchParams.get("sslrootcert");
+  if (sslrootcert && /[\r\n]/.test(sslrootcert)) {
+    throw new Error("Đường dẫn sslrootcert chứa ký tự xuống dòng.");
+  }
+
+  const sslcert = parsed.searchParams.get("sslcert");
+  if (sslcert && /[\r\n]/.test(sslcert)) {
+    throw new Error("Đường dẫn sslcert chứa ký tự xuống dòng.");
+  }
+
+  const sslkey = parsed.searchParams.get("sslkey");
+  if (sslkey && /[\r\n]/.test(sslkey)) {
+    throw new Error("Đường dẫn sslkey chứa ký tự xuống dòng.");
+  }
+
+  const rawTimeout = parsed.searchParams.get("connect_timeout");
+  let connectTimeout;
+  if (rawTimeout !== null) {
+    if (!/^\d+$/.test(rawTimeout) || parseInt(rawTimeout, 10) <= 0) {
+      throw new Error(`connect_timeout không hợp lệ: "${rawTimeout}". Phải là số nguyên dương.`);
+    }
+    connectTimeout = rawTimeout;
+  }
+
+  const rawSessionAttrs = parsed.searchParams.get("target_session_attrs");
+  let targetSessionAttrs;
+  if (rawSessionAttrs !== null) {
+    const normalized = rawSessionAttrs.toLowerCase();
+    if (!VALID_TARGET_SESSION_ATTRS.has(normalized)) {
+      throw new Error(
+        `target_session_attrs không hợp lệ: "${rawSessionAttrs}". Hợp lệ: ${Array.from(
+          VALID_TARGET_SESSION_ATTRS
+        ).join(", ")}.`
+      );
+    }
+    targetSessionAttrs = normalized;
+  }
+
+  const applicationName = parsed.searchParams.get("application_name");
+  if (applicationName && /[\r\n]/.test(applicationName)) {
+    throw new Error("application_name chứa ký tự xuống dòng.");
+  }
+
   return {
     host,
     port,
     dbname,
     user,
     password,
+    sslmode,
+    sslrootcert: sslrootcert || undefined,
+    sslcert: sslcert || undefined,
+    sslkey: sslkey || undefined,
+    connectTimeout,
+    targetSessionAttrs,
+    applicationName: applicationName || undefined,
   };
 }
 
 /**
- * Builds standard libpq pg_service.conf INI content.
+ * Builds standard libpq pg_service.conf INI content preserving security parameters.
  */
 export function buildPgServiceConfig({ databaseUrl, serviceName = "mqtech_service" }) {
   const safeServiceName = validateServiceName(serviceName);
-  const { host, port, dbname, user, password } = parseDatabaseUrl(databaseUrl);
+  const parsed = parseDatabaseUrl(databaseUrl);
 
   const lines = [
     `[${safeServiceName}]`,
-    `host=${escapeIniValue(host)}`,
-    `port=${escapeIniValue(port)}`,
-    `dbname=${escapeIniValue(dbname)}`,
-    `user=${escapeIniValue(user)}`,
+    `host=${escapeIniValue(parsed.host)}`,
+    `port=${escapeIniValue(parsed.port)}`,
+    `dbname=${escapeIniValue(parsed.dbname)}`,
+    `user=${escapeIniValue(parsed.user)}`,
   ];
 
-  if (password !== "") {
-    lines.push(`password=${escapeIniValue(password)}`);
+  if (parsed.password !== "") {
+    lines.push(`password=${escapeIniValue(parsed.password)}`);
+  }
+
+  // Preserve security-relevant parameters
+  if (parsed.sslmode) {
+    lines.push(`sslmode=${escapeIniValue(parsed.sslmode)}`);
+  }
+  if (parsed.sslrootcert) {
+    lines.push(`sslrootcert=${escapeIniValue(parsed.sslrootcert)}`);
+  }
+  if (parsed.sslcert) {
+    lines.push(`sslcert=${escapeIniValue(parsed.sslcert)}`);
+  }
+  if (parsed.sslkey) {
+    lines.push(`sslkey=${escapeIniValue(parsed.sslkey)}`);
+  }
+  if (parsed.connectTimeout) {
+    lines.push(`connect_timeout=${escapeIniValue(parsed.connectTimeout)}`);
+  }
+  if (parsed.targetSessionAttrs) {
+    lines.push(`target_session_attrs=${escapeIniValue(parsed.targetSessionAttrs)}`);
+  }
+  if (parsed.applicationName) {
+    lines.push(`application_name=${escapeIniValue(parsed.applicationName)}`);
   }
 
   return lines.join("\n") + "\n";
@@ -209,12 +326,16 @@ export function writeSecurePgPassFile({ databaseUrl, outputFilePath }) {
 /**
  * Returns safe command-line arguments for pg_dump and pg_restore.
  * 
- * IMPORTANT POSTGRESQL CLI RULES:
+ * IMPORTANT POSTGRESQL CLI RULES (P4.1.5):
  * - pg_dump and pg_restore DO NOT support a "--service" command-line option.
  * - Service selection is achieved via:
  *   1. Environment variable PGSERVICEFILE pointing to the private config.
  *   2. Connection specification: --dbname="service=<service_name>"
  *   3. Unattended mode flag: --no-password (-w) to fail immediately if auth fails.
+ * - RESTORE FAILURE POLICY (P4.1.5):
+ *   Includes --single-transaction and --exit-on-error to ensure all restore operations
+ *   succeed atomically or rollback completely on error (no partial corrupted state).
+ *   --single-transaction is NOT combined with parallel jobs (-j / --jobs).
  * - Ensures ZERO credentials, passwords, or raw connection URLs are present in process argv.
  */
 export function getSafeDumpArgs({ serviceName, filePath }) {
@@ -234,6 +355,8 @@ export function getSafeRestoreArgs({ serviceName, backupFilePath }) {
   return [
     `--dbname=service=${safeServiceName}`,
     "--no-password",
+    "--single-transaction",
+    "--exit-on-error",
     "--clean",
     "--if-exists",
     "--no-owner",

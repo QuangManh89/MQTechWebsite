@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# MQTech PostgreSQL Restore Engine
+# MQTech PostgreSQL Restore Engine (P4.1.5)
 # 
-# SAFETY SAFEGUARDS (P4.1.4):
+# SAFETY SAFEGUARDS:
 # 1. Approved Target Host Allowlist: Rejects all remote/unknown hosts by default.
 #    Only approved local loopback interfaces are accepted.
-# 2. Disposable Database Name Enforcement: Target DB name must contain a disposable
+# 2. Strict Destination Identity Requirement (P4.1.5):
+#    - EXPECTED_RESTORE_HOST (required)
+#    - EXPECTED_RESTORE_DB_NAME (required)
+# 3. Disposable Database Name Enforcement: Target DB name must contain a disposable
 #    test marker (_dev, _test, _disposable, _restore_test).
-# 3. Source & Destination Identity Conflict: Strictly rejects restoring into the
+# 4. Source & Destination Identity Conflict: Strictly rejects restoring into the
 #    same database as the source (prevents accidental self-clobbering).
-# 4. Two-Factor Operator Confirmation:
+# 5. Two-Factor Operator Confirmation:
 #    - CONFIRM_DESTRUCTIVE_RESTORE=true
 #    - CONFIRM_RESTORE_DB_NAME="<exact_target_db_name>"
-# 5. Masked Credential Logging: Never prints passwords or raw connection strings.
-# 6. Supported libpq CLI Invocation: Uses --dbname="service=${PGSERVICE}" --no-password.
+# 6. Masked Credential Logging: Never prints passwords or raw connection strings.
+# 7. Atomic Restore Failure Policy (P4.1.5):
+#    Uses --single-transaction and --exit-on-error. Either all SQL commands succeed,
+#    or the transaction is rolled back completely. No partial corrupted state.
+# 8. Supported libpq CLI Invocation: Uses --dbname="service=${PGSERVICE}" --no-password.
 #    (--service is NOT a supported flag in pg_restore).
-# 7. Encryption Status: At-rest encryption remains NOT IMPLEMENTED internally.
 # ==============================================================================
 
 set -euo pipefail
@@ -31,8 +36,10 @@ if [ -z "${BACKUP_FILE}" ]; then
   echo "[LỖI]: Thiếu đường dẫn tệp sao lưu."
   echo "Cách dùng:"
   echo "  CONFIRM_DESTRUCTIVE_RESTORE=true \\"
-  echo "  CONFIRM_RESTORE_DB_NAME=\"<target_db_name>\" \\"
-  echo "  TARGET_DATABASE_URL=\"postgresql://user:pass@localhost:5432/<target_db_name>\" \\"
+  echo "  EXPECTED_RESTORE_HOST=\"localhost\" \\"
+  echo "  EXPECTED_RESTORE_DB_NAME=\"mqtech_restore_test\" \\"
+  echo "  CONFIRM_RESTORE_DB_NAME=\"mqtech_restore_test\" \\"
+  echo "  TARGET_DATABASE_URL=\"postgresql://user:pass@localhost:5432/mqtech_restore_test\" \\"
   echo "  ./scripts/restore.sh <path-to-dump-file>"
   exit 1
 fi
@@ -44,6 +51,18 @@ fi
 
 if [ -z "${TARGET_DATABASE_URL:-}" ]; then
   echo "[LỖI]: Thiếu biến môi trường TARGET_DATABASE_URL."
+  exit 1
+fi
+
+if [ -z "${EXPECTED_RESTORE_HOST:-}" ]; then
+  echo "[LỖI]: Thiếu biến môi trường EXPECTED_RESTORE_HOST."
+  echo "Để bảo đảm an toàn danh tính, bạn bắt buộc phải khai báo máy chủ kỳ vọng độc lập với URL."
+  exit 1
+fi
+
+if [ -z "${EXPECTED_RESTORE_DB_NAME:-}" ]; then
+  echo "[LỖI]: Thiếu biến môi trường EXPECTED_RESTORE_DB_NAME."
+  echo "Để bảo đảm an toàn danh tính, bạn bắt buộc phải khai báo tên CSDL kỳ vọng độc lập với URL."
   exit 1
 fi
 
@@ -79,6 +98,7 @@ fi
 echo "[MÃ HÓA NGHỈ]: NOT IMPLEMENTED (Tệp dump phải ở dạng nhị phân hợp lệ hoặc đã được giải mã bên ngoài trước khi truyền vào script này)."
 echo ""
 echo "[Thực thi]: Bắt đầu phục hồi cấu trúc và dữ liệu vào mục tiêu kiểm thử '${TARGET_DB_NAME}'..."
+echo "[Chính sách thất bại]: Sử dụng --single-transaction và --exit-on-error (Khôi phục nguyên tử - Rollback toàn diện nếu có lỗi)."
 
 # Establish private temporary credential directory (0700).
 # Prefer volatile tmpfs (/dev/shm or XDG_RUNTIME_DIR) when available.
@@ -106,10 +126,12 @@ node scripts/credential-helper.mjs write-service "${PGSERVICE}" "${PGSERVICEFILE
 echo "[Bảo mật tiến trình]: Sử dụng PGSERVICEFILE (${PGSERVICEFILE}). Không truyền URL hay mật khẩu qua process argv."
 
 # Invoke pg_restore with supported libpq connection syntax: --dbname="service=${PGSERVICE}"
-# Note: --service is not a supported flag in pg_restore; --dbname="service=..." is the standard.
+# Uses --single-transaction and --exit-on-error for atomic execution:
 pg_restore \
   --dbname="service=${PGSERVICE}" \
   --no-password \
+  --single-transaction \
+  --exit-on-error \
   --clean \
   --if-exists \
   --no-owner \

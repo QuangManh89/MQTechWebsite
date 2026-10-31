@@ -81,10 +81,18 @@ describe("P4.1.4 Final Integration Gate: CLI Invocation, Credential Safety & Res
       "Must use --dbname=service=mqtech_restore"
     );
 
-    // 3. MUST use --no-password
+    // 3. MUST use --no-password, --single-transaction, and --exit-on-error
     assert.ok(
       restoreArgs.includes("--no-password"),
       "Must include --no-password flag"
+    );
+    assert.ok(
+      restoreArgs.includes("--single-transaction"),
+      "Must include --single-transaction flag for atomic restore rollback"
+    );
+    assert.ok(
+      restoreArgs.includes("--exit-on-error"),
+      "Must include --exit-on-error flag"
     );
 
     // 4. Clean and if-exists flags

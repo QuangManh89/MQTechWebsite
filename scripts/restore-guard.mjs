@@ -1,8 +1,8 @@
 /**
- * MQTech PostgreSQL Restore Target Guard (P4.1.4)
+ * MQTech PostgreSQL Restore Target Guard (P4.1.5)
  * 
  * Enforces fail-closed target identity validation before any restore operation:
- * 1. An explicitly approved destination host and database identity.
+ * 1. An explicitly approved destination host and database identity (independent of URL).
  * 2. Strict host allowlist (strictly local loopback interfaces).
  * 3. Rejection of production/live environment keywords.
  * 4. Disposable database name marker requirement (_dev, _test, _disposable, etc.).
@@ -19,6 +19,14 @@
  * The system requires defense-in-depth: disposable name markers, explicit expected identity,
  * source conflict rejection, and exact operator confirmation. Confirmation flags can NEVER
  * override failed identity checks.
+ * 
+ * CLOUD MANAGED POSTGRES (FLY MPG) LIMITATIONS:
+ * In managed database environments (such as Fly Managed Postgres, AWS RDS, Supabase),
+ * regular database application users do not have access to superuser-level commands like
+ * pg_control_system() to query cluster system identifiers. Therefore, when system identifier
+ * retrieval is unavailable from the provider, strict expected host matching, expected DB name
+ * matching, disposable name markers, and two-factor operator confirmation provide the necessary
+ * defense-in-depth.
  */
 
 export const DEFAULT_APPROVED_HOSTS = new Set([
@@ -53,6 +61,8 @@ export function validateRestoreTarget(options = {}) {
     expectedDbName = process.env.EXPECTED_RESTORE_DB_NAME,
     expectedSystemIdentifier = process.env.EXPECTED_SYSTEM_IDENTIFIER,
     serverIdentifier,
+    requireExplicitIdentity = false,
+    requireSystemIdentifier = false,
     approvedHosts = DEFAULT_APPROVED_HOSTS,
   } = options;
 
@@ -101,7 +111,22 @@ export function validateRestoreTarget(options = {}) {
     };
   }
 
-  // 3. Explicit Expected Destination Identity (if specified)
+  // 3. Explicit Expected Destination Identity (independent of URL)
+  if (requireExplicitIdentity) {
+    if (!expectedHost) {
+      return {
+        allowed: false,
+        reason: "Bắt buộc phải khai báo máy chủ kỳ vọng (expectedHost/EXPECTED_RESTORE_HOST) độc lập với TARGET_DATABASE_URL.",
+      };
+    }
+    if (!expectedDbName) {
+      return {
+        allowed: false,
+        reason: "Bắt buộc phải khai báo tên CSDL kỳ vọng (expectedDbName/EXPECTED_RESTORE_DB_NAME) độc lập với TARGET_DATABASE_URL.",
+      };
+    }
+  }
+
   if (expectedHost && targetHost !== expectedHost.toLowerCase()) {
     return {
       allowed: false,
@@ -166,15 +191,15 @@ export function validateRestoreTarget(options = {}) {
     }
   }
 
-  // 7. Database Server Identity Verification (when available)
-  if (expectedSystemIdentifier) {
+  // 7. Database Server Identity Verification (when available or required)
+  if (expectedSystemIdentifier || requireSystemIdentifier) {
     if (!serverIdentifier) {
       return {
         allowed: false,
-        reason: `Yêu cầu xác minh danh tính hệ thống máy chủ (System Identifier: '${expectedSystemIdentifier}') nhưng không lấy được định danh thực tế.`,
+        reason: `Yêu cầu xác minh danh tính hệ thống máy chủ (System Identifier) nhưng không lấy được định danh thực tế từ máy chủ CSDL.`,
       };
     }
-    if (serverIdentifier !== expectedSystemIdentifier) {
+    if (expectedSystemIdentifier && serverIdentifier !== expectedSystemIdentifier) {
       return {
         allowed: false,
         reason: `Định danh hệ thống máy chủ đích ('${serverIdentifier}') không khớp với định danh kỳ vọng ('${expectedSystemIdentifier}').`,
@@ -225,6 +250,7 @@ if (
     expectedHost: process.env.EXPECTED_RESTORE_HOST,
     expectedDbName: process.env.EXPECTED_RESTORE_DB_NAME,
     expectedSystemIdentifier: process.env.EXPECTED_SYSTEM_IDENTIFIER,
+    requireExplicitIdentity: true,
   });
 
   if (!result.allowed) {
