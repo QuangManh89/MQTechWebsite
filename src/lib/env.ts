@@ -10,6 +10,7 @@ export interface AppConfig {
   environment: "production" | "development" | "test" | "staging" | "unknown";
   isProduction: boolean;
   databaseUrl?: string;
+  migrationDatabaseUrl?: string;
   adminSessionSecret?: string;
   allowMemoryStore: boolean;
 }
@@ -56,6 +57,7 @@ export function getAppConfig(): AppConfig {
     environment,
     isProduction,
     databaseUrl: process.env.DATABASE_URL,
+    migrationDatabaseUrl: process.env.MIGRATION_DATABASE_URL,
     adminSessionSecret: process.env.ADMIN_SESSION_SECRET,
     allowMemoryStore,
   };

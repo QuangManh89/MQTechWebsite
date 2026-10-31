@@ -159,17 +159,40 @@ describe("P4.1.2 Deployment Safety: Healthchecks, Migration Baseline & Restore G
           const cols = [];
           for (const [tbl, colList] of Object.entries(REQUIRED_SCHEMA_OBJECTS.columns)) {
             for (const c of colList) {
-              cols.push({ table_name: tbl, column_name: c.name, is_nullable: c.nullable });
+              cols.push({
+                table_name: tbl,
+                column_name: c.name,
+                data_type: c.type,
+                is_nullable: c.nullable,
+              });
             }
           }
           return cols;
+        }
+        if (sql.includes("pg_constraint")) {
+          return [
+            { conname: "service_categories_pkey", contype: "p", table_name: "service_categories" },
+            { conname: "service_requests_pkey", contype: "p", table_name: "service_requests" },
+            { conname: "request_status_history_pkey", contype: "p", table_name: "request_status_history" },
+            { conname: "admin_users_pkey", contype: "p", table_name: "admin_users" },
+            { conname: "service_categories_slug_key", contype: "u" },
+            { conname: "service_requests_reference_code_key", contype: "u" },
+            { conname: "admin_users_username_key", contype: "u" },
+            { conname: "service_requests_service_mode_check", contype: "c" },
+            { conname: "service_requests_device_category_check", contype: "c" },
+            { conname: "service_requests_status_check", contype: "c" },
+            { conname: "admin_users_role_check", contype: "c" },
+          ];
         }
         if (sql.includes("pg_indexes")) {
           return REQUIRED_SCHEMA_OBJECTS.indexes.map((i) => ({ indexname: i }));
         }
         if (sql.includes("service_categories")) {
           // Only return 2 categories
-          return [{ id: "svc_desktop_laptop" }, { id: "svc_windows_software" }];
+          return [
+            { id: "svc_desktop_laptop", slug: "sua-chua-laptop-pc" },
+            { id: "svc_windows_software", slug: "cai-dat-windows-phan-mem" },
+          ];
         }
         return [];
       },
@@ -179,7 +202,7 @@ describe("P4.1.2 Deployment Safety: Healthchecks, Migration Baseline & Restore G
     assert.strictEqual(result.valid, false);
     assert.ok(
       result.errors.some((e) =>
-        e.includes('Dữ liệu danh mục dịch vụ mẫu (seed) còn thiếu mã: "svc_hardware_upgrade"')
+        e.includes('Dữ liệu mẫu (seed) còn thiếu mã danh mục: "svc_hardware_upgrade"')
       )
     );
   });
@@ -199,16 +222,39 @@ describe("P4.1.2 Deployment Safety: Healthchecks, Migration Baseline & Restore G
           const cols = [];
           for (const [tbl, colList] of Object.entries(REQUIRED_SCHEMA_OBJECTS.columns)) {
             for (const c of colList) {
-              cols.push({ table_name: tbl, column_name: c.name, is_nullable: c.nullable });
+              cols.push({
+                table_name: tbl,
+                column_name: c.name,
+                data_type: c.type,
+                is_nullable: c.nullable,
+              });
             }
           }
           return cols;
+        }
+        if (sql.includes("pg_constraint")) {
+          return [
+            { conname: "service_categories_pkey", contype: "p", table_name: "service_categories" },
+            { conname: "service_requests_pkey", contype: "p", table_name: "service_requests" },
+            { conname: "request_status_history_pkey", contype: "p", table_name: "request_status_history" },
+            { conname: "admin_users_pkey", contype: "p", table_name: "admin_users" },
+            { conname: "service_categories_slug_key", contype: "u" },
+            { conname: "service_requests_reference_code_key", contype: "u" },
+            { conname: "admin_users_username_key", contype: "u" },
+            { conname: "service_requests_service_mode_check", contype: "c" },
+            { conname: "service_requests_device_category_check", contype: "c" },
+            { conname: "service_requests_status_check", contype: "c" },
+            { conname: "admin_users_role_check", contype: "c" },
+          ];
         }
         if (sql.includes("pg_indexes")) {
           return REQUIRED_SCHEMA_OBJECTS.indexes.map((i) => ({ indexname: i }));
         }
         if (sql.includes("service_categories")) {
-          return REQUIRED_SCHEMA_OBJECTS.serviceCategories.map((id) => ({ id }));
+          return REQUIRED_SCHEMA_OBJECTS.serviceCategories.map((c) => ({
+            id: c.id,
+            slug: c.slug,
+          }));
         }
         return [];
       },

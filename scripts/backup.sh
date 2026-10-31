@@ -38,10 +38,25 @@ echo "[Khởi tạo]: Đang tiến hành sao lưu cấu trúc và dữ liệu...
 echo "[Mã hóa nghỉ]: NOT IMPLEMENTED (Bản nén nguyên bản; yêu cầu mã hóa ngoài trước khi tải lên kho lưu trữ)"
 echo "[Tệp xuất]: ${BACKUP_FILEPATH}"
 
-# Execute pg_dump using native environment credential resolution
-# Output format: Custom binary compressed (-Fc)
+# 1. Establish private temporary credential directory (0700) with automatic cleanup trap
+SECURE_TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_backup_cred')"
+chmod 700 "${SECURE_TMP_DIR}"
+
+cleanup() {
+  rm -rf "${SECURE_TMP_DIR}"
+}
+trap cleanup EXIT INT TERM QUIT
+
+# 2. Write protected pg_service.conf (0600) to isolate credentials from process arguments
+export PGSERVICEFILE="${SECURE_TMP_DIR}/pg_service.conf"
+export PGSERVICE="mqtech_backup"
+node scripts/credential-helper.mjs write-service "${PGSERVICE}" "${PGSERVICEFILE}"
+
+echo "[Bảo mật tiến trình]: Sử dụng PGSERVICEFILE (${PGSERVICEFILE}). Không truyền mật khẩu qua process argv."
+
+# 3. Execute pg_dump using --service (argv contains ONLY the service name)
 pg_dump \
-  --dbname="${DATABASE_URL}" \
+  --service="${PGSERVICE}" \
   --format=c \
   --no-owner \
   --no-privileges \

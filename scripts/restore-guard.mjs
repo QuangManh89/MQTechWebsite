@@ -8,11 +8,15 @@
  * 4. Requires two-factor confirmation: CONFIRM_DESTRUCTIVE_RESTORE=true and matching CONFIRM_RESTORE_DB_NAME.
  */
 
+// Approved destination hosts: Strictly loopback interfaces.
+// 0.0.0.0 is explicitly removed as it can bind across all interfaces.
+// NOTE ON TUNNELS & PROXIES: "localhost" does not guarantee the database is physically local,
+// as an SSH tunnel (e.g. ssh -L 5432:remote-prod:5432) can proxy to remote servers.
+// Therefore, strict destination database naming and exact two-factor confirmation are mandatory.
 const DEFAULT_APPROVED_HOSTS = new Set([
   "localhost",
   "127.0.0.1",
   "::1",
-  "0.0.0.0",
 ]);
 
 const FORBIDDEN_KEYWORDS = [

@@ -78,8 +78,23 @@ echo "[MÃ HÓA NGHỈ]: NOT IMPLEMENTED (Tệp dump phải ở dạng nhị ph�
 echo ""
 echo "[Thực thi]: Bắt đầu phục hồi cấu trúc và dữ liệu vào mục tiêu kiểm thử '${TARGET_DB_NAME}'..."
 
+# Establish private temporary credential directory (0700) with cleanup trap
+SECURE_TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mqtech_restore_cred')"
+chmod 700 "${SECURE_TMP_DIR}"
+
+cleanup() {
+  rm -rf "${SECURE_TMP_DIR}"
+}
+trap cleanup EXIT INT TERM QUIT
+
+export PGSERVICEFILE="${SECURE_TMP_DIR}/pg_service.conf"
+export PGSERVICE="mqtech_restore"
+node scripts/credential-helper.mjs write-service "${PGSERVICE}" "${PGSERVICEFILE}"
+
+echo "[Bảo mật tiến trình]: Sử dụng PGSERVICEFILE (${PGSERVICEFILE}). Không truyền URL hay mật khẩu qua process argv."
+
 pg_restore \
-  --dbname="${TARGET_DATABASE_URL}" \
+  --service="${PGSERVICE}" \
   --clean \
   --if-exists \
   --no-owner \
