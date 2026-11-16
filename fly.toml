@@ -1,33 +1,34 @@
 # ==============================================================================
-# Fly.io Deployment Configuration Template: MQTech Web Application
+# Fly.io Deployment Configuration: MQTech Web Application (P5 Staging)
 # 
 # OFFICIAL HEALTHCHECK REFERENCE: https://docs.fly.io/reference/health-checks
+# OFFICIAL CONFIGURATION REFERENCE: https://docs.fly.io/reference/configuration
 # 
 # PLATFORM BEHAVIOR SPECIFICATION:
 # 1. Service Checks ([[http_service.checks]]):
 #    - Control request routing by the Fly Proxy.
-#    - A passing check (HTTP 200) allows the Machine to receive customer traffic.
-#    - A failing check (e.g. HTTP 503 from /api/ready) removes the Machine from
-#      the proxy routing pool, preventing customer requests to unready instances.
-#    - CRITICAL: Failed service checks DO NOT restart or stop the Machine.
+#    - Evaluates /api/ready. If failing (e.g. HTTP 503), removes Machine from
+#      proxy routing pool without stopping or rebooting the instance.
 # 2. Top-Level Monitoring Checks ([checks]):
-#    - Run independent health monitoring against the instance.
-#    - Report status to the Fly.io dashboard, metrics, and alerts.
-#    - DO NOT affect traffic routing decisions.
-# 3. Container Engine Healthcheck (Dockerfile HEALTHCHECK):
-#    - Monitored by the local container runtime for process liveness (/api/health).
+#    - Monitors process liveness via /api/health independently of traffic routing.
 # 
 # SAFETY NOTICE:
-# - Application name: "mqtech-web" (dedicated isolated application).
+# - Application name: "mqtech" (stable approved web app name).
 # - NEVER point this configuration to "openwebui-mqtech", machine 2871574ae574e8,
 #   volume vol_4m3m9jdgen55793v, or any existing production resource.
 # - DO NOT run `fly deploy` without explicit user authorization in Phase P5.
 # ==============================================================================
 
-app = "mqtech-web"
+app = "mqtech"
 primary_region = "sin"
 kill_signal = "SIGTERM"
 kill_timeout = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
 
 [experimental]
   auto_rollback = true
@@ -38,6 +39,8 @@ kill_timeout = "10s"
 [env]
   PORT = "3000"
   NODE_ENV = "production"
+  MQTECH_DEPLOYMENT_ENV = "staging"
+  MQTECH_PUBLIC_ORIGIN = "https://mqtech.fly.dev"
 
 [http_service]
   internal_port = 3000
@@ -47,10 +50,6 @@ kill_timeout = "10s"
   min_machines_running = 1
 
   # Service-Level Readiness Check (Controls Fly Proxy Traffic Routing):
-  # Evaluates /api/ready, which validates required config and PostgreSQL connectivity.
-  # If PostgreSQL is unavailable, /api/ready returns HTTP 503.
-  # Fly Proxy temporarily stops routing incoming requests to this Machine without
-  # terminating or rebooting the instance.
   [[http_service.checks]]
     interval = "15s"
     timeout = "5s"
@@ -61,7 +60,6 @@ kill_timeout = "10s"
     tls_skip_verify = false
 
 # Top-Level Monitoring Check (Reporting & Observability):
-# Monitors process liveness via /api/health independently of traffic routing.
 [checks]
   [checks.process_liveness]
     port = 3000

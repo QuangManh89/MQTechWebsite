@@ -56,3 +56,60 @@ export interface AdminUser {
   isActive: boolean;
   createdAt: Date;
 }
+
+export type MediaAssetStatus = "PENDING" | "ACTIVE" | "ARCHIVED" | "DELETED";
+
+export interface MediaAsset {
+  id: string;
+  objectKey: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  checksumSha256?: string;
+  width?: number;
+  height?: number;
+  altText?: string;
+  uploadedBy: string;
+  status: MediaAssetStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type ArticleCategory =
+  | "hardware"
+  | "software"
+  | "thermal"
+  | "network"
+  | "tips";
+
+export type ArticleStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+
+export interface ArticleStep {
+  number: string;
+  action: string;
+  detail: string;
+  warning?: string;
+}
+
+export interface Article {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  content: string;
+  coverImageUrl?: string;
+  category: ArticleCategory;
+  categoryLabel: string;
+  readTime: string;
+  difficulty: "Dễ" | "Trung bình" | "Cần hỗ trợ kỹ thuật";
+  steps: ArticleStep[];
+  quickTips: string[];
+  status: ArticleStatus;
+  views: number;
+  r2ObjectKey: string;
+  authorId?: string;
+  authorName?: string;
+  publishedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}

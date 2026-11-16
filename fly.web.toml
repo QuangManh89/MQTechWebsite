@@ -1,0 +1,71 @@
+# ==============================================================================
+# Fly.io Deployment Configuration: MQTech Web Application (P5 Staging)
+# 
+# OFFICIAL HEALTHCHECK REFERENCE: https://docs.fly.io/reference/health-checks
+# OFFICIAL CONFIGURATION REFERENCE: https://docs.fly.io/reference/configuration
+# 
+# PLATFORM BEHAVIOR SPECIFICATION:
+# 1. Service Checks ([[http_service.checks]]):
+#    - Control request routing by the Fly Proxy.
+#    - Evaluates /api/ready. If failing (e.g. HTTP 503), removes Machine from
+#      proxy routing pool without stopping or rebooting the instance.
+# 2. Top-Level Monitoring Checks ([checks]):
+#    - Monitors process liveness via /api/health independently of traffic routing.
+# 
+# SAFETY NOTICE:
+# - Application name: "mqtech" (stable approved web app name).
+# - NEVER point this configuration to "openwebui-mqtech", machine 2871574ae574e8,
+#   volume vol_4m3m9jdgen55793v, or any existing production resource.
+# - DO NOT run `fly deploy` without explicit user authorization in Phase P5.
+# ==============================================================================
+
+app = "mqtech"
+primary_region = "sin"
+kill_signal = "SIGTERM"
+kill_timeout = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  MQTECH_DEPLOYMENT_ENV = "staging"
+  MQTECH_PUBLIC_ORIGIN = "https://mqtech.fly.dev"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  # Service-Level Readiness Check (Controls Fly Proxy Traffic Routing):
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/api/ready"
+    protocol = "http"
+    tls_skip_verify = false
+
+# Top-Level Monitoring Check (Reporting & Observability):
+[checks]
+  [checks.process_liveness]
+    port = 3000
+    type = "http"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/api/health"

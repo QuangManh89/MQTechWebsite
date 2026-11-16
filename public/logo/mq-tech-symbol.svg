@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 112" width="152" height="112" role="img" aria-label="MQ Tech Symbol">
+  <defs>
+    <linearGradient id="mq-sym-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="60%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#22D3EE" />
+    </linearGradient>
+  </defs>
+  <g id="symbol" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 14 98 L 14 14 L 56 56 L 94 18" stroke="url(#mq-sym-grad)" stroke-width="15" />
+    <circle cx="94" cy="56" r="38" stroke="url(#mq-sym-grad)" stroke-width="15" />
+    <circle cx="94" cy="56" r="10" fill="#22D3EE" stroke="none" />
+    <path d="M 106 68 L 136 98" stroke="#22D3EE" stroke-width="16" />
+  </g>
+</svg>

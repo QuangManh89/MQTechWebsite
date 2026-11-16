@@ -1,10 +1,11 @@
+/* Hallmark: v2.0.0 */
 @import "tailwindcss";
 
 @theme {
   --color-brand-dark: #0A0A0B;
   --color-surface-dark-card: #121214;
   --color-surface-dark-elevated: #18181B;
-  --color-surface-dark-border: #323238;
+  --color-surface-dark-border: #71717A;
   --color-brand-light: #F5F5F7;
   --color-surface-light-card: #FFFFFF;
   --color-surface-light-border: #E5E5EA;
@@ -21,18 +22,51 @@
 :root {
   --background: #0A0A0B;
   --foreground: #FFFFFF;
+  --text-muted: #A1A1AA;
+  --glass-surface: rgba(10, 10, 11, 0.8);
+  --hero-surface-glow: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.12), transparent 70%);
 }
 
+html,
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* Hallmark Floor Rule: balanced headings & pretty body text */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Accessibility: prefers-reduced-motion fallback (Hallmark Floor Rule 7) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hero subtle surface */
+.hero-glow {
+  background: var(--hero-surface-glow);
 }
 
 /* Glassmorphism utility */
 .glass {
-  background-color: rgba(10, 10, 11, 0.8);
+  background-color: var(--glass-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }

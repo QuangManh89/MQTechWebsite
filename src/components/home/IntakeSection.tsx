@@ -177,25 +177,19 @@ export function IntakeSection() {
   return (
     <section
       id="yeu-cau-dich-vu"
-      className="bg-[#0A0A0B] text-white py-20 lg:py-28 border-t border-white/10 relative overflow-hidden"
+      className="bg-brand-dark text-white py-20 lg:py-28 border-t border-surface-dark-border relative overflow-hidden"
     >
-      {/* Background ambient lighting glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[900px] rounded-full bg-[#3B82F6]/10 blur-[150px]"
-      />
-
       <div className="relative mx-auto max-w-[1280px] px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-14 items-start">
           {/* Left Column: Guidance, Security Notice & Service Area */}
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3.5 py-1.5 text-[11px] tracking-[0.12em] uppercase font-medium text-white/80">
-              Tiếp nhận & Xác nhận
-            </div>
-            <h2 className="mt-4 text-[32px] sm:text-[42px] font-bold tracking-tight text-white leading-[1.1]">
-              Gửi Yêu Cầu Dịch Vụ — Phục Vụ Chu Đáo
+            <p className="text-[13px] font-medium text-blue-400 mb-2">
+              Tiếp nhận & xác nhận
+            </p>
+            <h2 className="text-balance text-[32px] sm:text-[42px] font-bold tracking-tight text-white leading-[1.1]">
+              Gửi Yêu Cầu Dịch Vụ: Phục Vụ Chu Đáo
             </h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-white/70">
+            <p className="text-pretty mt-4 text-[15px] leading-relaxed text-neutral-300">
               Quý khách chỉ cần để lại thông tin liên hệ và mô tả sự cố máy tính.
               Kỹ thuật viên MQTech sẽ chủ động gọi điện hoặc liên hệ qua Zalo để
               tư vấn chẩn đoán ban đầu và xác nhận lịch hẹn trước khi tiếp nhận.
@@ -207,7 +201,7 @@ export function IntakeSection() {
                 <ShieldCheck className="h-4 w-4" />
                 <span>Cam kết an toàn thông tin & dữ liệu</span>
               </div>
-              <p className="text-[13px] text-white/60 leading-relaxed">
+              <p className="text-[13px] text-neutral-300 leading-relaxed">
                 MQTech <strong>không bao giờ</strong> yêu cầu khách hàng cung cấp
                 mật khẩu đăng nhập Windows, mã PIN hay mật khẩu email qua biểu
                 mẫu. Quý khách hoàn toàn an tâm về tính riêng tư của dữ liệu cá
@@ -216,10 +210,10 @@ export function IntakeSection() {
             </div>
 
             {/* Mandatory Confirmation Notice */}
-            <div className="mt-4 rounded-[18px] bg-[#3B82F6]/10 border border-[#3B82F6]/20 p-5">
+            <div className="mt-4 rounded-[18px] bg-blue-500/10 border border-blue-500/20 p-5">
               <div className="flex items-start gap-2.5">
-                <AlertTriangle className="h-4 w-4 text-[#3B82F6] shrink-0 mt-0.5" />
-                <div className="text-[13px] text-white/80 leading-relaxed">
+                <AlertTriangle className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                <div className="text-[13px] text-neutral-200 leading-relaxed">
                   <span className="font-semibold text-white">
                     Quy định trạng thái:
                   </span>{" "}
@@ -231,12 +225,12 @@ export function IntakeSection() {
             </div>
 
             {/* Service Area Card */}
-            <div className="mt-4 rounded-[18px] bg-white/[0.02] border border-white/[0.08] p-5 text-[13px] text-white/70 space-y-2">
+            <div className="mt-4 rounded-[18px] bg-white/[0.02] border border-white/[0.08] p-5 text-[13px] text-neutral-300 space-y-2">
               <div className="flex items-center gap-2 font-medium text-white">
-                <MapPin className="h-4 w-4 text-[#3B82F6]" />
+                <MapPin className="h-4 w-4 text-blue-400" />
                 <span>Phạm vi phục vụ: Buôn Ma Thuột & Lân cận</span>
               </div>
-              <p className="text-white/50 text-[12.5px] leading-relaxed">
+              <p className="text-neutral-400 text-[12.5px] leading-relaxed">
                 Hỗ trợ kỹ thuật viên đến sửa tận nơi trong bán kính ~15 km từ trung
                 tâm thành phố. Địa chỉ cửa hàng chính thức đang được hoàn thiện cập
                 nhật, vui lòng liên hệ trước khi mang máy đến.
@@ -245,10 +239,10 @@ export function IntakeSection() {
           </div>
 
           {/* Right Column: Interactive Form or Success View */}
-          <div className="rounded-[24px] bg-[#121214] border border-white/10 p-7 lg:p-9 shadow-2xl backdrop-blur relative">
+          <div className="rounded-[24px] bg-surface-dark-card border border-surface-dark-border p-7 lg:p-9 relative">
             {successData ? (
               /* Success View */
-              <div className="py-2 text-center animate-in fade-in zoom-in-95 duration-200">
+              <div className="py-2 text-center animate-in fade-in duration-200">
                 <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500/15 text-emerald-400 mb-5">
                   <CheckCircle2 className="h-9 w-9" />
                 </div>
@@ -257,14 +251,14 @@ export function IntakeSection() {
                   Tiếp Nhận Thành Công!
                 </h3>
 
-                <p className="text-[14px] text-white/70 mt-2 max-w-[420px] mx-auto leading-relaxed">
+                <p className="text-[14px] text-neutral-300 mt-2 max-w-[420px] mx-auto leading-relaxed">
                   Yêu cầu của <strong>{successData.customerName}</strong> đã được
                   ghi nhận vào hệ thống tiếp nhận dịch vụ của MQTech.
                 </p>
 
                 {/* Reference Code Box */}
                 <div className="mt-6 rounded-[16px] bg-white/[0.04] border border-white/10 p-4 max-w-[360px] mx-auto">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-white/40 block">
+                  <span className="text-[11px] font-medium text-neutral-400 block">
                     Mã tra cứu yêu cầu
                   </span>
                   <div className="mt-1 flex items-center justify-center gap-3">
@@ -274,7 +268,7 @@ export function IntakeSection() {
                     <button
                       type="button"
                       onClick={() => copyToClipboard(successData.referenceCode)}
-                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white/80 transition-colors focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white/80 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       title="Sao chép mã tra cứu"
                     >
                       {copiedCode ? (
@@ -298,11 +292,11 @@ export function IntakeSection() {
                 </div>
 
                 {/* Next Steps Guidance */}
-                <div className="mt-6 text-left rounded-[16px] bg-[#3B82F6]/10 border border-[#3B82F6]/20 p-4 text-[13px] text-white/80 space-y-2">
+                <div className="mt-6 text-left rounded-[16px] bg-blue-500/10 border border-blue-500/20 p-4 text-[13px] text-neutral-200 space-y-2">
                   <p className="font-semibold text-white">
                     Các bước tiếp theo của MQTech:
                   </p>
-                  <ul className="list-disc list-inside space-y-1 text-white/70 text-[12.5px]">
+                  <ul className="list-disc list-inside space-y-1 text-neutral-300 text-[12.5px]">
                     <li>
                       Kỹ thuật viên sẽ kiểm tra nội dung sự cố và gọi điện/nhắn
                       Zalo tới số điện thoại của quý khách.
@@ -321,10 +315,10 @@ export function IntakeSection() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-2.5 text-[13px] font-medium text-white hover:bg-white/[0.12] transition"
+                  className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-2.5 text-[13px] font-medium text-white hover:bg-white/[0.12] transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Gửi thêm yêu cầu dịch vụ khác</span>
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">Gửi thêm yêu cầu dịch vụ khác</span>
                 </button>
               </div>
             ) : (
@@ -333,7 +327,7 @@ export function IntakeSection() {
                 <h3 className="text-[20px] font-bold text-white tracking-tight">
                   Phiếu Tiếp Nhận Yêu Cầu
                 </h3>
-                <p className="text-[13px] text-white/50 mt-1">
+                <p className="text-[13px] text-neutral-400 mt-1">
                   Chọn phương thức nhận máy phù hợp với nhu cầu của bạn
                 </p>
 
@@ -356,10 +350,10 @@ export function IntakeSection() {
                         setErrors(next);
                       }
                     }}
-                    className={`flex-1 rounded-full py-2.5 text-[13px] font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[#3B82F6] ${
+                    className={`flex-1 rounded-full py-2.5 text-[13px] font-semibold transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap ${
                       serviceMode === "IN_STORE"
-                        ? "bg-white text-[#0A0A0B] shadow-sm"
-                        : "text-white/60 hover:text-white"
+                        ? "bg-white text-brand-dark"
+                        : "text-neutral-300 hover:text-white"
                     }`}
                   >
                     Mang máy đến tiệm
@@ -370,15 +364,28 @@ export function IntakeSection() {
                     id="tab-on-site"
                     aria-selected={serviceMode === "ON_SITE"}
                     onClick={() => setServiceMode("ON_SITE")}
-                    className={`flex-1 rounded-full py-2.5 text-[13px] font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[#3B82F6] ${
+                    className={`flex-1 rounded-full py-2.5 text-[13px] font-semibold transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap ${
                       serviceMode === "ON_SITE"
-                        ? "bg-white text-[#0A0A0B] shadow-sm"
-                        : "text-white/60 hover:text-white"
+                        ? "bg-white text-brand-dark"
+                        : "text-neutral-300 hover:text-white"
                     }`}
                   >
                     Sửa chữa tận nơi
                   </button>
                 </div>
+
+                {serviceMode === "IN_STORE" && (
+                  <div className="mt-4 rounded-[14px] bg-blue-500/10 border border-blue-500/20 p-3.5 text-[12.5px] text-neutral-200 flex items-start gap-2.5 animate-in fade-in duration-150">
+                    <MapPin className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                      <span className="font-semibold text-white">Địa chỉ tiệm tiếp nhận:</span>{" "}
+                      Hẻm 4, số nhà 13/2 Võ Thị Sáu, Phường Tân Lập, TP. Buôn Ma Thuột.
+                      <span className="text-neutral-400 block mt-0.5">
+                        Giờ làm việc: 08:00 – 18:30 (Thứ 2 – Chủ Nhật) · Hotline: 0987 482 573
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {generalError && (
                   <div
@@ -394,9 +401,9 @@ export function IntakeSection() {
                   <div>
                     <label
                       htmlFor="customerName"
-                      className="block text-[13px] font-medium text-white/70 mb-1.5"
+                      className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                     >
-                      Họ và tên của bạn <span className="text-[#3B82F6]">*</span>
+                      Họ và tên của bạn <span className="text-blue-400">*</span>
                     </label>
                     <input
                       id="customerName"
@@ -409,10 +416,10 @@ export function IntakeSection() {
                       aria-describedby={
                         errors.customerName ? "err-customerName" : undefined
                       }
-                      className={`w-full rounded-[12px] bg-white/[0.04] border px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-[#3B82F6] transition ${
+                      className={`w-full rounded-[12px] bg-surface-dark-elevated border px-4 py-3 text-[14px] text-white placeholder-neutral-500 outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150 ${
                         errors.customerName
                           ? "border-red-500 focus:border-red-500"
-                          : "border-white/10 focus:border-[#3B82F6]"
+                          : "border-surface-dark-border focus:border-blue-500"
                       }`}
                     />
                     {errors.customerName && (
@@ -429,10 +436,10 @@ export function IntakeSection() {
                   <div>
                     <label
                       htmlFor="customerPhone"
-                      className="block text-[13px] font-medium text-white/70 mb-1.5"
+                      className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                     >
                       Số điện thoại liên hệ (hoặc số Zalo){" "}
-                      <span className="text-[#3B82F6]">*</span>
+                      <span className="text-blue-400">*</span>
                     </label>
                     <input
                       id="customerPhone"
@@ -445,10 +452,10 @@ export function IntakeSection() {
                       aria-describedby={
                         errors.customerPhone ? "err-customerPhone" : undefined
                       }
-                      className={`w-full rounded-[12px] bg-white/[0.04] border px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-[#3B82F6] transition ${
+                      className={`w-full rounded-[12px] bg-surface-dark-elevated border px-4 py-3 text-[14px] text-white placeholder-neutral-500 outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150 ${
                         errors.customerPhone
                           ? "border-red-500 focus:border-red-500"
-                          : "border-white/10 focus:border-[#3B82F6]"
+                          : "border-surface-dark-border focus:border-blue-500"
                       }`}
                     />
                     {errors.customerPhone && (
@@ -466,7 +473,7 @@ export function IntakeSection() {
                     <div>
                       <label
                         htmlFor="deviceCategory"
-                        className="block text-[13px] font-medium text-white/70 mb-1.5"
+                        className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                       >
                         Loại thiết bị
                       </label>
@@ -476,7 +483,7 @@ export function IntakeSection() {
                         onChange={(e) =>
                           setDeviceCategory(e.target.value as DeviceCategory)
                         }
-                        className="w-full rounded-[12px] bg-[#18181B] border border-white/10 px-3.5 py-3 text-[13.5px] text-white outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition"
+                        className="w-full rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border px-3.5 py-3 text-[13.5px] text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
                       >
                         <option value="LAPTOP">Laptop</option>
                         <option value="PC_DESKTOP">Máy tính để bàn (PC)</option>
@@ -489,7 +496,7 @@ export function IntakeSection() {
                     <div>
                       <label
                         htmlFor="serviceCategoryId"
-                        className="block text-[13px] font-medium text-white/70 mb-1.5"
+                        className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                       >
                         Nhóm dịch vụ cần hỗ trợ
                       </label>
@@ -497,13 +504,13 @@ export function IntakeSection() {
                         id="serviceCategoryId"
                         value={serviceCategoryId}
                         onChange={(e) => setServiceCategoryId(e.target.value)}
-                        className="w-full rounded-[12px] bg-[#18181B] border border-white/10 px-3.5 py-3 text-[13.5px] text-white outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition"
+                        className="w-full rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border px-3.5 py-3 text-[13.5px] text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
                       >
                         {MQTECH_SERVICES.map((s) => (
                           <option
                             key={s.id}
                             value={s.id}
-                            className="bg-[#18181B] text-white"
+                            className="bg-surface-dark-elevated text-white"
                           >
                             {s.title}
                           </option>
@@ -517,10 +524,10 @@ export function IntakeSection() {
                     <div className="animate-in fade-in duration-150">
                       <label
                         htmlFor="serviceAddress"
-                        className="block text-[13px] font-medium text-white/70 mb-1.5"
+                        className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                       >
                         Địa chỉ phục vụ tận nơi tại Buôn Ma Thuột{" "}
-                        <span className="text-[#3B82F6]">*</span>
+                        <span className="text-blue-400">*</span>
                       </label>
                       <input
                         id="serviceAddress"
@@ -533,10 +540,10 @@ export function IntakeSection() {
                         aria-describedby={
                           errors.serviceAddress ? "err-serviceAddress" : undefined
                         }
-                        className={`w-full rounded-[12px] bg-white/[0.04] border px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-[#3B82F6] transition ${
+                        className={`w-full rounded-[12px] bg-surface-dark-elevated border px-4 py-3 text-[14px] text-white placeholder-neutral-500 outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150 ${
                           errors.serviceAddress
                             ? "border-red-500 focus:border-red-500"
-                            : "border-white/10 focus:border-[#3B82F6]"
+                            : "border-surface-dark-border focus:border-blue-500"
                         }`}
                       />
                       {errors.serviceAddress && (
@@ -554,9 +561,9 @@ export function IntakeSection() {
                   <div>
                     <label
                       htmlFor="issueDescription"
-                      className="block text-[13px] font-medium text-white/70 mb-1.5"
+                      className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                     >
-                      Mô tả tình trạng sự cố <span className="text-[#3B82F6]">*</span>
+                      Mô tả tình trạng sự cố <span className="text-blue-400">*</span>
                     </label>
                     <textarea
                       id="issueDescription"
@@ -564,15 +571,15 @@ export function IntakeSection() {
                       required
                       value={issueDescription}
                       onChange={(e) => setIssueDescription(e.target.value)}
-                      placeholder="Ví dụ: Máy laptop không lên nguồn, quạt kêu to, cần kiểm tra và báo giá..."
+                      placeholder="Ví dụ: Máy laptop không lên nguồn, quạt kêu to, cần kiểm tra và báo giá…"
                       aria-invalid={Boolean(errors.issueDescription)}
                       aria-describedby={
                         errors.issueDescription ? "err-issueDescription" : undefined
                       }
-                      className={`w-full rounded-[12px] bg-white/[0.04] border px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:ring-1 focus:ring-[#3B82F6] transition resize-none ${
+                      className={`w-full rounded-[12px] bg-surface-dark-elevated border px-4 py-3 text-[14px] text-white placeholder-neutral-500 outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150 resize-none ${
                         errors.issueDescription
                           ? "border-red-500 focus:border-red-500"
-                          : "border-white/10 focus:border-[#3B82F6]"
+                          : "border-surface-dark-border focus:border-blue-500"
                       }`}
                     />
                     {errors.issueDescription && (
@@ -589,7 +596,7 @@ export function IntakeSection() {
                   <div>
                     <label
                       htmlFor="preferredContactTime"
-                      className="block text-[13px] font-medium text-white/70 mb-1.5"
+                      className="block text-[13px] font-medium text-neutral-300 mb-1.5"
                     >
                       Khung giờ thuận tiện nhận cuộc gọi / tin nhắn Zalo
                     </label>
@@ -597,7 +604,7 @@ export function IntakeSection() {
                       id="preferredContactTime"
                       value={preferredContactTime}
                       onChange={(e) => setPreferredContactTime(e.target.value)}
-                      className="w-full rounded-[12px] bg-[#18181B] border border-white/10 px-3.5 py-3 text-[13.5px] text-white outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition"
+                      className="w-full rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border px-3.5 py-3 text-[13.5px] text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
                     >
                       <option value="Càng sớm càng tốt">Càng sớm càng tốt</option>
                       <option value="Buổi sáng (08:00 - 11:30)">
@@ -616,22 +623,22 @@ export function IntakeSection() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full h-[48px] rounded-full bg-white text-[#0A0A0B] font-semibold text-[14px] shadow-[0_8px_24px_rgba(255,255,255,0.14)] hover:shadow-[0_12px_32px_rgba(255,255,255,0.22)] active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+                    className="w-full h-[48px] rounded-xl bg-white text-brand-dark font-semibold text-[14px] hover:bg-neutral-100 active:scale-[0.98] transition-colors duration-150 flex items-center justify-center gap-2 mt-4 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 whitespace-nowrap"
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin text-[#0A0A0B]" />
-                        <span>Đang gửi yêu cầu...</span>
+                        <Loader2 className="h-4 w-4 animate-spin text-brand-dark shrink-0" />
+                        <span className="whitespace-nowrap">Đang gửi yêu cầu…</span>
                       </>
                     ) : (
                       <>
-                        <span>Gửi yêu cầu dịch vụ</span>
-                        <ArrowRight className="h-4 w-4" />
+                        <span className="whitespace-nowrap">Gửi yêu cầu dịch vụ</span>
+                        <ArrowRight className="h-4 w-4 shrink-0" />
                       </>
                     )}
                   </button>
 
-                  <p className="text-center text-[11px] text-white/40 mt-3 leading-normal">
+                  <p className="text-center text-[12px] text-neutral-400 mt-3 leading-normal">
                     Thông tin liên hệ của quý khách chỉ dùng để liên lạc xác nhận dịch vụ.
                     MQTech cam kết bảo mật tuyệt đối.
                   </p>

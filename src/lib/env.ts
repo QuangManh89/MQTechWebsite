@@ -8,20 +8,49 @@ export interface AppConfig {
   trustedOrigin: string;
   serviceArea: string;
   environment: "production" | "development" | "test" | "staging" | "unknown";
+  deploymentEnv?: "staging" | "production" | "development" | "test";
   isProduction: boolean;
   databaseUrl?: string;
   migrationDatabaseUrl?: string;
   adminSessionSecret?: string;
   allowMemoryStore: boolean;
+  // Cloudflare R2 Media, Attachments & Backup Configuration (Three Distinct Buckets)
+  r2AccountId?: string;
+  r2AccessKeyId?: string;
+  r2SecretAccessKey?: string;
+  r2MediaBucket: string;
+  r2AttachmentsBucket: string;
+  r2BackupBucket: string;
+  mediaPublicBaseUrl?: string;
 }
 
 export function getAppConfig(): AppConfig {
-  const rawEnv = (process.env.NODE_ENV || "unknown").toLowerCase();
+  const rawNodeEnv = (process.env.NODE_ENV || "unknown").toLowerCase();
+  const rawDeployEnv = (process.env.MQTECH_DEPLOYMENT_ENV || "").toLowerCase();
+
+  let deploymentEnv: AppConfig["deploymentEnv"];
+  if (
+    rawDeployEnv === "staging" ||
+    rawDeployEnv === "production" ||
+    rawDeployEnv === "development" ||
+    rawDeployEnv === "test"
+  ) {
+    deploymentEnv = rawDeployEnv;
+  }
+
   let environment: AppConfig["environment"] = "unknown";
-  if (rawEnv === "production") environment = "production";
-  else if (rawEnv === "development") environment = "development";
-  else if (rawEnv === "test") environment = "test";
-  else if (rawEnv === "staging") environment = "staging";
+  // In a production-built container (NODE_ENV=production), MQTECH_DEPLOYMENT_ENV allows labeling as staging
+  if (deploymentEnv === "staging") {
+    environment = "staging";
+  } else if (rawNodeEnv === "production") {
+    environment = "production";
+  } else if (rawNodeEnv === "development") {
+    environment = "development";
+  } else if (rawNodeEnv === "test") {
+    environment = "test";
+  } else if (rawNodeEnv === "staging") {
+    environment = "staging";
+  }
 
   const isProduction = environment === "production";
 
@@ -55,11 +84,19 @@ export function getAppConfig(): AppConfig {
       process.env.NEXT_PUBLIC_SERVICE_AREA ||
       "Buôn Ma Thuột và khu vực lân cận (~15 km)",
     environment,
+    deploymentEnv,
     isProduction,
     databaseUrl: process.env.DATABASE_URL,
     migrationDatabaseUrl: process.env.MIGRATION_DATABASE_URL,
-    adminSessionSecret: process.env.ADMIN_SESSION_SECRET,
+    adminSessionSecret: process.env.ADMIN_SESSION_SECRET || process.env.SESSION_SECRET,
     allowMemoryStore,
+    r2AccountId: process.env.R2_ACCOUNT_ID,
+    r2AccessKeyId: process.env.R2_ACCESS_KEY_ID,
+    r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    r2MediaBucket: process.env.R2_MEDIA_BUCKET || "mqtech-media-staging",
+    r2AttachmentsBucket: process.env.R2_ATTACHMENTS_BUCKET || "mqtech-attachments-staging",
+    r2BackupBucket: process.env.R2_BACKUPS_BUCKET || process.env.R2_BACKUP_BUCKET || "mqtech-db-backups-staging",
+    mediaPublicBaseUrl: process.env.MEDIA_PUBLIC_BASE_URL,
   };
 }
 

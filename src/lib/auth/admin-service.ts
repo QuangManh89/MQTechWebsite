@@ -30,7 +30,7 @@ export class AdminService {
     if (this.bootstrapped && adminStore.size > 0) return;
 
     const username = process.env.ADMIN_INIT_USERNAME || "admin";
-    const initialPassword = process.env.ADMIN_INIT_PASSWORD;
+    const initialPassword = process.env.ADMIN_INIT_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD;
 
     if (config.isProduction && !initialPassword) {
       // In production, never create a silent default administrator

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 380" width="400" height="380" role="img" aria-labelledby="mq-ls-title">
+  <title id="mq-ls-title">MQ Tech Stacked Logo</title>
+  <g transform="translate(72, 10)">
+    <g id="symbol" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 38 198 L 38 74 L 102 138 L 158 82" stroke="#2563EB" stroke-width="22" />
+      <circle cx="158" cy="138" r="56" stroke="#2563EB" stroke-width="22" />
+      <circle cx="158" cy="138" r="16" fill="#06B6D4" stroke="none" />
+      <path d="M 176 156 L 222 202" stroke="#06B6D4" stroke-width="24" />
+    </g>
+  </g>
+  <g id="wordmark" text-anchor="middle">
+    <text x="200" y="296" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="-1">
+      <tspan fill="#0F172A">MQ </tspan><tspan fill="#2563EB">TECH</tspan>
+    </text>
+    <text x="200" y="334" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="5" fill="#64748B">COMPUTER SERVICE</text>
+  </g>
+</svg>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   LogOut,
   RefreshCw,
@@ -30,6 +31,7 @@ import {
   VALID_STATUS_TRANSITIONS,
 } from "@/lib/constants/status-lifecycle.ts";
 import { MQTECH_SERVICES } from "@/lib/constants/services.ts";
+import { AdminArticlesManager } from "./AdminArticlesManager.tsx";
 
 interface StatsData {
   total: number;
@@ -47,6 +49,9 @@ export function AdminDashboardClient({
   currentUser: AdminSession;
 }) {
   const router = useRouter();
+
+  // Top-Level Module Tab
+  const [currentTab, setCurrentTab] = useState<"requests" | "articles">("requests");
 
   // Filter & Pagination States
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -223,22 +228,26 @@ export function AdminDashboardClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white flex flex-col font-sans">
+    <div className="min-h-screen bg-brand-dark text-white flex flex-col font-sans">
       {/* Top Admin Navigation Bar */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0A0A0B]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-surface-dark-border bg-brand-dark/90 backdrop-blur-md">
         <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-[10px] bg-white text-[#0A0A0B] font-bold text-[13px]">
-              MQ
-            </div>
+            <Image
+              src="/logo/mq-tech-symbol.svg"
+              alt="MQTech Symbol"
+              width={44}
+              height={32}
+              className="h-8 w-auto"
+            />
             <div>
               <div className="font-bold tracking-tight text-white text-[15px] flex items-center gap-2">
                 <span>MQTech Admin</span>
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-mono text-white/70">
+                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-mono text-neutral-300">
                   v1.0
                 </span>
               </div>
-              <div className="text-[11px] text-white/40">
+              <div className="text-[11px] text-neutral-400">
                 Tiếp nhận & Quản lý yêu cầu dịch vụ
               </div>
             </div>
@@ -248,17 +257,17 @@ export function AdminDashboardClient({
             <Link
               href="/"
               target="_blank"
-              className="hidden sm:inline-flex items-center gap-1.5 text-[12.5px] text-white/60 hover:text-white transition"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[12.5px] text-neutral-300 hover:text-white transition-colors duration-150"
             >
               <span>Xem trang web</span>
               <ExternalLink className="h-3.5 w-3.5" />
             </Link>
 
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[12px] text-white/80">
-              <Shield className="h-3.5 w-3.5 text-[#3B82F6]" />
+            <div className="flex items-center gap-2 rounded-full border border-surface-dark-border bg-white/[0.04] px-3.5 py-1.5 text-[12px] text-neutral-200">
+              <Shield className="h-3.5 w-3.5 text-blue-400" />
               <span className="font-medium">{currentUser.fullName}</span>
-              <span className="text-white/30">•</span>
-              <span className="text-white/50 text-[11px]">
+              <span className="text-neutral-500">·</span>
+              <span className="text-neutral-400 text-[11px]">
                 {currentUser.role}
               </span>
             </div>
@@ -266,7 +275,7 @@ export function AdminDashboardClient({
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3.5 py-1.5 text-[12px] font-medium text-red-400 hover:bg-red-500/20 transition"
+              className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3.5 py-1.5 text-[12px] font-medium text-red-400 hover:bg-red-500/20 transition-colors duration-150"
               title="Đăng xuất khỏi hệ thống (thu hồi phiên trên tất cả thiết bị)"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -278,8 +287,52 @@ export function AdminDashboardClient({
 
       {/* Main Workspace Body */}
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 lg:px-8 py-8 space-y-8">
-        {/* Statistics Cards */}
-        {stats && (
+        {/* Module Switcher Tabs */}
+        <div className="flex items-center gap-3 border-b border-surface-dark-border pb-4">
+          <button
+            type="button"
+            onClick={() => setCurrentTab("requests")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${
+              currentTab === "requests"
+                ? "bg-white text-brand-dark shadow-sm"
+                : "bg-surface-dark-card text-neutral-400 hover:text-white border border-surface-dark-border"
+            }`}
+          >
+            <Clock className="h-4 w-4" />
+            <span>Yêu cầu dịch vụ</span>
+            {stats && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] ${
+                  currentTab === "requests"
+                    ? "bg-brand-dark/15 text-brand-dark font-extrabold"
+                    : "bg-white/10 text-neutral-300"
+                }`}
+              >
+                {stats.total}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentTab("articles")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${
+              currentTab === "articles"
+                ? "bg-white text-brand-dark shadow-sm"
+                : "bg-surface-dark-card text-neutral-400 hover:text-white border border-surface-dark-border"
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            <span>Bài viết & Cẩm nang (R2 CMS)</span>
+          </button>
+        </div>
+
+        {currentTab === "articles" ? (
+          <AdminArticlesManager />
+        ) : (
+          <>
+            {/* Statistics Cards */}
+            {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             <button
               type="button"
@@ -287,13 +340,13 @@ export function AdminDashboardClient({
                 setSelectedStatus("");
                 setPage(1);
               }}
-              className={`rounded-[16px] p-4 text-left border transition-all ${
+              className={`rounded-[16px] p-4 text-left border transition-colors duration-150 ${
                 selectedStatus === ""
                   ? "bg-white/10 border-white/30"
-                  : "bg-[#121214] border-white/10 hover:border-white/20"
+                  : "bg-surface-dark-card border-surface-dark-border hover:border-white/20"
               }`}
             >
-              <span className="text-[11px] font-medium uppercase tracking-wider text-white/50 block">
+              <span className="text-[12px] font-medium text-neutral-400 block">
                 Tổng yêu cầu
               </span>
               <span className="text-[26px] font-bold text-white tracking-tight mt-1 block">
@@ -307,13 +360,13 @@ export function AdminDashboardClient({
                 setSelectedStatus("AWAITING_CONFIRMATION");
                 setPage(1);
               }}
-              className={`rounded-[16px] p-4 text-left border transition-all ${
+              className={`rounded-[16px] p-4 text-left border transition-colors duration-150 ${
                 selectedStatus === "AWAITING_CONFIRMATION"
                   ? "bg-amber-500/15 border-amber-500/40"
-                  : "bg-[#121214] border-white/10 hover:border-amber-500/20"
+                  : "bg-surface-dark-card border-surface-dark-border hover:border-amber-500/30"
               }`}
             >
-              <span className="text-[11px] font-medium uppercase tracking-wider text-amber-400/80 block">
+              <span className="text-[12px] font-medium text-amber-400/90 block">
                 Chờ xác nhận
               </span>
               <span className="text-[26px] font-bold text-amber-400 tracking-tight mt-1 block">
@@ -327,13 +380,13 @@ export function AdminDashboardClient({
                 setSelectedStatus("CONFIRMED");
                 setPage(1);
               }}
-              className={`rounded-[16px] p-4 text-left border transition-all ${
+              className={`rounded-[16px] p-4 text-left border transition-colors duration-150 ${
                 selectedStatus === "CONFIRMED"
                   ? "bg-blue-500/15 border-blue-500/40"
-                  : "bg-[#121214] border-white/10 hover:border-blue-500/20"
+                  : "bg-surface-dark-card border-surface-dark-border hover:border-blue-500/30"
               }`}
             >
-              <span className="text-[11px] font-medium uppercase tracking-wider text-blue-400/80 block">
+              <span className="text-[12px] font-medium text-blue-400/90 block">
                 Đã xác nhận
               </span>
               <span className="text-[26px] font-bold text-blue-400 tracking-tight mt-1 block">
@@ -347,13 +400,13 @@ export function AdminDashboardClient({
                 setSelectedStatus("IN_PROGRESS");
                 setPage(1);
               }}
-              className={`rounded-[16px] p-4 text-left border transition-all ${
+              className={`rounded-[16px] p-4 text-left border transition-colors duration-150 ${
                 selectedStatus === "IN_PROGRESS"
                   ? "bg-indigo-500/15 border-indigo-500/40"
-                  : "bg-[#121214] border-white/10 hover:border-indigo-500/20"
+                  : "bg-surface-dark-card border-surface-dark-border hover:border-indigo-500/30"
               }`}
             >
-              <span className="text-[11px] font-medium uppercase tracking-wider text-indigo-400/80 block">
+              <span className="text-[12px] font-medium text-indigo-400/90 block">
                 Đang xử lý
               </span>
               <span className="text-[26px] font-bold text-indigo-400 tracking-tight mt-1 block">
@@ -367,13 +420,13 @@ export function AdminDashboardClient({
                 setSelectedStatus("WAITING_FOR_APPROVAL");
                 setPage(1);
               }}
-              className={`rounded-[16px] p-4 text-left border transition-all ${
+              className={`rounded-[16px] p-4 text-left border transition-colors duration-150 ${
                 selectedStatus === "WAITING_FOR_APPROVAL"
                   ? "bg-purple-500/15 border-purple-500/40"
-                  : "bg-[#121214] border-white/10 hover:border-purple-500/20"
+                  : "bg-surface-dark-card border-surface-dark-border hover:border-purple-500/30"
               }`}
             >
-              <span className="text-[11px] font-medium uppercase tracking-wider text-purple-400/80 block">
+              <span className="text-[12px] font-medium text-purple-400/90 block">
                 Chờ duyệt
               </span>
               <span className="text-[26px] font-bold text-purple-400 tracking-tight mt-1 block">
@@ -387,13 +440,13 @@ export function AdminDashboardClient({
                 setSelectedStatus("COMPLETED");
                 setPage(1);
               }}
-              className={`rounded-[16px] p-4 text-left border transition-all ${
+              className={`rounded-[16px] p-4 text-left border transition-colors duration-150 ${
                 selectedStatus === "COMPLETED"
                   ? "bg-emerald-500/15 border-emerald-500/40"
-                  : "bg-[#121214] border-white/10 hover:border-emerald-500/20"
+                  : "bg-surface-dark-card border-surface-dark-border hover:border-emerald-500/30"
               }`}
             >
-              <span className="text-[11px] font-medium uppercase tracking-wider text-emerald-400/80 block">
+              <span className="text-[12px] font-medium text-emerald-400/90 block">
                 Hoàn thành
               </span>
               <span className="text-[26px] font-bold text-emerald-400 tracking-tight mt-1 block">
@@ -404,7 +457,7 @@ export function AdminDashboardClient({
         )}
 
         {/* Filter & Search Toolbar */}
-        <div className="rounded-[20px] bg-[#121214] border border-white/10 p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="rounded-[20px] bg-surface-dark-card border border-surface-dark-border p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex flex-1 flex-col sm:flex-row gap-3 w-full md:w-auto">
             {/* Search Input */}
             <div className="relative flex-1 max-w-[380px]">
@@ -415,10 +468,10 @@ export function AdminDashboardClient({
                   setSearchQuery(e.target.value);
                   setPage(1);
                 }}
-                placeholder="Tìm mã MQT, tên khách, số ĐT..."
-                className="w-full rounded-[12px] bg-white/[0.04] border border-white/10 pl-9 pr-4 py-2.5 text-[13.5px] text-white placeholder-white/40 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition"
+                placeholder="Tìm mã MQT, tên khách, số ĐT…"
+                className="w-full rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border pl-9 pr-4 py-2.5 text-[13.5px] text-white placeholder-neutral-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
             </div>
 
             {/* Status Dropdown */}
@@ -428,7 +481,7 @@ export function AdminDashboardClient({
                 setSelectedStatus(e.target.value);
                 setPage(1);
               }}
-              className="rounded-[12px] bg-[#18181B] border border-white/10 px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-[#3B82F6] transition"
+              className="rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-blue-500 transition-colors duration-150"
             >
               <option value="">Tất cả trạng thái</option>
               {Object.values(REQUEST_STATUS_META).map((s) => (
@@ -445,7 +498,7 @@ export function AdminDashboardClient({
                 setSelectedMode(e.target.value);
                 setPage(1);
               }}
-              className="rounded-[12px] bg-[#18181B] border border-white/10 px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-[#3B82F6] transition"
+              className="rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border px-3.5 py-2.5 text-[13px] text-white outline-none focus:border-blue-500 transition-colors duration-150"
             >
               <option value="">Tất cả hình thức</option>
               <option value="IN_STORE">Mang máy đến tiệm</option>
@@ -454,13 +507,13 @@ export function AdminDashboardClient({
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-            <span className="text-[12px] text-white/40">
+            <span className="text-[12px] text-neutral-400">
               Tổng {totalCount} kết quả
             </span>
             <button
               type="button"
               onClick={handleRefresh}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[12.5px] font-medium text-white/80 hover:bg-white/10 transition"
+              className="inline-flex items-center gap-2 rounded-full border border-surface-dark-border bg-white/[0.04] px-4 py-2 text-[12.5px] font-medium text-neutral-200 hover:bg-white/10 transition-colors duration-150"
               title="Tải lại danh sách"
             >
               <RefreshCw
@@ -472,11 +525,11 @@ export function AdminDashboardClient({
         </div>
 
         {/* Requests Table */}
-        <div className="rounded-[20px] bg-[#121214] border border-white/10 overflow-hidden shadow-xl">
+        <div className="rounded-[20px] bg-surface-dark-card border border-surface-dark-border overflow-hidden">
           {loading ? (
-            <div className="p-16 text-center text-white/40 flex flex-col items-center gap-3">
-              <RefreshCw className="h-6 w-6 animate-spin text-[#3B82F6]" />
-              <span className="text-[14px]">Đang tải danh sách yêu cầu...</span>
+            <div className="p-16 text-center text-neutral-400 flex flex-col items-center gap-3">
+              <RefreshCw className="h-6 w-6 animate-spin text-blue-400" />
+              <span className="text-[14px]">Đang tải danh sách yêu cầu…</span>
             </div>
           ) : requests.length === 0 ? (
             <div className="p-16 text-center text-white/40 flex flex-col items-center gap-3">
@@ -491,16 +544,16 @@ export function AdminDashboardClient({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-[13.5px]">
-                <thead className="border-b border-white/10 bg-white/[0.02] text-[11px] uppercase tracking-wider text-white/40">
+                <thead className="border-b border-surface-dark-border bg-white/[0.02] text-[12px] font-semibold text-neutral-400">
                   <tr>
-                    <th className="px-6 py-4">Mã Tiếp Nhận</th>
-                    <th className="px-6 py-4">Khách Hàng</th>
-                    <th className="px-6 py-4">Số Điện Thoại</th>
-                    <th className="px-6 py-4">Hình Thức & Thiết Bị</th>
-                    <th className="px-6 py-4">Dịch Vụ Yêu Cầu</th>
-                    <th className="px-6 py-4">Trạng Thái</th>
-                    <th className="px-6 py-4">Ngày Nhận</th>
-                    <th className="px-6 py-4 text-right">Thao Tác</th>
+                    <th className="px-6 py-4">Mã tiếp nhận</th>
+                    <th className="px-6 py-4">Khách hàng</th>
+                    <th className="px-6 py-4">Số điện thoại</th>
+                    <th className="px-6 py-4">Hình thức &amp; thiết bị</th>
+                    <th className="px-6 py-4">Dịch vụ yêu cầu</th>
+                    <th className="px-6 py-4">Trạng thái</th>
+                    <th className="px-6 py-4">Ngày nhận</th>
+                    <th className="px-6 py-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.06]">
@@ -511,7 +564,7 @@ export function AdminDashboardClient({
                         key={r.id}
                         className="hover:bg-white/[0.02] transition-colors"
                       >
-                        <td className="px-6 py-4 font-mono font-bold text-white tracking-wider">
+                        <td className="px-6 py-4 font-mono font-bold text-white">
                           {r.referenceCode}
                         </td>
                         <td className="px-6 py-4 font-medium text-white">
@@ -590,14 +643,16 @@ export function AdminDashboardClient({
             </div>
           )}
         </div>
+        </>
+        )}
       </main>
 
       {/* Request Detail & Transition Modal */}
       {selectedRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-[720px] max-h-[90vh] overflow-y-auto rounded-[24px] bg-[#121214] border border-white/15 p-6 sm:p-8 shadow-2xl relative text-white">
+          <div className="w-full max-w-[720px] max-h-[90vh] overflow-y-auto rounded-[24px] bg-surface-dark-card border border-surface-dark-border p-6 sm:p-8 relative text-white">
             {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-white/10">
+            <div className="flex items-start justify-between pb-4 border-b border-surface-dark-border">
               <div>
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-[20px] font-bold text-white tracking-wider">
@@ -611,7 +666,7 @@ export function AdminDashboardClient({
                     {REQUEST_STATUS_META[selectedRequest.status].label}
                   </span>
                 </div>
-                <p className="text-[12px] text-white/40 mt-1">
+                <p className="text-[12px] text-neutral-400 mt-1">
                   Đã tạo lúc:{" "}
                   {new Date(selectedRequest.createdAt).toLocaleString("vi-VN")}
                 </p>
@@ -620,7 +675,7 @@ export function AdminDashboardClient({
               <button
                 type="button"
                 onClick={() => setSelectedRequest(null)}
-                className="grid h-8 w-8 place-items-center rounded-full bg-white/10 hover:bg-white/15 transition text-white/80"
+                className="grid h-8 w-8 place-items-center rounded-full bg-white/10 hover:bg-white/15 transition-colors duration-150 text-neutral-200"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -631,14 +686,14 @@ export function AdminDashboardClient({
               {/* Customer Information Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="rounded-[16px] bg-white/[0.03] border border-white/[0.06] p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-[12px] font-medium text-white/40">
-                    <User className="h-3.5 w-3.5 text-[#3B82F6]" />
+                  <div className="flex items-center gap-2 text-[12px] font-medium text-neutral-400">
+                    <User className="h-3.5 w-3.5 text-blue-400" />
                     <span>Khách hàng</span>
                   </div>
                   <div className="font-semibold text-[15px] text-white">
                     {selectedRequest.customerName}
                   </div>
-                  <div className="flex items-center gap-2 pt-1 text-[13px] text-white/80">
+                  <div className="flex items-center gap-2 pt-1 text-[13px] text-neutral-200">
                     <Phone className="h-3.5 w-3.5 text-emerald-400" />
                     <a
                       href={`tel:${selectedRequest.customerPhone}`}
@@ -650,8 +705,8 @@ export function AdminDashboardClient({
                 </div>
 
                 <div className="rounded-[16px] bg-white/[0.03] border border-white/[0.06] p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-[12px] font-medium text-white/40">
-                    <MapPin className="h-3.5 w-3.5 text-[#3B82F6]" />
+                  <div className="flex items-center gap-2 text-[12px] font-medium text-neutral-400">
+                    <MapPin className="h-3.5 w-3.5 text-blue-400" />
                     <span>Hình thức phục vụ</span>
                   </div>
                   <div className="font-semibold text-[14px] text-white">
@@ -660,11 +715,11 @@ export function AdminDashboardClient({
                       : "Sửa chữa tận nơi"}
                   </div>
                   {selectedRequest.serviceAddress ? (
-                    <p className="text-[12.5px] text-white/70 leading-relaxed">
+                    <p className="text-[12.5px] text-neutral-300 leading-relaxed">
                       {selectedRequest.serviceAddress}
                     </p>
                   ) : (
-                    <p className="text-[12px] text-white/40">
+                    <p className="text-[12px] text-neutral-400">
                       Khách sẽ mang thiết bị đến tiệm
                     </p>
                   )}
@@ -674,29 +729,29 @@ export function AdminDashboardClient({
               {/* Service & Issue Details */}
               <div className="rounded-[16px] bg-white/[0.03] border border-white/[0.06] p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-medium text-white/40">
+                  <span className="text-[12px] font-medium text-neutral-400">
                     Dịch vụ:{" "}
                     <strong className="text-white">
                       {getServiceName(selectedRequest.serviceCategoryId)}
                     </strong>
                   </span>
-                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-white/70">
+                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-neutral-300">
                     Thiết bị: {selectedRequest.deviceCategory}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-white/40 block mb-1">
+                  <span className="text-[12px] font-medium text-neutral-400 block mb-1">
                     Mô tả tình trạng sự cố
                   </span>
-                  <p className="text-[13.5px] text-white/90 bg-[#18181B] p-3.5 rounded-[12px] border border-white/10 leading-relaxed">
+                  <p className="text-[13.5px] text-white/90 bg-surface-dark-elevated p-3.5 rounded-[12px] border border-surface-dark-border leading-relaxed">
                     {selectedRequest.issueDescription}
                   </p>
                 </div>
 
                 {selectedRequest.preferredContactTime && (
-                  <div className="flex items-center gap-2 text-[12.5px] text-white/60">
-                    <Calendar className="h-3.5 w-3.5 text-[#3B82F6]" />
+                  <div className="flex items-center gap-2 text-[12.5px] text-neutral-300">
+                    <Calendar className="h-3.5 w-3.5 text-blue-400" />
                     <span>
                       Khung giờ liên hệ: {selectedRequest.preferredContactTime}
                     </span>
@@ -705,10 +760,10 @@ export function AdminDashboardClient({
               </div>
 
               {/* Status Transition Action Panel */}
-              <div className="rounded-[18px] bg-white/[0.04] border border-white/10 p-5 space-y-4">
+              <div className="rounded-[18px] bg-white/[0.04] border border-surface-dark-border p-5 space-y-4">
                 <h4 className="text-[14px] font-bold text-white flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-[#3B82F6]" />
-                  <span>Cập Nhật Trạng Thái Xử Lý</span>
+                  <Clock className="h-4 w-4 text-blue-400" />
+                  <span>Cập nhật trạng thái xử lý</span>
                 </h4>
 
                 {statusError && (
@@ -724,7 +779,7 @@ export function AdminDashboardClient({
 
                 {VALID_STATUS_TRANSITIONS[selectedRequest.status].length ===
                 0 ? (
-                  <div className="rounded-[10px] bg-neutral-500/10 border border-neutral-500/20 p-3 text-[12.5px] text-white/60">
+                  <div className="rounded-[10px] bg-neutral-500/10 border border-neutral-500/20 p-3 text-[12.5px] text-neutral-300">
                     Yêu cầu này đã đạt trạng thái kết thúc (
                     {REQUEST_STATUS_META[selectedRequest.status].label}) và không
                     thể chuyển trạng thái thêm.
@@ -732,7 +787,7 @@ export function AdminDashboardClient({
                 ) : (
                   <>
                     <div>
-                      <span className="text-[12px] text-white/60 block mb-2">
+                      <span className="text-[12px] text-neutral-300 block mb-2">
                         Chọn trạng thái tiếp theo hợp lệ:
                       </span>
                       <div className="flex flex-wrap gap-2">
@@ -745,10 +800,10 @@ export function AdminDashboardClient({
                                 key={statusKey}
                                 type="button"
                                 onClick={() => setTargetStatus(statusKey)}
-                                className={`rounded-full px-4 py-2 text-[12.5px] font-semibold border transition ${
+                                className={`rounded-full px-4 py-2 text-[12.5px] font-semibold border transition-colors duration-150 ${
                                   isSelected
-                                    ? "bg-white text-[#0A0A0B] border-white shadow-sm"
-                                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                                    ? "bg-white text-brand-dark border-white"
+                                    : "bg-white/5 border-surface-dark-border text-neutral-200 hover:bg-white/10"
                                 }`}
                               >
                                 {meta.label}
@@ -762,7 +817,7 @@ export function AdminDashboardClient({
                     <div>
                       <label
                         htmlFor="statusNote"
-                        className="text-[12px] text-white/60 block mb-1.5"
+                        className="text-[12px] text-neutral-300 block mb-1.5"
                       >
                         Ghi chú kỹ thuật / nhật ký xử lý:
                       </label>
@@ -772,7 +827,7 @@ export function AdminDashboardClient({
                         value={statusNote}
                         onChange={(e) => setStatusNote(e.target.value)}
                         placeholder="Ví dụ: Đã gọi điện thoại xác nhận, hẹn 15:30 đến lấy máy"
-                        className="w-full rounded-[10px] bg-[#18181B] border border-white/10 px-3.5 py-2 text-[13px] text-white placeholder-white/30 outline-none focus:border-[#3B82F6]"
+                        className="w-full rounded-[10px] bg-surface-dark-elevated border border-surface-dark-border px-3.5 py-2 text-[13px] text-white placeholder-neutral-500 outline-none focus:border-blue-500 transition-colors duration-150"
                       />
                     </div>
 
@@ -780,10 +835,10 @@ export function AdminDashboardClient({
                       type="button"
                       disabled={!targetStatus || updatingStatus}
                       onClick={handleUpdateStatus}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-[#0A0A0B] shadow-md hover:bg-[#F5F5F7] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-brand-dark hover:bg-neutral-100 active:scale-[0.98] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {updatingStatus ? (
-                        <span>Đang lưu...</span>
+                        <span>Đang lưu…</span>
                       ) : (
                         <>
                           <Check className="h-4 w-4" />
@@ -797,24 +852,24 @@ export function AdminDashboardClient({
 
               {/* Audit Status History Timeline */}
               <div className="space-y-3">
-                <h4 className="text-[13px] font-semibold uppercase tracking-wider text-white/50 flex items-center gap-2">
-                  <History className="h-4 w-4 text-[#3B82F6]" />
-                  <span>Nhật Ký Chuyển Trạng Thái</span>
+                <h4 className="text-[13px] font-semibold text-neutral-200 flex items-center gap-2">
+                  <History className="h-4 w-4 text-blue-400" />
+                  <span>Nhật ký chuyển trạng thái</span>
                 </h4>
 
                 {detailLoading ? (
-                  <p className="text-[12px] text-white/40">
-                    Đang tải nhật ký...
+                  <p className="text-[12px] text-neutral-400">
+                    Đang tải nhật ký…
                   </p>
                 ) : requestHistory.length === 0 ? (
-                  <p className="text-[12px] text-white/40">
+                  <p className="text-[12px] text-neutral-400">
                     Chưa có thay đổi trạng thái nào khác.
                   </p>
                 ) : (
-                  <div className="divide-y divide-white/[0.06] rounded-[14px] bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+                  <div className="divide-y divide-white/[0.06] rounded-[14px] bg-white/[0.02] border border-surface-dark-border overflow-hidden">
                     {requestHistory.map((h) => (
                       <div key={h.id} className="p-3.5 text-[12.5px] space-y-1">
-                        <div className="flex items-center justify-between text-white/50 text-[11px]">
+                        <div className="flex items-center justify-between text-neutral-400 text-[11px]">
                           <span>
                             Người thực hiện:{" "}
                             <strong className="text-white">
@@ -826,20 +881,20 @@ export function AdminDashboardClient({
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-white">
-                          <span className="text-white/60">
+                          <span className="text-neutral-400">
                             {h.fromStatus === "NONE"
                               ? "Khởi tạo"
                               : REQUEST_STATUS_META[h.fromStatus]?.label ||
                                 h.fromStatus}
                           </span>
-                          <span className="text-white/30">→</span>
-                          <span className="font-semibold text-[#3B82F6]">
+                          <span className="text-neutral-500">→</span>
+                          <span className="font-semibold text-blue-400">
                             {REQUEST_STATUS_META[h.toStatus]?.label ||
                               h.toStatus}
                           </span>
                         </div>
                         {h.note && (
-                          <p className="text-[12px] text-white/60 bg-black/20 p-2 rounded-md italic">
+                          <p className="text-[12px] text-neutral-300 bg-black/20 p-2 rounded-md italic">
                             &quot;{h.note}&quot;
                           </p>
                         )}

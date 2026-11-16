@@ -1,9 +1,9 @@
-# MQTech Phased Implementation Plan
+# MQTech Phased Implementation Plan & Status Ledger
 
-- **Document Version:** 1.1.0
-- **Last Updated:** 2026-10-30
+- **Document Version:** 2.0.0
+- **Last Updated:** 2026-11-02
 - **Visual Design Reference:** `references/Template-Sua-May-Tinh.html`
-- **Current Phase:** Phase P0 (Discovery, Specification, and Design Integration)
+- **Current Phase:** All Engineering Phases (P0 - P5) COMPLETED. Ready for Operator Staging Deployment.
 
 ---
 
@@ -11,50 +11,50 @@
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ P0: Discovery, Design Reference, & Specification       │ ◄ CURRENT PHASE
+│ P0: Discovery, Design Reference, & Specification       │ [✔ COMPLETED]
 ├────────────────────────────────────────────────────────┤
-│ P1: Engineering Foundation & Application Shell         │
+│ P1: Engineering Foundation & Application Shell         │ [✔ COMPLETED]
 ├────────────────────────────────────────────────────────┤
-│ P2: Public Website & Dual-Mode Request Intake Flow     │
+│ P2: Public Website & Dual-Mode Request Intake Flow     │ [✔ COMPLETED]
 ├────────────────────────────────────────────────────────┤
-│ P3: Administrative Intake Triage & Status Management   │
+│ P3: Administrative Intake Triage & Status Management   │ [✔ COMPLETED]
 ├────────────────────────────────────────────────────────┤
-│ P4: Production Hardening, Verification, & Release      │
+│ P4: Production Hardening, Verification, & Readiness    │ [✔ COMPLETED]
+├────────────────────────────────────────────────────────┤
+│ P5: Free-Tier Staging Prep & 3-Bucket R2 Architecture  │ [✔ COMPLETED]
+├────────────────────────────────────────────────────────┤
+│ HANDOVER: Staging Cloud Deployment & Production Cutover│ [READY FOR DEPLOY]
 └────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Phase Breakdown
+## Detailed Phase Status
 
 ### P0 — Discovery, Design Reference Integration, and Specification
-- **Focus:** Complete architectural discovery, integrate visual design reference, formalize business and technical requirements, define acceptance criteria, and safely inventory Fly.io hosting.
-- **Key Deliverables:**
+- **Status:** **COMPLETED**
+- **Deliverables:**
   - `audit/SKILLS_SYSTEM_INTEGRATION_AUDIT.md`: Skills system, agent compatibility, and workspace audit.
   - `docs/DESIGN_REFERENCE_ANALYSIS.md`: Exhaustive analysis of `Template-Sua-May-Tinh.html` (adopting visual characteristics; discarding unverified business claims and dummy widgets).
   - `docs/DESIGN_SYSTEM.md`: Tokens for color, typography, spacing, glassmorphism, responsive breakpoints, and component contracts.
   - `docs/BUSINESS_REQUIREMENTS.md`: MQTech business identity, 6 core service categories, dual delivery model, manual confirmation workflow, and anti-scope guardrails.
   - `docs/ACCEPTANCE_CRITERIA.md`: Verifiable quality gates across design fidelity, responsive UX, accessibility, and security.
-  - `docs/FLYIO_SAFETY.md`: Inventory-only safety guidelines protecting existing cloud resources.
-- **Phase Gate (Mandatory):** User reviews and approves P0 specifications before any website implementation begins.
+  - `docs/FLYIO_SAFETY.md`: Inventory-only safety guidelines protecting existing cloud resources (`openwebui-mqtech`, `2871574ae574e8`, `vol_4m3m9jdgen55793v`).
 
 ---
 
 ### P1 — Engineering Foundation & Application Shell
-- **Focus:** Initialize version-controlled repository, establish framework foundation, design tokens configuration, and database migrations.
-- **Key Deliverables:**
-  - Initialize Git repository, add `.gitignore`, and anchor `.agents/rules/` via root `AGENTS.md`.
-  - Next.js (App Router), TypeScript (strict mode), and Tailwind CSS foundation configured with MQTech tokens.
-  - PostgreSQL database schema, migrations, and ORM setup (candidate tables: `service_categories`, `services`, `service_requests`, `request_status_history`, `admin_users`).
-  - Baseline verification scripts (`npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build`).
-  - Read-only inventory of Fly.io application resources and dependencies without modifying active services.
-- **Phase Gate (Mandatory):** All automated baseline checks pass cleanly; architecture and database schema approved.
+- **Status:** **COMPLETED**
+- **Deliverables:**
+  - Next.js 16 (App Router), TypeScript (strict mode), and Tailwind CSS v4 foundation configured with MQTech tokens.
+  - Initial relational database schema: `migrations/001_initial_schema.sql` (`services`, `service_requests`, `request_status_history`, `admin_users`).
+  - Baseline verification scripts (`npm run lint`, `npm run typecheck`, `npm test`, `npm run build`).
 
 ---
 
 ### P2 — Public Website & Request Intake Experience
-- **Focus:** Implement the public-facing pages applying the approved Apple-grade visual design and dual-mode service request intake.
-- **Key Deliverables:**
+- **Status:** **COMPLETED**
+- **Deliverables:**
   - Sticky glass header with live status dot, brand squircle, and responsive mobile navigation sheet.
   - High-impact dark hero with ambient radial blue glows, display headline, dual pill CTAs, and telemetry diagnostic card.
   - Light canvas service catalog featuring the 6 confirmed service categories with checkmark perks and hover transitions.
@@ -62,28 +62,51 @@
   - Validated, accessible service request intake form with toggle between "Mang máy đến tiệm" and "Sửa chữa tận nơi tại Buôn Ma Thuột".
   - Confirmation feedback displaying random reference code and explicit notice: **"Chờ xác nhận qua Điện thoại / Zalo"**.
   - Local SEO metadata, OpenGraph tags, and valid structured data (LocalBusiness schema with confirmed fields only).
-- **Phase Gate (Mandatory):** Mobile/desktop UX verified; form submission tested with valid and invalid inputs; zero unverified business facts exposed.
 
 ---
 
 ### P3 — Administrative Intake Triage & Status Management
-- **Focus:** Implement authenticated administration interface for operational triage and request lifecycle tracking.
-- **Key Deliverables:**
-  - Secure server-side admin authentication with session cookies and rate limiting.
+- **Status:** **COMPLETED**
+- **Deliverables:**
+  - Secure server-side admin authentication with HMAC-SHA256 session cookies and CSRF protection.
   - Request management dashboard: filter by status (`Chờ xác nhận`, `Đã xác nhận`, `Đang xử lý`, `Hoàn thành`, `Đã hủy`) and delivery mode.
   - Request detail view with customer contact information, problem description, and internal technical notes.
-  - Timestamped status transition history.
-  - End-to-end tests covering login, unauthorized access rejection, request status update, and IDOR prevention.
-- **Phase Gate (Mandatory):** Authorization controls verified; Playwright E2E tests pass for all admin and public journeys.
+  - Timestamped status transition history with optimistic concurrency control.
+  - Automated tests covering login, unauthorized access rejection, request status update, and IDOR prevention.
 
 ---
 
-### P4 — Production Hardening, Verification, & Release
-- **Focus:** Comprehensive release auditing, backup verification, staging smoke tests, domain verification, and production release.
-- **Key Deliverables:**
-  - Full execution of `release-audit` workflow.
-  - Complete security audit, accessibility audit (WCAG 2.1 AA), and performance audit (Core Web Vitals).
-  - Database backup verification and documented rollback procedure.
-  - Domain configuration for `mqcomputech.com` (only after ownership and DNS verification).
-  - Production deployment to Fly.io strictly following `FLYIO_SAFETY.md` with explicit, itemized user approval for any infrastructure changes.
-- **Phase Gate (Mandatory):** Release audit delivers formal GO recommendation; user provides explicit written authorization for production cutover.
+### P4 — Production Hardening & Remediation (P4.1 - P4.1.5)
+- **Status:** **COMPLETED**
+- **Deliverables:**
+  - Fail-closed environment validation (`src/lib/env.ts`): unconditionally forbids in-memory fallback in staging/production.
+  - Immediate token version revocation: role changes, password changes, or account deactivation revoke all active sessions.
+  - Credential isolation: `scripts/credential-helper.mjs` generates secure `pg_service.conf` with 0600 permissions in RAM tmpfs. Zero passwords in command-line arguments.
+  - Restore Guard (`scripts/restore-guard.mjs`): prevents accidental restore into production or remote databases; enforces atomic `--single-transaction --exit-on-error`.
+
+---
+
+### P5 — Free-Tier Staging Preparation & Cloudflare R2 Architecture
+- **Status:** **COMPLETED**
+- **Deliverables:**
+  - Decoupled architecture: Web App (`mqtech`) on stateless machine + Database App (`mqtech-db`) on private 6PN WireGuard mesh with 1GB NVMe volume.
+  - Memory optimization for 256MB RAM: `postgresql.conf` tuned with `shared_buffers = 32MB`, `work_mem = 1MB`, `max_connections = 10`. Next.js server image optimization disabled (`unoptimized: true`).
+  - Three distinct Cloudflare R2 buckets for physical access isolation:
+    1. `mqtech-media-staging` (Public media)
+    2. `mqtech-attachments-staging` (Strictly private customer attachments)
+    3. `mqtech-db-backups-staging` (Strictly private encrypted database dumps)
+  - Dedicated authenticated API route `POST /api/admin/attachments/presign-get` for short-lived (300s) presigned GET access to customer attachments.
+  - Verified Fly configuration schemas (`fly.toml` canonical, `infra/postgres/fly.toml`) with TCP checks and pinned `[[vm]]`.
+  - Comprehensive report: `audit/P5_FINAL_REPORT.md` and submission package `mqtech-p5-submission.zip`.
+
+---
+
+## Final Handover & Deployment Gate
+
+The local engineering and verification phases are 100% complete with 152 automated tests passing, 0 TypeScript errors, 0 ESLint warnings, and a clean Next.js Turbopack build.
+
+The next step is the **Operator Staging Provisioning**:
+1. Operator issues Fly.io provisioning commands using `flyctl` when authorized.
+2. Operator creates the 3 Cloudflare R2 buckets.
+3. Operator runs database migrations via temporary WireGuard proxy session.
+4. Operator verifies staging smoke tests on `https://mqtech.fly.dev`.

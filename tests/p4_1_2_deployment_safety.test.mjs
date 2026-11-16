@@ -274,7 +274,7 @@ describe("P4.1.2 Deployment Safety: Healthchecks, Migration Baseline & Restore G
       confirmBaseline: true,
     });
     assert.strictEqual(result.dryRun, false);
-    assert.deepStrictEqual(result.applied, ["001"]);
+    assert.deepStrictEqual(result.applied, ["001", "002", "003"]);
 
     // Verify DDL was NOT executed
     const executedSqls = clientWithConfirm.queries.map((q) => q.sql);
