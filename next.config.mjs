@@ -60,17 +60,6 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "www.suamaytinhbmt.id.vn",
-          },
-        ],
-        destination: "https://suamaytinhbmt.id.vn/:path*",
-        permanent: true,
-      },
-      {
         source: "/device-test",
         destination: "/kiem-tra-may-tinh",
         permanent: true,
