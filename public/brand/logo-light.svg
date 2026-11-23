@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <mask id="qMask-light">
+      <rect width="256" height="256" fill="#FFFFFF" />
+      <rect x="42" y="38" width="44" height="180" fill="#000000" />
+      <rect x="170" y="38" width="44" height="180" fill="#000000" />
+    </mask>
+  </defs>
+  <path fill="#2563eb" fill-rule="evenodd" mask="url(#qMask-light)" d="M 128 44 A 84 84 0 1 1 127.9 44 Z M 128 66 A 62 62 0 1 0 128.1 66 Z" />
+  <polygon points="182,168 198,152 234,188 218,204" fill="#2563eb" />
+  <rect x="54" y="48" width="20" height="160" fill="#0f172a" />
+  <rect x="44" y="48" width="40" height="8" fill="#0f172a" />
+  <rect x="44" y="200" width="40" height="8" fill="#0f172a" />
+  <rect x="182" y="48" width="20" height="160" fill="#0f172a" />
+  <rect x="172" y="48" width="40" height="8" fill="#0f172a" />
+  <rect x="172" y="200" width="40" height="8" fill="#0f172a" />
+  <polygon points="66,50 82,50 128,136 174,50 190,50 135,154 121,154" fill="#0f172a" />
+</svg>

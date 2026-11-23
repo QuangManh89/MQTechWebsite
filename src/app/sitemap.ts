@@ -1,78 +1,51 @@
 import type { MetadataRoute } from "next";
-import { articleRepo } from "@/lib/db/article-repository";
+import { getPublishedPosts, getPublishedServices, getSiteSettings } from "@/lib/site-data";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://mqcomputech.com";
-  const now = new Date().toISOString();
+  const [settings, services, posts] = await Promise.all([
+    getSiteSettings(),
+    getPublishedServices(),
+    getPublishedPosts(),
+  ]);
 
-  let articleEntries: MetadataRoute.Sitemap = [];
-  try {
-    const { items } = await articleRepo.listPublishedArticles({ pageSize: 100 });
-    articleEntries = items.map((art) => ({
-      url: `${baseUrl}/cam-nang/${art.slug}`,
-      lastModified: art.updatedAt.toISOString(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-  } catch {
-    // Fallback if db is unavailable during sitemap generation
-  }
+  const base =
+    (process.env.NEXT_PUBLIC_SITE_URL || settings.siteUrl || "https://suamaytinhbmt.id.vn").replace(
+      /\/$/,
+      ""
+    );
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/cam-nang`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    ...articleEntries,
-    {
-      url: `${baseUrl}/device-test`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/device-test/ban-phim`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/device-test/man-hinh`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/device-test/loa`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/device-test/micro`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/device-test/camera`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/device-test/benchmark`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-  ];
+  const staticRoutes = [
+    "",
+    "/dich-vu",
+    "/bang-gia",
+    "/dat-lich",
+    "/kiem-tra-may-tinh",
+    "/tra-cuu",
+    "/bai-viet",
+    "/gioi-thieu",
+    "/lien-he",
+  ].map((route) => ({
+    url: `${base}${route}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: route === "" ? 1 : 0.8,
+  }));
+
+  const serviceRoutes = services.map((s) => ({
+    url: `${base}/dich-vu/${s.slug}`,
+    lastModified: new Date(s.updatedAt),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  const postRoutes = posts.map((p) => ({
+    url: `${base}/bai-viet/${p.slug}`,
+    lastModified: new Date(p.updatedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...serviceRoutes, ...postRoutes];
 }

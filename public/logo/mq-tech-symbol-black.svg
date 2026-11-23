@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="mq-sym-b-title">
-  <title id="mq-sym-b-title">MQ Tech Logo Symbol (Black)</title>
-  <g id="symbol" fill="none" stroke="#0F172A" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 38 198 L 38 74 L 102 138 L 158 82" stroke-width="22" />
-    <circle cx="158" cy="138" r="56" stroke-width="22" />
-    <circle cx="158" cy="138" r="16" fill="#0F172A" stroke="none" />
-    <path d="M 176 156 L 222 202" stroke-width="24" />
-  </g>
-</svg>

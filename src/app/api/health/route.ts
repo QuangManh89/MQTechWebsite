@@ -1,7 +1,7 @@
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  return Response.json({
-    status: "ok",
-    service: "mqtech-web",
-    timestamp: new Date().toISOString(),
-  });
+  return NextResponse.json({ ok: true, service: "mqtech-bmt", timestamp: Date.now() });
 }

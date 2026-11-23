@@ -1,168 +1,143 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { ShieldCheck, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
+import { AlertCircle, Lock } from "lucide-react";
+import { toast } from "sonner";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("manhquang89@gmail.com");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    if (!email.trim() || !password) {
+      setErrorMsg("Vui lòng nhập đầy đủ Email và Mật khẩu quản trị.");
+      return;
+    }
 
+    setErrorMsg(null);
+    setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15_000);
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        signal: controller.signal,
+        body: JSON.stringify({ email: email.trim(), password }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
-        setError(data.error || "Đăng nhập không thành công.");
+        const msg = data.error || "Email hoặc mật khẩu chưa chính xác.";
+        setErrorMsg(msg);
+        toast.error(msg);
         return;
       }
-
-      // Redirect to Admin Dashboard upon success
-      router.push("/admin");
+      toast.success("Đăng nhập thành công");
+      router.push(data.user?.role === "EDITOR" ? "/admin/bai-viet" : "/admin");
       router.refresh();
-    } catch {
-      setError("Không thể kết nối đến máy chủ xác thực.");
+    } catch (err) {
+      const isTimeout = err instanceof DOMException && err.name === "AbortError";
+      setErrorMsg(
+        isTimeout
+          ? "Máy chủ phản hồi quá hạn 15 giây. Vui lòng thử đăng nhập lại."
+          : "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại."
+      );
     } finally {
+      window.clearTimeout(timeoutId);
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-brand-dark text-white flex flex-col justify-between p-6">
-      <div className="flex items-center justify-between max-w-[1200px] w-full mx-auto">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-[13px] text-neutral-400 hover:text-white transition-colors duration-150"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Về trang chủ MQTech</span>
-        </Link>
-        <div className="flex items-center gap-2 text-[12px] text-neutral-400">
-          <ShieldCheck className="h-4 w-4 text-blue-400" />
-          <span>Cổng bảo mật nội bộ</span>
+    <main className="flex min-h-screen items-center justify-center bg-navy px-4">
+      <div className="w-full max-w-md rounded-2xl border border-navy-border bg-surface p-8 shadow-2xl space-y-6">
+        <div className="flex justify-center">
+          <BrandLogo
+            brandName="MQTech - Computer Service"
+            subTagline="QUẢN TRỊ HỆ THỐNG BMT"
+            variant="light"
+          />
         </div>
-      </div>
 
-      <div className="w-full max-w-[420px] mx-auto my-12 animate-in fade-in duration-200">
-        <div className="rounded-[24px] bg-surface-dark-card border border-surface-dark-border p-8">
-          {/* Brand Lockup */}
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex items-center justify-center">
-              <Image
-                src="/logo/mq-tech-symbol.svg"
-                alt="MQTech Logo Symbol"
-                width={56}
-                height={42}
-                priority
-                className="h-12 w-auto"
-              />
-            </div>
-            <h1 className="text-[22px] font-bold tracking-tight text-white text-balance">
-              Đăng Nhập Quản Trị
-            </h1>
-            <p className="text-[13px] text-neutral-400 mt-1 text-pretty">
-              Hệ thống quản lý và xử lý yêu cầu dịch vụ MQTech
-            </p>
+        {errorMsg && (
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 rounded-xl border border-status-danger-line bg-status-danger-bg p-3.5 text-xs font-medium text-status-danger-ink"
+          >
+            <AlertCircle
+              className="h-4 w-4 shrink-0 text-status-danger-ink mt-0.5"
+              aria-hidden="true"
+            />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <div>
+            <label
+              htmlFor="adminEmail"
+              className="block text-sm font-semibold text-navy mb-1.5"
+            >
+              Email quản trị
+            </label>
+            <input
+              id="adminEmail"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errorMsg) setErrorMsg(null);
+              }}
+              className="min-h-12 w-full rounded-xl border border-line bg-surface px-4 py-3 text-base text-navy sm:text-sm"
+            />
           </div>
 
-          {error && (
-            <div
-              role="alert"
-              className="mt-6 rounded-[12px] bg-red-500/10 border border-red-500/20 p-3.5 text-[13px] text-red-400 text-center"
+          <div>
+            <label
+              htmlFor="adminPassword"
+              className="block text-sm font-semibold text-navy mb-1.5"
             >
-              {error}
-            </div>
-          )}
+              Mật khẩu
+            </label>
+            <input
+              id="adminPassword"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errorMsg) setErrorMsg(null);
+              }}
+              placeholder="Nhập mật khẩu quản trị"
+              className="min-h-12 w-full rounded-xl border border-line bg-surface px-4 py-3 text-base text-navy sm:text-sm"
+            />
+          </div>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-[13px] font-medium text-neutral-300 mb-1.5"
-              >
-                Tên đăng nhập
-              </label>
-              <div className="relative">
-                <input
-                  id="username"
-                  type="text"
-                  required
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Nhập tài khoản quản trị"
-                  className="w-full rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border pl-10 pr-4 py-3 text-[14px] text-white placeholder-neutral-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
-                />
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-              </div>
-            </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-semibold text-ink-inverse shadow-brand-glow hover:bg-brand-hover disabled:opacity-60"
+          >
+            <Lock className="h-4 w-4" aria-hidden="true" />
+            <span>{loading ? "Đang xác thực..." : "Đăng nhập Admin"}</span>
+          </button>
+        </form>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-[13px] font-medium text-neutral-300 mb-1.5"
-              >
-                Mật khẩu
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu"
-                  className="w-full rounded-[12px] bg-surface-dark-elevated border border-surface-dark-border pl-10 pr-4 py-3 text-[14px] text-white placeholder-neutral-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors duration-150"
-                />
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-[46px] rounded-full bg-white text-brand-dark font-semibold text-[14px] hover:bg-neutral-100 active:scale-[0.98] transition-colors duration-150 flex items-center justify-center gap-2 mt-6 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin text-brand-dark" />
-                  <span>Đang xác thực…</span>
-                </>
-              ) : (
-                <>
-                  <span>Đăng nhập hệ thống</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-[12.5px] text-neutral-400 leading-relaxed">
-            Khu vực giới hạn. Mọi hành vi truy cập trái phép đều được ghi nhận và
-            giới hạn theo địa chỉ IP.
-          </p>
-        </div>
+        <p className="text-center text-xs text-ink-muted">
+          Mật khẩu mặc định lần đầu:{" "}
+          <span className="font-mono font-semibold text-navy">MQTech@2026</span>{" "}
+          (nên đổi ngay trong mục Cài đặt).
+        </p>
       </div>
-
-      <div className="text-center text-[12px] text-neutral-500">
-        © 2026 MQTech (Computer Service) · Buôn Ma Thuột
-      </div>
-    </div>
+    </main>
   );
 }

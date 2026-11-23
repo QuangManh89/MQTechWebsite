@@ -1,188 +1,188 @@
 "use client";
 
-import React, { useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Menu, X, Clock, PhoneCall } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CalendarCheck, Menu, Phone, X } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
+import { cn } from "@/lib/utils";
 
-export function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface NavbarProps {
+  brandName: string;
+  subTagline: string;
+  hotline: string;
+  hotlineRaw: string;
+}
+
+const NAV_ITEMS = [
+  { href: "/", label: "Trang chủ" },
+  { href: "/dich-vu", label: "Dịch vụ" },
+  { href: "/kiem-tra-may-tinh", label: "Kiểm tra máy" },
+  { href: "/bang-gia", label: "Bảng giá" },
+  { href: "/tra-cuu", label: "Tra cứu BH" },
+  { href: "/bai-viet", label: "Kiến thức" },
+  { href: "/gioi-thieu", label: "Giới thiệu" },
+  { href: "/lien-he", label: "Liên hệ" },
+];
+
+export function Navbar({
+  brandName,
+  subTagline,
+  hotline,
+  hotlineRaw,
+}: NavbarProps) {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-surface-dark-border bg-brand-dark/90 backdrop-blur-md">
-      <div className="mx-auto flex h-[68px] max-w-[1280px] items-center justify-between px-6 lg:px-8">
-        {/* Brand Lockup */}
-        <Link href="/" className="flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="MQTech — Trang chủ">
-          <Image
-            src="/logo/mq-tech-lockup-horizontal-white.svg"
-            alt="MQTech — Computer Service"
-            width={176}
-            height={44}
-            priority
-            className="h-10 sm:h-11 w-auto transition-opacity duration-150 group-hover:opacity-90"
-          />
-        </Link>
+    <header className="sticky top-0 z-40 w-full border-b border-line/80 bg-surface/90 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 xl:h-20 xl:px-6">
+        <BrandLogo
+          brandName={brandName}
+          subTagline={subTagline}
+          variant="light"
+        />
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-5 text-[14px]">
-          <Link
-            href="/#dich-vu"
-            className="text-neutral-300 hover:text-white transition-colors duration-200 font-medium whitespace-nowrap rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            Dịch vụ
-          </Link>
-          <Link
-            href="/cam-nang"
-            className="text-neutral-300 hover:text-white transition-colors duration-200 font-medium whitespace-nowrap rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            Cẩm nang
-          </Link>
-          <Link
-            href="/device-test"
-            className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shrink-0" />
-            <span>Kiểm tra thiết bị</span>
-          </Link>
-          <Link
-            href="/#quy-trinh"
-            className="text-neutral-300 hover:text-white transition-colors duration-200 font-medium whitespace-nowrap rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            Quy trình
-          </Link>
-          <Link
-            href="/#cam-ket"
-            className="text-neutral-300 hover:text-white transition-colors duration-200 font-medium whitespace-nowrap rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            Cam kết
-          </Link>
-          <Link
-            href="/#lien-he"
-            className="text-neutral-300 hover:text-white transition-colors duration-200 font-medium whitespace-nowrap rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            Liên hệ
-          </Link>
+        <nav
+          aria-label="Điều hướng chính"
+          className="hidden xl:flex items-center gap-0.5 2xl:gap-1"
+        >
+          {NAV_ITEMS.map((item) => {
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "min-h-11 inline-flex items-center rounded-full px-2.5 2xl:px-3.5 py-2 text-xs 2xl:text-sm font-medium transition-colors whitespace-nowrap",
+                  active
+                    ? "bg-brand-light text-brand font-semibold"
+                    : "text-ink-muted hover:bg-surface-muted hover:text-navy"
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Right CTA & Operational Status */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden xl:flex items-center gap-2 shrink-0">
           <a
-            href="tel:0987482573"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[12.5px] font-semibold text-neutral-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-            title="Gọi hotline kỹ thuật Buôn Ma Thuột 24/7"
+            href={`tel:${hotlineRaw}`}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line bg-surface px-3 2xl:px-4 py-2 text-xs 2xl:text-sm font-semibold text-navy shadow-sm transition-all hover:border-brand hover:text-brand whitespace-nowrap"
           >
-            <PhoneCall className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-            <span>0987 482 573</span>
+            <Phone className="h-4 w-4 text-brand shrink-0" aria-hidden="true" />
+            <span className="font-mono tabular-nums">{hotline}</span>
           </a>
-
-          {/* Live Status Pill */}
-          <div className="hidden xl:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[12px] text-neutral-300 whitespace-nowrap">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0" />
-            <span className="font-medium text-neutral-200">Tiếp nhận yêu cầu</span>
-            <span className="text-neutral-400">·</span>
-            <span className="flex items-center gap-1 text-neutral-300">
-              <Clock className="h-3 w-3 shrink-0" /> Buôn Ma Thuột
-            </span>
-          </div>
-
-          {/* Primary CTA */}
           <Link
-            href="#yeu-cau-dich-vu"
-            className="group inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-[13.5px] font-semibold text-brand-dark shadow-md transition-colors duration-200 hover:bg-neutral-100 active:scale-[0.98] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+            href="/dat-lich"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-cta px-3.5 2xl:px-5 py-2 text-xs 2xl:text-sm font-semibold text-ink-inverse shadow-cta-glow transition-all hover:bg-cta-hover hover:-translate-y-0.5 whitespace-nowrap"
           >
-            <span>Yêu cầu dịch vụ</span>
-            <ArrowRight className="h-3.5 w-3.5 opacity-70 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none shrink-0" />
+            <CalendarCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>Đặt lịch sửa</span>
           </Link>
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <button
-          type="button"
-          aria-label="Mở danh mục điều hướng"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/15 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-        >
-          {mobileMenuOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </button>
-      </div>
+        <div className="flex xl:hidden items-center gap-2 shrink-0">
+          <Link
+            href="/dat-lich"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-cta px-3.5 py-2 text-xs font-semibold text-ink-inverse shadow-cta-glow hover:bg-cta-hover"
+          >
+            <CalendarCheck className="h-4 w-4" aria-hidden="true" />
+            <span>Đặt lịch</span>
+          </Link>
 
-      {/* Mobile Menu Panel */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-brand-dark px-6 py-6 animate-in fade-in slide-in-from-top-2 duration-200">
-          <nav className="flex flex-col gap-4 text-[15px] font-medium text-neutral-200">
-            <Link
-              href="/#dich-vu"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-white transition-colors duration-150"
-            >
-              Dịch vụ
-            </Link>
-            <Link
-              href="/cam-nang"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-white transition-colors duration-150"
-            >
-              Cẩm nang
-            </Link>
-            <Link
-              href="/device-test"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 text-blue-400 font-semibold hover:text-blue-300 flex items-center gap-2 transition-colors duration-150"
-            >
-              <span className="h-2 w-2 rounded-full bg-blue-400" />
-              <span>Kiểm tra thiết bị (Hardware Test)</span>
-            </Link>
-            <Link
-              href="/#quy-trinh"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-white transition-colors duration-150"
-            >
-              Quy trình
-            </Link>
-            <Link
-              href="#cam-ket"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-white transition-colors duration-150"
-            >
-              Cam kết
-            </Link>
-            <Link
-              href="#lien-he"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-white transition-colors duration-150"
-            >
-              Liên hệ
-            </Link>
-          </nav>
+          <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}>
+            <Dialog.Trigger asChild>
+              <button
+                type="button"
+                aria-label={
+                  mobileOpen ? "Đóng menu điều hướng" : "Mở menu điều hướng"
+                }
+                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line text-navy hover:bg-surface-subtle"
+              >
+                <Menu className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </Dialog.Trigger>
 
-          <div className="mt-6 pt-6 border-t border-white/10 flex flex-col gap-3">
-            <div className="flex items-center gap-2 text-[12px] text-neutral-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span>Phục vụ khu vực Buôn Ma Thuột (~15 km)</span>
-            </div>
-            <a
-              href="tel:0987482573"
-              onClick={() => setMobileMenuOpen(false)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 text-white font-semibold text-[14px] transition-colors hover:bg-white/15"
-            >
-              <PhoneCall className="h-4 w-4 text-emerald-400" />
-              <span>Hotline: 0987 482 573</span>
-            </a>
-            <Link
-              href="#yeu-cau-dich-vu"
-              onClick={() => setMobileMenuOpen(false)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white text-brand-dark font-semibold text-[14px] shadow-md transition-colors duration-200 hover:bg-neutral-100"
-            >
-              <span>Gửi yêu cầu dịch vụ</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+            <Dialog.Portal>
+              <Dialog.Overlay className="dialog-overlay-animate fixed inset-0 z-50 bg-navy/55 backdrop-blur-sm xl:hidden" />
+              <Dialog.Content className="dialog-sheet-animate fixed inset-x-0 top-0 z-50 max-h-[100dvh] overflow-y-auto overscroll-contain border-b border-line bg-surface pb-6 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))] shadow-2xl focus:outline-none xl:hidden">
+                <div className="mb-3 flex items-center justify-between gap-3 border-b border-line-subtle pb-3">
+                  <BrandLogo
+                    brandName={brandName}
+                    subTagline={subTagline}
+                    variant="light"
+                  />
+                  <Dialog.Close asChild>
+                    <button
+                      type="button"
+                      aria-label="Đóng menu điều hướng"
+                      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line text-navy hover:bg-surface-subtle"
+                    >
+                      <X className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </Dialog.Close>
+                </div>
+
+                <Dialog.Title className="sr-only">
+                  Menu điều hướng di động
+                </Dialog.Title>
+                <Dialog.Description className="sr-only">
+                  Chọn trang dịch vụ, bảng giá, đặt lịch hoặc tra cứu bảo hành
+                  tại MQTech BMT.
+                </Dialog.Description>
+
+                <nav aria-label="Menu di động" className="flex flex-col gap-1">
+                  {NAV_ITEMS.map((item) => {
+                    const active =
+                      item.href === "/"
+                        ? pathname === "/"
+                        : pathname.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "min-h-11 flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                          active
+                            ? "bg-brand-light text-brand font-semibold"
+                            : "text-ink-body hover:bg-surface-subtle"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                <div className="mt-4 flex flex-col gap-2 border-t border-line-subtle pt-4">
+                  <a
+                    href={`tel:${hotlineRaw}`}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-surface-subtle px-4 py-3 text-sm font-semibold text-navy"
+                  >
+                    <Phone className="h-4 w-4 text-brand" aria-hidden="true" />
+                    <span className="font-mono tabular-nums">
+                      Hotline: {hotline}
+                    </span>
+                  </a>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
         </div>
-      )}
+      </div>
     </header>
   );
 }

@@ -1,1 +1,0 @@
-export { mountCamera } from './camera';

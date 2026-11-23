@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T08:06:00.000Z",
+  "title": "Design System: MQTech - Computer Service BMT",
+  "extensions": {
+    "colorMeta": {
+      "titanium-cobalt": {
+        "role": "primary",
+        "displayName": "Titanium Cobalt",
+        "canonical": "#2563eb",
+        "tonalRamp": ["#172554", "#1e3a8a", "#1e40af", "#1d4ed8", "#2563eb", "#3b82f6", "#93c5fd", "#eff6ff"]
+      },
+      "cobalt-deep": {
+        "role": "primary",
+        "displayName": "Deep Cobalt",
+        "canonical": "#1d4ed8",
+        "tonalRamp": ["#0f172a", "#172554", "#1e3a8a", "#1e40af", "#1d4ed8", "#2563eb", "#60a5fa", "#dbeafe"]
+      },
+      "electric-cyan": {
+        "role": "secondary",
+        "displayName": "Electric Cyan",
+        "canonical": "#38bdf8",
+        "tonalRamp": ["#082f49", "#0c4a6e", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#f0f9ff"]
+      },
+      "obsidian-navy": {
+        "role": "secondary",
+        "displayName": "Obsidian Navy",
+        "canonical": "#0b1120",
+        "tonalRamp": ["#050811", "#0b1120", "#0f172a", "#1e293b", "#334155", "#64748b", "#cbd5e1", "#f8fafc"]
+      },
+      "canvas-white": {
+        "role": "neutral",
+        "displayName": "Canvas White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9", "#ffffff"]
+      },
+      "bench-subtle": {
+        "role": "neutral",
+        "displayName": "Bench Subtle (Cobalt-Tinted)",
+        "canonical": "#f7f9fc",
+        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#5b6b82", "#93accf", "#c5d2e4", "#eef2f8", "#f7f9fc"]
+      },
+      "slate-ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#0f172a",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#2b384e", "#475569", "#5b6b82", "#93accf", "#dde5f0"]
+      },
+      "slate-muted": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "canonical": "#475569",
+        "tonalRamp": ["#0f172a", "#1e293b", "#2b384e", "#475569", "#5b6b82", "#93accf", "#c5d2e4", "#eef2f8"]
+      },
+      "border-hairline": {
+        "role": "neutral",
+        "displayName": "Cobalt Hairline Border",
+        "canonical": "#dde5f0",
+        "tonalRamp": ["#1e293b", "#334155", "#475569", "#5b6b82", "#93accf", "#c5d2e4", "#dde5f0", "#f7f9fc"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Headline",
+        "purpose": "Tiêu đề chính Hero trang chủ với text-wrap: balance."
+      },
+      "headline": {
+        "displayName": "Section & Page Headline",
+        "purpose": "Tiêu đề h1 trang con và tiêu đề h2 phân khu nội dung."
+      },
+      "title": {
+        "displayName": "Card & Dialog Title",
+        "purpose": "Tiêu đề thẻ dịch vụ, bài viết và hộp thoại quản trị."
+      },
+      "body": {
+        "displayName": "Technical Body Copy",
+        "purpose": "Nội dung mô tả và bài viết kỹ thuật tiếng Việt tối đa 68-72ch."
+      },
+      "label": {
+        "displayName": "UI Action & Field Label",
+        "purpose": "Nhãn trường nhập liệu, nút bấm và thanh điều hướng."
+      },
+      "mono": {
+        "displayName": "Tabular Technical Data",
+        "purpose": "Mã phiếu MQ-YYYY-XXXX, số điện thoại Hotline và báo giá VNĐ."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-card",
+        "value": "0 4px 20px -4px rgba(11, 17, 32, 0.06)",
+        "purpose": "Độ nổi mặc định ở trạng thái nghỉ của thẻ dịch vụ và khung biểu mẫu."
+      },
+      {
+        "name": "shadow-card-hover",
+        "value": "0 20px 40px -12px rgba(11, 17, 32, 0.14)",
+        "purpose": "Độ sâu phản hồi khi di chuột lên thẻ liên kết."
+      },
+      {
+        "name": "shadow-brand-lift",
+        "value": "0 10px 24px -6px rgba(37, 99, 235, 0.32)",
+        "purpose": "Độ nâng dưới nút CTA chính trên bề mặt nền sáng."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Đường cong chuyển động xuất hiện mượt mà khi cuộn tới phần tử dưới màn hình đầu tiên."
+      },
+      {
+        "name": "press-scale",
+        "value": "scale(0.985)",
+        "purpose": "Phản hồi xúc giác tức thì khi nhấn giữ nút bấm."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Nút CTA chính dạng viên thuốc dùng để Đặt lịch sửa chữa hoặc Gửi biểu mẫu.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"/><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"/><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"/><path d=\"m9 16 2 2 4-4\"/></svg><span>Đặt lịch kiểm tra miễn phí</span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; min-height: 48px; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 9999px; border: none; background: var(--raw-cobalt, #2563eb); color: #ffffff; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 10px 24px -6px rgba(37, 99, 235, 0.32); transition: background-color 0.18s ease, transform 0.18s ease; } .ds-btn-primary:hover { background: var(--raw-cobalt-hover, #1d4ed8); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--raw-cobalt, #2563eb); outline-offset: 2px; } .ds-btn-primary:active { transform: scale(0.985); }"
+    },
+    {
+      "name": "Secondary Hotline Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Nút gọi nhanh Hotline viền đậm Obsidian Navy hiển thị số điện thoại dạng chữ đơn cách.",
+      "html": "<a class=\"ds-btn-secondary\" href=\"tel:0987482573\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z\"/></svg><span>0987 482 573</span></a>",
+      "css": ".ds-btn-secondary { display: inline-flex; min-height: 48px; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 9999px; border: 2px solid var(--raw-obsidian, #0b1120); background: #ffffff; color: var(--raw-obsidian, #0b1120); font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; text-decoration: none; transition: background-color 0.18s ease, color 0.18s ease, transform 0.15s ease; } .ds-btn-secondary:hover { background: var(--raw-obsidian, #0b1120); color: #ffffff; } .ds-btn-secondary:focus-visible { outline: 2px solid var(--raw-cobalt, #2563eb); outline-offset: 2px; } .ds-btn-secondary:active { transform: scale(0.985); }"
+    },
+    {
+      "name": "Category Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-filter",
+      "description": "Chip lọc nhóm dịch vụ và chuyển tab bảng giá cao chuẩn 44px.",
+      "html": "<div class=\"ds-chip-row\"><button class=\"ds-chip ds-chip-active\" type=\"button\" aria-pressed=\"true\">Sửa Tại Nhà &amp; IT BMT</button><button class=\"ds-chip\" type=\"button\" aria-pressed=\"false\">Laptop &amp; MacBook</button></div>",
+      "css": ".ds-chip-row { display: flex; flex-wrap: wrap; gap: 8px; } .ds-chip { min-height: 44px; padding: 10px 18px; border-radius: 9999px; border: 1px solid var(--border-default, #e2e8f0); background: #ffffff; color: var(--text-secondary, #475569); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease; } .ds-chip:hover { border-color: rgba(37, 99, 235, 0.45); color: #0b1120; } .ds-chip-active { background: var(--raw-cobalt, #2563eb); border-color: var(--raw-cobalt, #2563eb); color: #ffffff; } .ds-chip:focus-visible { outline: 2px solid var(--raw-cobalt, #2563eb); outline-offset: 2px; }"
+    },
+    {
+      "name": "Accessible Form Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Trường nhập liệu cao 48px, cỡ chữ 16px trên di động kèm vòng focus kép rõ nét.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-ticket-input\">Mã phiếu sửa chữa</label><input id=\"ds-ticket-input\" class=\"ds-input\" type=\"text\" placeholder=\"VD: MQ-2026-1001\" value=\"MQ-2026-1001\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; max-width: 320px; } .ds-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #0b1120; } .ds-input { min-height: 48px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-default, #e2e8f0); background: #ffffff; color: #0b1120; font-family: 'JetBrains Mono', monospace; font-size: 15px; font-variant-numeric: tabular-nums; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-input::placeholder { color: #64748b; } .ds-input:focus-visible { outline: 2px solid var(--raw-cobalt, #2563eb); outline-offset: 0; border-color: var(--raw-cobalt, #2563eb); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.28); }"
+    },
+    {
+      "name": "Commitment Ledger Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Thẻ cam kết bố cục ngang (side-by-side icon + tiêu đề) trên bề mặt sáng.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-icon\" aria-hidden=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/><path d=\"m9 12 2 2 4-4\"/></svg></div><div class=\"ds-card-body\"><h3 class=\"ds-card-title\">Không tráo linh kiện</h3><p class=\"ds-card-desc\">Ghi nhận mã serial linh kiện khi tiếp nhận, khách quan sát trực tiếp toàn bộ quá trình tháo lắp.</p></div></div>",
+      "css": ".ds-card { display: flex; align-items: flex-start; gap: 16px; max-width: 440px; padding: 24px; border-radius: 16px; border: 1px solid var(--border-default, #e2e8f0); background: #ffffff; box-shadow: 0 4px 20px -4px rgba(11, 17, 32, 0.06); transition: border-color 0.2s ease; } .ds-card:hover { border-color: rgba(37, 99, 235, 0.5); } .ds-card-icon { display: flex; width: 44px; height: 44px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 12px; background: var(--raw-cobalt-light, #eff6ff); } .ds-card-title { margin: 0 0 6px; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #0b1120; } .ds-card-desc { margin: 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; line-height: 1.6; color: #475569; }"
+    },
+    {
+      "name": "Electronic Warranty Ticket Summary",
+      "kind": "custom",
+      "refersTo": "card-surface",
+      "description": "Thẻ tra cứu tiến độ sửa chữa và hạn bảo hành điện tử MQTech BMT.",
+      "html": "<div class=\"ds-ticket\"><div class=\"ds-ticket-head\"><div><span class=\"ds-ticket-code\">MQ-2026-1001</span><p class=\"ds-ticket-meta\">Anh Minh Tuấn • Dell Inspiron 5515</p></div><span class=\"ds-ticket-badge\">Hoàn thành</span></div><p class=\"ds-ticket-warranty\">Bảo hành SSD 36 tháng (1 đổi 1) • Hạn đến: 2029-11-18</p></div>",
+      "css": ".ds-ticket { max-width: 480px; padding: 20px 24px; border-radius: 16px; border: 1px solid var(--border-default, #e2e8f0); background: #ffffff; box-shadow: 0 4px 20px -4px rgba(11, 17, 32, 0.06); } .ds-ticket-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; } .ds-ticket-code { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #2563eb; font-variant-numeric: tabular-nums; } .ds-ticket-meta { margin: 4px 0 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 600; color: #0b1120; } .ds-ticket-badge { padding: 4px 12px; border-radius: 9999px; border: 1px solid #a7f3d0; background: #ecfdf5; color: #047857; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 600; } .ds-ticket-warranty { margin: 12px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #047857; font-variant-numeric: tabular-nums; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Transparent Precision Bench",
+    "overview": "MQTech BMT được thiết kế như một bàn kỹ thuật phần cứng sáng rõ, ngăn nắp và trung thực. Khách hàng tìm đến dịch vụ sửa máy tính khi thiết bị làm việc gặp sự cố khẩn cấp; giao diện phải truyền tải ngay sự bình tĩnh, tay nghề chuẩn xác và cam kết báo đúng giá trước khi chạm vào ốc vít. Không gian nền sáng chiếm chủ đạo để bảng giá, triệu chứng lỗi và mã bảo hành điện tử đọc rõ tức thì dưới ánh sáng ngoài trời hay màn hình di động.\n\nMàu nhấn Titanium Cobalt lấy trực tiếp từ biểu trưng hình học MQ chỉ xuất hiện ở các điểm quyết định hành động (Đặt lịch, Gọi Hotline, Mã phiếu sửa chữa), đối trọng với khối nền Obsidian Navy vững chãi dành riêng cho khu vực chứng thực uy tín và chân trang. Mọi chi tiết trang trí thừa — nhãn phụ chữ hoa lặp lại trên tiêu đề, chấm nhấp nháy vô hạn, bóng phát sáng màu trên nền tối — đều bị loại bỏ để nhường chỗ cho thông tin kỹ thuật xác thực.",
+    "keyCharacteristics": [
+      "Bề mặt sáng chuẩn phòng Lab kết hợp điểm nhấn Titanium Cobalt sắc nét từ bộ nhận diện gốc edition-2-cobalt.",
+      "Cặp chữ hình học hiện đại (Outfit) cho tiêu đề và chữ nhân văn kỹ thuật (IBM Plex Sans hỗ trợ đầy đủ dấu tiếng Việt) cho văn bản đọc dài.",
+      "Chữ đơn cách (JetBrains Mono bật tabular-nums) dành riêng cho mã phiếu MQ-YYYY-XXXX, số điện thoại và con số báo giá.",
+      "Tương tác chuẩn công thái học cảm ứng (>= 44x44px), tôn trọng vùng an toàn iOS và có vòng focus bàn phím rõ nét."
+    ],
+    "rules": [
+      {
+        "name": "The Cobalt Signal Rule",
+        "body": "Titanium Cobalt chỉ dành cho phần tử tương tác được, con số giá niêm yết và mã phiếu sửa chữa; không tô tràn Cobalt lên các mảng nền lớn gây mỏi mắt.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dark-Surface Shadow Rule",
+        "body": "Trên nền tối Obsidian Navy, nút bấm chỉ dùng bóng đổ đen tự nhiên (rgba(0,0,0,0.25)), tuyệt đối không phát quầng sáng màu xanh neon xung quanh nút.",
+        "section": "colors"
+      },
+      {
+        "name": "The Self-Sufficient Heading Rule",
+        "body": "Mọi tiêu đề h1 và h2 phải tự đứng vững bằng ý nghĩa của chính nó; không đặt nhãn phụ chữ hoa trang trí (kicker/eyebrow) phía trên tiêu đề, và dùng đường dẫn Breadcrumb thực thụ ở đầu các trang con.",
+        "section": "typography"
+      },
+      {
+        "name": "The Monospace Discipline Rule",
+        "body": "Chỉ sử dụng JetBrains Mono cho mã phiếu, số điện thoại, thời lượng/con số đo đạc và đơn giá; không dùng chữ đơn cách để trang trí câu văn thông thường.",
+        "section": "typography"
+      },
+      {
+        "name": "The Structural Border First Rule",
+        "body": "Mọi thẻ trên nền sáng luôn có viền mảnh 1px solid var(--border-default) để giữ ranh giới sắc nét ngay cả trên màn hình độ tương phản thấp; bóng đổ chỉ đóng vai trò bổ trợ chiều sâu.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do giữ cỡ chữ tối thiểu 16px trên màn hình di động cho mọi <input>, <select>, <textarea> để ngăn trình duyệt iOS Safari tự động phóng to làm lệch bố cục.",
+      "Do dùng component ResponsiveImage có srcSet, sizes, width và height tường minh cho mọi hình ảnh dịch vụ và bài viết để đạt CLS = 0.",
+      "Do hiển thị vòng :focus-visible 2px rõ nét trên tất cả phần tử tương tác và ô biểu mẫu, đồng thời bổ sung khoảng đệm env(safe-area-inset-bottom) cho thanh tác vụ đáy di động.",
+      "Do dùng Breadcrumb điều hướng thực tế ở đầu trang con thay cho nhãn trang trí."
+    ],
+    "donts": [
+      "Don't đặt dòng chữ phụ in hoa (kicker / eyebrow chip) nằm riêng phía trên thẻ h1 hoặc h2.",
+      "Don't xếp chồng hộp icon vuông nhỏ phía trên tiêu đề thẻ theo khuôn mẫu lặp lại (icon-tile-stack); hãy đặt icon ngang hàng với nội dung.",
+      "Don't dùng hiệu ứng nhấp nháy vô hạn (animate-pulse, animate-ping) trên các chấm trạng thái tĩnh hoặc tạo bóng phát sáng màu trên nền tối bg-navy.",
+      "Don't dùng hộp thoại window.confirm() / window.alert() mặc định của trình duyệt; luôn sử dụng ModalDialog và ConfirmDialog chuẩn Radix."
+    ]
+  }
+}
