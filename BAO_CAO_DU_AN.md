@@ -188,3 +188,57 @@ npm run dev
 > - **Tuyệt đối không** bật biến `RESET_ADMIN_PASSWORD=true` trên Fly secrets nếu không muốn đặt lại mật khẩu Admin chính.
 > - **Mọi dữ liệu** (bài viết, bảng giá, đơn hàng, khách hàng, kho hàng, thu chi, cài đặt SEO/Telegram) đều nằm trên **Neon PostgreSQL**, nên việc đổi máy tính hay deploy lại code sẽ **không bao giờ làm mất dữ liệu**.
 > - Nếu muốn kích hoạt sao lưu 1 chạm sang PostgreSQL thứ 2 (Supabase hoặc Neon project phụ), chạy `fly secrets set BACKUP_DATABASE_URL="postgresql://..."` rồi bấm đồng bộ tại `/admin/cai-dat` (Mục 6).
+
+
+---
+
+## 7. Nhật ký Nâng cấp Hạ tầng, Tính năng & Lộ trình SEO (23–24/11/2026)
+
+### 7.1. Chuyển đổi Hạ tầng Production sang Vercel Singapore (`sin1`) — Chi phí 0đ
+- **Ngừng phụ thuộc Fly.io:** Đã gỡ chứng chỉ domain (`suamaytinhbmt.id.vn`, `www.suamaytinhbmt.id.vn`) khỏi Fly.io và scale máy chủ Fly về `0` để chấm dứt phát sinh chi phí.
+- **Triển khai tự động qua GitHub + Vercel (`QuangManh89/MQTechWebsite`, nhánh `master`):**
+  - Thêm file `vercel.json` cấu hình `"regions": ["sin1"]` (Singapore), đặt cạnh Neon Serverless PostgreSQL (`ap-southeast-1`) giúp tốc độ phản hồi tối ưu cho người dùng tại Việt Nam.
+  - Cấu hình đủ biến môi trường trên Vercel (`DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL`, `R2_*`).
+  - Gỡ bỏ đoạn redirect `www` trùng lặp trong `next.config.mjs` để tránh vòng lặp chuyển hướng.
+- **Chuẩn hóa Domain & DNS Cloudflare:**
+  - Trỏ bản ghi CNAME `@` và `www` về `176ec2cb9a8cfb8b.vercel-dns-017.com` (chế độ **DNS only** để Vercel cấp SSL tự động).
+  - Thống nhất Primary Domain trên Vercel: **`https://suamaytinhbmt.id.vn`** trả về thẳng `HTTP/1.1 200 OK`, còn **`https://www.suamaytinhbmt.id.vn`** chuyển hướng vĩnh viễn **`HTTP/1.1 308 Permanent Redirect`** về `https://suamaytinhbmt.id.vn/`.
+
+### 7.2. Nâng cấp UI/UX, Accessibility & Nghiệp vụ Phiếu sửa chữa
+- **Chuẩn tương phản WCAG AA (`Impeccable Audit` đạt 20/20 & `impeccable doctor` 0 findings):**
+  - Tinh chỉnh token màu nút CTA (`--rgb-cta`) từ `#ea580c` sang cam sâu `#c2410c` (hover `#9a3412`), đạt tỷ lệ tương phản **4.7:1** với chữ trắng (vượt ngưỡng 4.5:1 WCAG AA).
+  - Đồng bộ hoàn toàn `DESIGN.md` và sidecar `.impeccable/design.json`.
+- **Tự động tính Hạn bảo hành đến ngày (`/admin/phieu-sua` — Modal Tạo phiếu mới):**
+  - Thêm hàng nút chọn nhanh thời hạn (`Không BH`, `1T`, `3T`, `6T`, `12T`, `24T`, `36T`) kèm ghi chú mốc `Tính từ dd/mm/yyyy` (ngày lập phiếu hôm nay).
+  - Mặc định khi mở form chọn sẵn `6T` (`Hôm nay + 6 tháng`), tự động tính đúng ngày cuối tháng và đồng bộ nội dung vào ô **Nội dung bảo hành** (vẫn cho phép chỉnh tay bất cứ lúc nào).
+
+### 7.3. Hoàn thành SEO Giai đoạn 1 — Kỹ thuật & Tối ưu 11 bài viết hiện có
+- **Nâng cấp Technical SEO & Liên kết 2 chiều Hub ↔ Spoke:**
+  - `src/app/(public)/bai-viet/[slug]/page.tsx`: Bổ sung `alternates.canonical`, `openGraph` (`type: "article"`, `locale: "vi_VN"`, `siteName`, `publishedTime`, `modifiedTime`, `images`), `twitter` (`summary_large_image`), nâng cấp JSON-LD `Article` (`mainEntityOfPage`, `publisher.logo` chuẩn hóa URL tuyệt đối), nâng cấp khối bài liên quan ưu tiên cùng chuyên mục (3 thẻ).
+  - `src/app/(public)/dich-vu/[slug]/page.tsx`: Bổ sung `alternates.canonical`, `openGraph`, `twitter`, JSON-LD `Service` (`LocalBusiness` provider, `areaServed: Buôn Ma Thuột, Đắk Lắk`), và bổ sung khối **"Kiến thức & Hướng dẫn liên quan"** (3 bài viết chấm điểm khớp theo slug/chuyên mục dịch vụ).
+- **Cứu 4 bài Thin Content & Xử lý liên kết nội bộ trên Neon DB (đồng bộ `src/db/seed-data.ts`):**
+  - Sao lưu toàn bộ 11 bài gốc trước khi chỉnh sửa.
+  - Mở rộng 4 bài seed mỏng (#1–#4) từ 111–247 từ lên **952–1.007 từ** (đầy đủ cấu trúc `##`/`###`, bảng so sánh Markdown, 4 câu FAQ, 4–5 internal link tự nhiên).
+  - Chèn internal link cho các bài đang có 0 link (#9, #10, #11) và phân tách intent cụm Cài Win (#5, #7) chống ăn thịt từ khóa.
+
+### 7.4. Hoàn thành SEO Giai đoạn 2 — 8 Bài Viết Chuyên Sâu (Deep Search)
+- **Xuất bản 8 bài viết mới (ID #12 – #19)** trên Neon DB (mỗi bài 1.390–1.996 từ, bảng Markdown chuẩn, 4 FAQ, 5–6 internal link hợp lệ, ảnh bìa HTTP 200 OK):
+  - **Nhóm Phần cứng & Hệ thống (4 bài):**
+    1. `laptop-khong-len-nguon-man-hinh-den-con-tro-chuot-bmt`
+    2. `pc-bat-quat-quay-man-hinh-no-signal-bmt`
+    3. `sua-loi-laptop-khong-bat-duoc-wifi-cham-than-vang`
+    4. `laptop-sac-khong-vao-pin-thay-pin-laptop-bmt`
+  - **Chuyên mục mới `Thủ Thuật Văn Phòng` (4 bài):**
+    5. `sua-loi-unikey-khong-go-duoc-tieng-viet-loi-font-word-excel`
+    6. `sua-loi-word-excel-product-activation-failed-khong-go-duoc-chu`
+    7. `sua-loi-chia-se-may-in-mang-lan-0x0000011b-0x00000709-win-11`
+    8. `huong-dan-cai-dat-tron-bo-phan-mem-van-phong-thiet-yeu-win-11`
+- **Kết quả Audit tổng thể kho nội dung (19/19 bài):**
+  - **19/19 bài viết** đang xuất bản trên **7 chuyên mục** (`Bảo Dưỡng Phần Cứng`, `Thủ Thuật Windows`, `Thủ Thuật Văn Phòng`, `Nâng Cấp Máy`, `Cẩm Nang MacBook`, `Sửa Chữa Tại Nhà BMT`, `Bảng Giá & Tư Vấn`).
+  - **89/89 internal links hợp lệ (0 link hỏng)**, **0 lỗi hiển thị Markdown**, đã kiểm thử trực quan 0 lỗi console trên production.
+
+### 7.5. Hoàn thành Trụ cột 1 — Google Search Console & Indexing
+- Xác nhận mã xác minh **Google Search Console** (`3hjBjUrdXW7iKHNIK5NBpIizV1PxkCP8-DMXyTOsBDA`) và **Google Analytics 4** (`G-QMFWXSV7YL`) hoạt động ổn định qua `/admin/cai-dat` và `src/app/layout.tsx`.
+- Gửi thành công **`/sitemap.xml`** trên Google Search Console — trạng thái **Thành công**, Google đã khám phá đủ **36 URL** (9 trang tĩnh + 8 trang dịch vụ + 19 bài viết).
+- Đã gửi **Yêu cầu lập chỉ mục (Request Indexing)** thành công cho **5 trang chủ lực** (`/dich-vu/sua-may-tinh-tai-nha-bmt`, `/dich-vu/cai-win-10-11-phan-mem-tai-nha-bmt`, `/dich-vu/sua-laptop-windows`, `/dich-vu/nang-cap-ram-ssd-linh-kien`, `/bang-gia`) và các bài viết mới.
+- **Lộ trình tiếp theo (Trụ cột 2–5 trong 90 ngày):** Đẩy mạnh **Google Business Profile (Google Maps + Review 5 sao)**, thay ảnh chụp thực tế tại tiệm vào 5 trang chủ lực, bổ sung FAQ Schema trên trang dịch vụ, triển khai **Giai đoạn 3 SEO** (kéo traffic công cụ `/kiem-tra-may-tinh` & MacBook BMT) và tối ưu định kỳ theo dữ liệu GSC.
