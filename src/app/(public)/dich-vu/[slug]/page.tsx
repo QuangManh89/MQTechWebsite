@@ -80,8 +80,24 @@ function getRelatedPostsForService<
           sSlug.includes("windows") ||
           sCategory === "software") &&
         !sSlug.includes("sua-laptop"),
-      categoryKeywords: ["thủ thuật windows", "windows", "phần mềm"],
-      slugKeywords: ["cai-win", "windows", "win-10", "win-11", "phan-mem"],
+      categoryKeywords: [
+        "thủ thuật windows",
+        "thủ thuật văn phòng",
+        "windows",
+        "phần mềm",
+      ],
+      slugKeywords: [
+        "cai-win",
+        "windows",
+        "win-10",
+        "win-11",
+        "phan-mem",
+        "unikey",
+        "word",
+        "excel",
+        "van-phong",
+        "wifi",
+      ],
     },
     {
       matchesService:
@@ -99,7 +115,7 @@ function getRelatedPostsForService<
     },
     {
       matchesService: sCategory === "pc-build" || sSlug.includes("pc"),
-      categoryKeywords: ["nâng cấp", "bảo dưỡng", "bảng giá"],
+      categoryKeywords: ["nâng cấp", "bảo dưỡng", "sửa chữa", "bảng giá"],
       slugKeywords: [
         "ssd",
         "ram",
@@ -107,6 +123,8 @@ function getRelatedPostsForService<
         "bang-gia",
         "man-hinh-xanh",
         "nang-cap",
+        "no-signal",
+        "wifi",
       ],
     },
     {
@@ -120,16 +138,52 @@ function getRelatedPostsForService<
         sSlug.includes("laptop") ||
         sCategory === "repair",
       categoryKeywords: ["bảo dưỡng", "sửa chữa"],
-      slugKeywords: ["laptop", "man-hinh", "pin", "ban-phim", "sac"],
+      slugKeywords: [
+        "laptop",
+        "man-hinh",
+        "pin",
+        "ban-phim",
+        "sac",
+        "wifi",
+        "no-signal",
+      ],
+    },
+    {
+      matchesService: sSlug.includes("bao-tri-it"),
+      categoryKeywords: ["thủ thuật văn phòng", "dịch vụ", "bảng giá"],
+      slugKeywords: [
+        "may-in",
+        "máy in",
+        "0x0000011b",
+        "0x00000709",
+        "word",
+        "excel",
+        "unikey",
+        "van-phong",
+        "wifi",
+        "tai-nha",
+        "bang-gia",
+      ],
     },
     {
       matchesService:
-        sSlug.includes("sua-may-tinh-tai-nha") ||
-        sSlug.includes("tai-nha") ||
-        sSlug.includes("bao-tri-it") ||
-        sCategory === "onsite-it",
-      categoryKeywords: ["dịch vụ", "bảng giá"],
-      slugKeywords: ["tai-nha", "tan-lap", "bang-gia", "sua-may-tinh", "bmt"],
+        (sSlug.includes("sua-may-tinh-tai-nha") ||
+          sSlug.includes("tai-nha") ||
+          sCategory === "onsite-it") &&
+        !sSlug.includes("bao-tri-it"),
+      categoryKeywords: ["dịch vụ", "bảng giá", "thủ thuật văn phòng"],
+      slugKeywords: [
+        "tai-nha",
+        "tan-lap",
+        "bang-gia",
+        "sua-may-tinh",
+        "bmt",
+        "may-in",
+        "máy in",
+        "0x0000011b",
+        "wifi",
+        "van-phong",
+      ],
     },
   ];
 
