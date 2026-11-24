@@ -40,12 +40,12 @@
   --rgb-surface-subtle: 242 245 249;
   --rgb-surface-muted: 232 238 246;
 
-  /* Action CTA Orange (synced with Hero Banner CTA) */
-  --raw-cta: #ea580c;
-  --raw-cta-hover: #c2410c;
-  --rgb-cta: 234 88 12;
-  --rgb-cta-hover: 194 65 12;
-  --shadow-cta-lift: 0 8px 20px -4px rgba(234, 88, 12, 0.38);
+  /* Action CTA Deep Orange (Contrast >= 4.5:1 against white text for WCAG AA) */
+  --raw-cta: #c2410c;
+  --raw-cta-hover: #9a3412;
+  --rgb-cta: 194 65 12;
+  --rgb-cta-hover: 154 52 18;
+  --shadow-cta-lift: 0 8px 20px -4px rgba(194, 65, 12, 0.38);
 
   --text-primary: #0f172a;
   --text-body: #2b384e;
