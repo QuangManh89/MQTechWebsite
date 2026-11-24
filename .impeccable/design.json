@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-18T08:06:00.000Z",
+  "generatedAt": "2026-11-24T08:15:00.000Z",
   "title": "Design System: MQTech - Computer Service BMT",
   "extensions": {
     "colorMeta": {
@@ -57,6 +57,12 @@
         "displayName": "Cobalt Hairline Border",
         "canonical": "#dde5f0",
         "tonalRamp": ["#1e293b", "#334155", "#475569", "#5b6b82", "#93accf", "#c5d2e4", "#dde5f0", "#f7f9fc"]
+      },
+      "action-orange": {
+        "role": "accent",
+        "displayName": "Action CTA Deep Orange",
+        "canonical": "#c2410c",
+        "tonalRamp": ["#431407", "#7c2d12", "#9a3412", "#c2410c", "#ea580c", "#f97316", "#fdba74", "#fff7ed"]
       }
     },
     "typographyMeta": {
