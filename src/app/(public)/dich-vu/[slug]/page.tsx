@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import {
+  getPublishedPosts,
   getPublishedServices,
   getServiceBySlug,
   getSiteSettings,
@@ -52,17 +53,158 @@ function getServicePromoBanner(
   };
 }
 
+function getRelatedPostsForService<
+  T extends {
+    id: number;
+    slug: string;
+    title: string;
+    category: string;
+    excerpt: string;
+  },
+>(
+  service: { slug: string; category: string },
+  allPosts: T[],
+  limit = 3
+): T[] {
+  const sSlug = service.slug.toLowerCase();
+  const sCategory = service.category.toLowerCase();
+
+  const rules: Array<{
+    matchesService: boolean;
+    categoryKeywords: string[];
+    slugKeywords: string[];
+  }> = [
+    {
+      matchesService:
+        (sSlug.includes("cai-win") ||
+          sSlug.includes("windows") ||
+          sCategory === "software") &&
+        !sSlug.includes("sua-laptop"),
+      categoryKeywords: ["thủ thuật windows", "windows", "phần mềm"],
+      slugKeywords: ["cai-win", "windows", "win-10", "win-11", "phan-mem"],
+    },
+    {
+      matchesService:
+        sSlug.includes("ve-sinh") || sSlug.includes("tan-nhiet"),
+      categoryKeywords: ["bảo dưỡng"],
+      slugKeywords: ["ve-sinh", "tan-nhiet", "keo", "nong"],
+    },
+    {
+      matchesService:
+        sSlug.includes("nang-cap") ||
+        sSlug.includes("ssd") ||
+        sSlug.includes("ram"),
+      categoryKeywords: ["nâng cấp"],
+      slugKeywords: ["ssd", "ram", "cham", "nang-cap"],
+    },
+    {
+      matchesService: sCategory === "pc-build" || sSlug.includes("pc"),
+      categoryKeywords: ["nâng cấp", "bảo dưỡng", "bảng giá"],
+      slugKeywords: [
+        "ssd",
+        "ram",
+        "ve-sinh",
+        "bang-gia",
+        "man-hinh-xanh",
+        "nang-cap",
+      ],
+    },
+    {
+      matchesService: sSlug.includes("sua-macbook") || sSlug.includes("macbook"),
+      categoryKeywords: ["macbook"],
+      slugKeywords: ["macbook", "macos", "apple"],
+    },
+    {
+      matchesService:
+        sSlug.includes("sua-laptop") ||
+        sSlug.includes("laptop") ||
+        sCategory === "repair",
+      categoryKeywords: ["bảo dưỡng", "sửa chữa"],
+      slugKeywords: ["laptop", "man-hinh", "pin", "ban-phim", "sac"],
+    },
+    {
+      matchesService:
+        sSlug.includes("sua-may-tinh-tai-nha") ||
+        sSlug.includes("tai-nha") ||
+        sSlug.includes("bao-tri-it") ||
+        sCategory === "onsite-it",
+      categoryKeywords: ["dịch vụ", "bảng giá"],
+      slugKeywords: ["tai-nha", "tan-lap", "bang-gia", "sua-may-tinh", "bmt"],
+    },
+  ];
+
+  const activeRules = rules.filter((r) => r.matchesService);
+  const serviceTokens = sSlug.split("-").filter((t) => t.length >= 3);
+
+  const scored = allPosts.map((post, index) => {
+    const pCategory = post.category.toLowerCase();
+    const pSlug = post.slug.toLowerCase();
+    const pTitle = post.title.toLowerCase();
+    let score = 0;
+
+    for (const rule of activeRules) {
+      for (const kw of rule.categoryKeywords) {
+        if (pCategory.includes(kw)) score += 4;
+      }
+      for (const kw of rule.slugKeywords) {
+        if (pSlug.includes(kw)) score += 3;
+        else if (pTitle.includes(kw.replace(/-/g, " "))) score += 2;
+      }
+    }
+
+    for (const token of serviceTokens) {
+      if (pSlug.includes(token)) score += 1;
+    }
+
+    return { post, score, index };
+  });
+
+  scored.sort((a, b) => b.score - a.score || a.index - b.index);
+  return scored.slice(0, limit).map((item) => item.post);
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const service = await getServiceBySlug(slug);
+  const [service, settings] = await Promise.all([
+    getServiceBySlug(slug),
+    getSiteSettings(),
+  ]);
   if (!service) return { title: "Không tìm thấy dịch vụ" };
+
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    settings.siteUrl ||
+    "https://suamaytinhbmt.id.vn"
+  ).replace(/\/$/, "");
+  const canonicalUrl = `${baseUrl}/dich-vu/${service.slug}`;
+
   return {
     title: service.title,
     description: service.shortDesc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "vi_VN",
+      siteName: settings.brandName,
+      url: canonicalUrl,
+      title: service.title,
+      description: service.shortDesc,
+      images: service.imageUrl
+        ? [{ url: service.imageUrl, alt: service.title }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: service.title,
+      description: service.shortDesc,
+      images: service.imageUrl ? [service.imageUrl] : undefined,
+    },
   };
 }
 
@@ -72,10 +214,11 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [service, settings, allServices] = await Promise.all([
+  const [service, settings, allServices, allPosts] = await Promise.all([
     getServiceBySlug(slug),
     getSiteSettings(),
     getPublishedServices(),
+    getPublishedPosts(),
   ]);
 
   if (!service) notFound();
@@ -95,23 +238,37 @@ export default async function ServiceDetailPage({
     priceRows = [];
   }
 
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    settings.siteUrl ||
+    "https://suamaytinhbmt.id.vn"
+  ).replace(/\/$/, "");
+  const canonicalUrl = `${baseUrl}/dich-vu/${service.slug}`;
+
   const relatedServices = allServices
     .filter((s) => s.id !== service.id)
     .slice(0, 3);
+  const relatedPosts = getRelatedPostsForService(service, allPosts, 3);
   const promoBanner = getServicePromoBanner(service.slug, service.category);
 
   const serviceJsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.title,
-    description: service.description,
-    provider: {
-      "@type": "ComputerStore",
-      name: settings.brandName,
-      telephone: settings.hotlineRaw,
-      address: settings.address,
+    description: service.shortDesc,
+    url: canonicalUrl,
+    serviceType: service.title,
+    areaServed: {
+      "@type": "City",
+      name: "Buôn Ma Thuột, Đắk Lắk",
     },
-    areaServed: "Buôn Ma Thuột, Đắk Lắk",
+    provider: {
+      "@type": "LocalBusiness",
+      name: settings.brandName,
+      telephone: settings.hotline,
+      address: settings.address,
+      url: baseUrl,
+    },
   };
 
   return (
@@ -321,6 +478,60 @@ export default async function ServiceDetailPage({
               </p>
             </div>
           </div>
+
+          {relatedPosts.length > 0 && (
+            <div className="border-t border-line pt-14">
+              <div className="flex items-center justify-between gap-4 mb-8">
+                <h2 className="font-heading text-2xl font-bold text-navy">
+                  Kiến thức &amp; Hướng dẫn liên quan
+                </h2>
+                <Link
+                  href="/bai-viet"
+                  className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-hover"
+                >
+                  <span>Xem tất cả</span>
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+              <div className="grid gap-6 md:grid-cols-3">
+                {relatedPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/bai-viet/${post.slug}`}
+                    className="group flex min-w-0 flex-col justify-between rounded-2xl border border-line bg-surface p-6 shadow-card transition-all hover:-translate-y-1 hover:border-brand/40"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="inline-flex rounded-full bg-brand-light px-2.5 py-0.5 font-semibold text-brand">
+                          {post.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-ink-muted tabular-nums">
+                          <Clock
+                            className="h-3.5 w-3.5 text-brand"
+                            aria-hidden="true"
+                          />
+                          <span>{post.readTimeMinutes} phút đọc</span>
+                        </span>
+                      </div>
+                      <h3 className="font-heading text-lg font-bold text-navy group-hover:text-brand transition-colors break-words">
+                        {post.title}
+                      </h3>
+                      <p className="text-sm text-ink-muted line-clamp-2 break-words">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-brand">
+                      Đọc hướng dẫn{" "}
+                      <ArrowRight
+                        className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {relatedServices.length > 0 && (
             <div className="border-t border-line pt-14">

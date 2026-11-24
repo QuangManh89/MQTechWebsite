@@ -25,11 +25,46 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const [post, settings] = await Promise.all([
+    getPostBySlug(slug),
+    getSiteSettings(),
+  ]);
   if (!post) return { title: "Không tìm thấy bài viết" };
+
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    settings.siteUrl ||
+    "https://suamaytinhbmt.id.vn"
+  ).replace(/\/$/, "");
+  const canonicalUrl = `${baseUrl}/bai-viet/${post.slug}`;
+  const metaTitle = post.seoTitle || post.title;
+  const metaDescription = post.seoDescription || post.excerpt;
+
   return {
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt,
+    title: metaTitle,
+    description: metaDescription,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "article",
+      locale: "vi_VN",
+      siteName: settings.brandName,
+      url: canonicalUrl,
+      title: metaTitle,
+      description: metaDescription,
+      publishedTime: new Date(post.publishedAt).toISOString(),
+      modifiedTime: new Date(post.updatedAt).toISOString(),
+      images: post.coverImage
+        ? [{ url: post.coverImage, alt: post.title }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metaTitle,
+      description: metaDescription,
+      images: post.coverImage ? [post.coverImage] : undefined,
+    },
   };
 }
 
@@ -68,14 +103,38 @@ export default async function PostDetailPage({
     year: "numeric",
   }).format(new Date(post.publishedAt));
 
-  const relatedPosts = allPosts.filter((p) => p.id !== post.id).slice(0, 2);
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    settings.siteUrl ||
+    "https://suamaytinhbmt.id.vn"
+  ).replace(/\/$/, "");
+  const canonicalUrl = `${baseUrl}/bai-viet/${post.slug}`;
+
+  const otherPosts = allPosts.filter((p) => p.id !== post.id);
+  const sameCategoryPosts = otherPosts.filter(
+    (p) => p.category === post.category
+  );
+  const otherCategoryPosts = otherPosts.filter(
+    (p) => p.category !== post.category
+  );
+  const relatedPosts = [...sameCategoryPosts, ...otherCategoryPosts].slice(
+    0,
+    3
+  );
 
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonicalUrl,
+    },
+    url: canonicalUrl,
     headline: post.title,
     description: post.excerpt,
-    image: allImages,
+    image: allImages.map((url) =>
+      url.startsWith("/") ? `${baseUrl}${url}` : url
+    ),
     datePublished: new Date(post.publishedAt).toISOString(),
     dateModified: new Date(post.updatedAt).toISOString(),
     author: {
@@ -85,6 +144,10 @@ export default async function PostDetailPage({
     publisher: {
       "@type": "Organization",
       name: settings.brandName,
+      logo: {
+        "@type": "ImageObject",
+        url: `${baseUrl}/icon-512.png`,
+      },
     },
   };
 
@@ -175,7 +238,7 @@ export default async function PostDetailPage({
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-3">
               {relatedPosts.map((rel) => (
                 <Link
                   key={rel.id}
