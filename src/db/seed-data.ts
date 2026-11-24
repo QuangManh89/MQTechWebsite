@@ -232,99 +232,354 @@ export const SEED_POSTS = [
     slug: "5-dau-hieu-laptop-can-ve-sinh-tra-keo-tan-nhiet",
     excerpt:
       "Thời tiết Tây Nguyên nhiều bụi mịn khiến khe tản nhiệt laptop dễ bít tắc sau 6 tháng. Nhận biết sớm 5 dấu hiệu quá nhiệt để tránh hư chip CPU/VGA tốn tiền triệu.",
-    content: `Laptop chạy chậm, quạt kêu vù vù hoặc tự động tắt ngang giữa chừng thường không phải do máy yếu đi mà do hệ thống tản nhiệt đang bị quá tải.
+    content: `Thời tiết Tây Nguyên nhiều bụi mịn khiến khe tản nhiệt laptop tại Buôn Ma Thuột dễ bít tắc sau 6–12 tháng sử dụng. Khi laptop chạy chậm, quạt kêu to hoặc tự tắt ngang, nguyên nhân chủ yếu là hệ thống tản nhiệt đang quá tải.
 
-### 1. Quạt kêu to liên tục dù chỉ mở Word hoặc lướt Web
-Khi bụi bẩn đóng thành lớp dày ở lá đồng tản nhiệt, luồng gió không thoát được ra ngoài buộc quạt phải quay ở tốc độ tối đa.
+Nhận biết sớm **5 dấu hiệu laptop cần vệ sinh và tra keo tản nhiệt** dưới đây giúp bạn tránh hư chip CPU/VGA tốn tiền triệu và giữ pin bền hơn.
 
-### 2. Nhiệt độ CPU luôn vượt ngưỡng 85°C - 95°C
-Keo tản nhiệt gốc sau 8-12 tháng sẽ bị khô cứng, mất khả năng dẫn nhiệt. Thay keo tản nhiệt chất lượng cao như Arctic MX-6 hoặc Thermal Grizzly giúp hạ ngay 10-20°C.
+## 5 Dấu Hiệu Cảnh Báo Laptop Đang Quá Nhiệt Cần Vệ Sinh Ngay
 
-### 3. Bàn phím và kê tay nóng ran khó chịu
-Nhiệt không thoát qua khe gió sẽ tích tụ ngược lên phần vỏ và bàn phím, lâu ngày còn làm chai phồng pin nhanh hơn.
+### 1. Quạt kêu to liên tục dù chỉ mở Word hoặc lướt web
 
-### 4. Máy bị tụt xung, giật lag khi chơi game hoặc xuất file
-CPU có cơ chế tự giảm xung nhịp (Thermal Throttling) để tự bảo vệ khi quá nóng, khiến máy đột ngột khựng lag dù cấu hình mạnh.
+Khi bụi và xơ vải đóng mảng dày ở lá đồng tản nhiệt, khí nóng không thoát ra được. Mainboard buộc đẩy quạt quay tối đa (3.500–5.000 RPM), gây tiếng ồn lớn và nhanh mòn trục quạt.
 
-### 5. Máy tự sập nguồn đột ngột
-Đây là mức cảnh báo đỏ: nếu để kéo dài có thể gây chết tụ nguồn hoặc hở chân chip VGA. Hãy mang máy đến MQTech (Đường Võ Thị Sáu, P. Tân Lập, BMT) hoặc đặt lịch kỹ thuật viên đến tận nơi kiểm tra.`,
+### 2. Nhiệt độ CPU và GPU thường xuyên vượt 85°C – 95°C
+
+Keo tản nhiệt gốc sau 8–12 tháng sẽ khô cứng, mất khả năng dẫn nhiệt từ chip sang ống đồng. Nếu đo bằng HWMonitor thấy CPU ở chế độ nghỉ trên 60°C và tác vụ nhẹ đã vọt lên 85°C–95°C, máy cần thay keo ngay. Dùng keo Arctic MX-6 hoặc Thermal Grizzly giúp hạ ngay **10°C – 20°C**.
+
+### 3. Bàn phím, chiếu nghỉ tay và đáy máy nóng ran
+
+Nhiệt ứ đọng trong khung máy sẽ lan ngược lên mặt phím và cụm pin lithium-ion, khiến pin nhanh chai hoặc phồng làm cấn trackpad. Tại Buôn Ma Thuột, khe hở ấm trong máy còn dễ thu hút côn trùng — xem thêm [ca thật kiến làm tổ trong màn hình laptop tại BMT](/bai-viet/man-hinh-laptop-chop-soc-kien-lam-to-bmt) để thấy tầm quan trọng của việc bảo dưỡng định kỳ.
+
+### 4. Máy tụt xung, giật lag khi làm việc hoặc chơi game
+
+CPU và GPU hiện đại có cơ chế tự bảo vệ **Thermal Throttling**: khi nhiệt chạm ngưỡng 95°C–100°C, máy tự ép xung xuống thấp để tránh cháy chip, làm tụt FPS, render chậm hoặc khựng lag. Nếu máy chậm bất thường, bạn xem thêm bài [laptop chạy chậm phải làm sao tại Tân Lập BMT](/bai-viet/laptop-chay-cham-phai-lam-sao-tan-lap-bmt) để kiểm tra đúng nguyên nhân.
+
+### 5. Laptop tự sập nguồn đột ngột sau 15–30 phút sử dụng
+
+Đây là **mức cảnh báo đỏ**. Khi cảm biến nhiệt phải ngắt nguồn khẩn cấp mà người dùng vẫn cố bật lại liên tục, tụ nguồn, MOSFET và chân chip VGA rất dễ hở mạch hoặc chập cháy. Nếu để lâu ngày, chi phí sửa mainboard hoặc đóng lại chip sẽ cao gấp nhiều lần so với một lần bảo dưỡng định kỳ.
+
+Ngoài ra, bạn cũng nên kiểm tra thói quen sử dụng hằng ngày: không đặt laptop lên chăn, nệm hoặc mặt bàn phủ khăn dễ bịt khe hút gió dưới đáy máy. Khi làm việc nhiều giờ liên tục, kê nhẹ phần đuôi máy lên 1–2 cm bằng đế tản nhiệt nhôm sẽ giúp luồng khí lưu thông tốt hơn đáng kể.
+
+## Bảng Đánh Giá Nhiệt Độ & Chi Phí Vệ Sinh Laptop Tại BMT
+
+| Mức nhiệt độ CPU | Triệu chứng thường gặp | Mức độ rủi ro | Giải pháp & Giá tham khảo tại MQTech |
+| :--- | :--- | :---: | :--- |
+| **45°C – 65°C** | Quạt êm, vỏ mát, hiệu năng ổn định | An toàn | Vệ sinh định kỳ mỗi 6–12 tháng |
+| **66°C – 80°C** | Quạt kêu rõ khi mở nhiều tab, ấm phím | Trung bình | Vệ sinh laptop văn phòng + keo Arctic MX-4/MX-6: **120.000đ** |
+| **81°C – 92°C** | Quạt rú to, tụt xung khi chạy đồ họa/game | Cao | Vệ sinh laptop Gaming / MacBook + keo Thermal Grizzly: **180.000đ** |
+| **Trên 93°C** | Nóng ran mặt phím, giật lag, tự sập nguồn | Nguy hiểm | Vệ sinh gấp + kiểm tra quạt & ống đồng: **120.000đ – 180.000đ** |
+
+Xem chi tiết quy trình 12 bước tại trang [dịch vụ vệ sinh và tra keo tản nhiệt chuẩn Lab](/dich-vu/ve-sinh-tra-keo-tan-nhiet) hoặc đối chiếu toàn bộ hạng mục tại [bảng giá sửa máy tính MQTech BMT](/bang-gia).
+
+## Quy Trình Vệ Sinh Laptop Chuẩn Lab Tại MQTech BMT
+
+Khách hàng quan sát trực tiếp toàn bộ quá trình thao tác:
+
+- **Đo nhiệt độ trước khi làm**: Kiểm tra nhiệt CPU/GPU và tốc độ quạt để đối chiếu kết quả.
+- **Làm sạch bụi khe gió và cánh quạt**: Tẩy mảng bụi ở lá đồng, vệ sinh và tra dầu trục quạt nếu kêu rè.
+- **Tẩy keo cũ & tra keo chính hãng**: Lau sạch bằng dung dịch IPA, tra keo Arctic MX-6 hoặc Thermal Grizzly vừa đủ.
+- **Test stress & bảo hành điện tử**: Đo lại nhiệt độ sau lắp ráp và cấp phiếu bảo hành điện tử tra cứu tại \`suamaytinhbmt.id.vn/tra-cuu\`.
+
+## Câu Hỏi Thường Gặp
+
+**1. Bao lâu nên vệ sinh laptop và tra keo tản nhiệt một lần?**
+
+Tại Buôn Ma Thuột, laptop văn phòng nên vệ sinh mỗi **9–12 tháng/lần**; laptop Gaming hoặc chạy đồ họa nặng nên làm mỗi **6 tháng/lần**.
+
+**2. Vệ sinh laptop tại MQTech mất bao lâu? Có để máy qua đêm không?**
+
+Chỉ mất **30–45 phút**, bạn ngồi xem trực tiếp và lấy máy ngay, không cần gửi qua đêm.
+
+**3. Vệ sinh máy có làm mất dữ liệu không?**
+
+Hoàn toàn không. Quá trình vệ sinh không đụng chạm ổ cứng nên dữ liệu an toàn 100%.
+
+**4. MQTech có hỗ trợ vệ sinh laptop tận nhà tại BMT không?**
+
+Có. Bạn có thể ghé tiệm hoặc [đặt lịch kỹ thuật viên đến tận nhà tại BMT](/dat-lich) trong 15–30 phút (ưu tiên P. Tân Lập, P. Tân An và toàn nội thành).
+
+---
+
+**MQTech – Computer Service Buôn Ma Thuột:**
+
+- **Địa chỉ:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
+- **Hotline / Zalo:** 0987 482 573
+- **Tra cứu bảo hành điện tử:** suamaytinhbmt.id.vn/tra-cuu`,
     category: "Bảo Dưỡng Phần Cứng",
     coverImage:
       "https://images.unsplash.com/photo-1721333089073-215a56fd710c?auto=format&fit=crop&w=1200&q=80",
     authorName: "Kỹ thuật MQTech BMT",
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
     featured: true,
-    seoTitle: "5 Dấu Hiệu Laptop Quá Nhiệt Cần Vệ Sinh & Tra Keo Tại BMT",
+    seoTitle: "5 Dấu Hiệu Laptop Cần Vệ Sinh & Tra Keo Tản Nhiệt Tại BMT",
     seoDescription:
-      "Nhận biết sớm 5 dấu hiệu laptop quá nhiệt cần vệ sinh, tra keo tản nhiệt tại Buôn Ma Thuột để bảo vệ CPU và pin bền lâu.",
+      "Nhận biết 5 dấu hiệu laptop quá nhiệt cần vệ sinh, tra keo tản nhiệt Arctic MX-6 tại Buôn Ma Thuột. Hạ nhiệt 10-20°C trong 35 phút tại MQTech BMT.",
   },
   {
     title: "Cách Khắc Phục Nhanh Lỗi Màn Hình Xanh (BSOD) Trên Windows 11",
     slug: "cach-khac-phuc-loi-man-hinh-xanh-bsod-windows-11",
     excerpt:
       "Hướng dẫn từng bước kiểm tra mã lỗi STOP CODE, gỡ driver xung đột và kiểm tra RAM/SSD khi máy tính Windows 11 gặp màn hình xanh.",
-    content: `Lỗi màn hình xanh (Blue Screen of Death) thường xuất hiện sau khi cập nhật Windows, cài phần mềm không tương thích hoặc do thanh RAM/SSD gặp lỗi tiếp xúc.
+    content: `Lỗi màn hình xanh (**BSOD – Blue Screen of Death**) trên Windows 11 khiến máy đột ngột dừng mọi tác vụ, hiển thị mã lỗi tiếng Anh rồi tự khởi động lại. Thực chất đây là cơ chế tự bảo vệ của Windows nhằm ngăn hư hại sâu hơn cho dữ liệu và phần cứng.
 
-### Bước 1: Ghi lại mã STOP CODE
-Các mã phổ biến như CRITICAL_PROCESS_DIED, MEMORY_MANAGEMENT hoặc INACCESSIBLE_BOOT_DEVICE sẽ chỉ rõ nguyên nhân nằm ở hệ điều hành, RAM hay ổ cứng.
+Dưới đây là hướng dẫn từ kỹ thuật viên MQTech Buôn Ma Thuột giúp bạn đọc đúng **STOP CODE** và tự xử lý lỗi màn hình xanh Windows 11 từng bước an toàn tại nhà.
 
-### Bước 2: Vào Safe Mode để gỡ bản cập nhật hoặc Driver mới nhất
-Nếu máy vừa cài driver card đồ họa hoặc Windows Update xong thì bị lỗi, hãy vào Safe Mode (giữ Shift + Restart) và thực hiện Roll Back Driver.
+## Bảng Tra Cứu Các Mã STOP CODE Windows 11 Phổ Biến
 
-### Bước 3: Kiểm tra chân tiếp xúc RAM và sức khỏe SSD
-Nếu tự thao tác không hết hoặc máy không boot vào được Windows, bạn có thể gọi Hotline MQTech 0987 482 573 để kỹ thuật viên hỗ trợ tận nhà tại Buôn Ma Thuột.`,
+Hãy chụp ảnh lại dòng **Stop code** ở góc dưới màn hình xanh để khoanh vùng đúng nguyên nhân:
+
+| Mã STOP CODE thường gặp | Nguyên nhân chính | Hướng xử lý ưu tiên |
+| :--- | :--- | :--- |
+| **CRITICAL_PROCESS_DIED** | Tệp hệ thống Windows hỏng, xung đột phần mềm hoặc lỗi update | Chạy \`sfc /scannow\`, gỡ bản Windows Update mới nhất |
+| **MEMORY_MANAGEMENT** | Thanh RAM lỗi, lỏng chân tiếp xúc hoặc không tương thích | Vệ sinh chân RAM, chạy Windows Memory Diagnostic |
+| **INACCESSIBLE_BOOT_DEVICE** | Sai chuẩn boot (AHCI/VMD), lỏng cáp SSD hoặc ổ cứng lỗi | Kiểm tra BIOS/UEFI và đo sức khỏe SSD |
+| **VIDEO_TDR_FAILURE** | Driver card đồ họa (NVIDIA/AMD/Intel) xung đột hoặc quá nhiệt | Vào Safe Mode gỡ sạch driver VGA và cài bản ổn định |
+| **IRQL_NOT_LESS_OR_EQUAL** | Driver thiết bị lỗi thời hoặc phần mềm diệt virus xung đột | Roll back driver mới cài, gỡ phần mềm diệt virus bên thứ 3 |
+| **BAD_SYSTEM_CONFIG_INFO** | Registry lỗi do tắt máy đột ngột lúc đang cập nhật | Dùng System Restore hoặc Startup Repair trong WinRE |
+
+## Hướng Dẫn 5 Bước Khắc Phục Lỗi Màn Hình Xanh Windows 11
+
+### Bước 1: Ngắt kết nối thiết bị ngoại vi không cần thiết
+
+Rút toàn bộ USB, ổ cứng di động, máy in và hub chuyển đổi Type-C ra khỏi máy. Nhiều trường hợp xung đột nguồn hoặc driver từ hub USB giá rẻ cũng gây màn hình xanh liên tục lúc khởi động.
+
+### Bước 2: Khởi động vào Safe Mode (Chế độ an toàn)
+
+Nếu máy còn vào được màn hình đăng nhập, giữ phím **Shift** + bấm **Restart** → **Troubleshoot** → **Advanced options** → **Startup Settings** → **Restart** → nhấn phím **4** (hoặc **F4**). Nếu máy kẹt vòng lặp khởi động, tắt/bật nguồn 3 lần liên tiếp ở logo Windows để vào môi trường khôi phục WinRE.
+
+### Bước 3: Gỡ bản cập nhật Windows hoặc Driver vừa cài
+
+Vào **Settings** → **Windows Update** → **Update history** → **Uninstall updates** để gỡ bản vá gần nhất. Tương tự, mở **Device Manager** → *Display adapters* hoặc *Network adapters* → **Properties** → **Roll Back Driver**. Nếu lỗi phát sinh ngay sau khi nâng cấp hệ điều hành, xem thêm hướng dẫn [máy lỗi sau cập nhật Windows tại Tân Lập BMT](/bai-viet/may-loi-sau-cap-nhat-windows-cai-win-tai-nha-tan-lap).
+
+### Bước 4: Quét và sửa tệp hệ thống bằng Command Prompt
+
+Mở **Command Prompt** với quyền Administrator và chạy lần lượt 2 lệnh:
+
+- \`DISM /Online /Cleanup-Image /RestoreHealth\`
+- \`sfc /scannow\`
+
+Chờ hoàn tất 100% rồi khởi động lại máy để kiểm tra.
+
+### Bước 5: Kiểm tra RAM và sức khỏe ổ cứng SSD
+
+Với các mã lỗi như *MEMORY_MANAGEMENT*, nhấn **Windows + R**, gõ \`mdsched.exe\` để kiểm tra RAM tích hợp sẵn. Nếu dùng PC hoặc laptop dễ mở nắp đáy, vệ sinh chân đồng thanh RAM bằng gôm trắng mềm cũng xử lý được nhiều ca lỗi tiếp xúc.
+
+## Khi Nào Nên Gọi Kỹ Thuật Viên Hỗ Trợ Tận Nhà?
+
+Không nên cài đè Windows liên tục khi chưa sao lưu file hoặc khi máy báo lỗi ổ cứng (\`INACCESSIBLE_BOOT_DEVICE\`), tránh mất dữ liệu quan trọng trên ổ C. Lúc này hãy liên hệ [dịch vụ sửa máy tính tại nhà BMT](/dich-vu/sua-may-tinh-tai-nha-bmt) để kỹ thuật viên kiểm tra RAM, đo sức khỏe SSD và sao lưu dữ liệu an toàn.
+
+Nếu hệ điều hành đã lỗi nặng không thể khôi phục, phương án dứt điểm nhất là [dịch vụ cài Win 10/11 & phần mềm tại nhà BMT](/dich-vu/cai-win-10-11-phan-mem-tai-nha-bmt) từ bộ ISO sạch chính hãng Microsoft, hoàn tất trong 30–45 phút kèm bảo hành điện tử tra cứu tại \`suamaytinhbmt.id.vn/tra-cuu\`.
+
+## Câu Hỏi Thường Gặp
+
+**1. Bị màn hình xanh Windows 11 có mất dữ liệu không?**
+
+Lỗi BSOD không tự xóa file đã lưu, chỉ mất nội dung đang mở chưa kịp lưu. Nếu lỗi do ổ SSD sắp hỏng, cần sao lưu dữ liệu ngay khi còn truy cập được.
+
+**2. Lỗi màn hình xanh có bắt buộc phải cài lại Windows không?**
+
+Không. Khoảng 50% trường hợp chỉ do xung đột driver, bản cập nhật lỗi hoặc lỏng chân RAM — xử lý đúng điểm là máy chạy lại bình thường.
+
+**3. Sửa lỗi màn hình xanh tại nhà BMT giá bao nhiêu?**
+
+Kỹ thuật viên MQTech có mặt sau 15–30 phút, kiểm tra và báo giá rõ trước khi làm. Cài lại Win bản sạch + driver chuẩn trọn gói chỉ **150.000đ** (bảo hành 30 ngày).
+
+**4. Làm sao đặt lịch nhanh khi máy không vào được mạng?**
+
+Gọi hoặc nhắn Zalo **0987 482 573**, hoặc dùng điện thoại [đặt lịch sửa máy tính online tại MQTech](/dat-lich) để kỹ thuật viên liên hệ trong 5 phút.
+
+---
+
+**MQTech – Sửa Máy Tính & Cài Win Tận Nơi Buôn Ma Thuột:**
+
+- **Địa chỉ:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
+- **Hotline / Zalo:** 0987 482 573
+- **Tra cứu bảo hành:** suamaytinhbmt.id.vn/tra-cuu`,
     category: "Thủ Thuật Windows",
     coverImage:
       "https://images.pexels.com/photos/7639355/pexels-photo-7639355.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
     authorName: "Kỹ thuật MQTech BMT",
-    readTimeMinutes: 5,
+    readTimeMinutes: 6,
     featured: false,
-    seoTitle: "Cách Sửa Lỗi Màn Hình Xanh Windows 11 Hiệu Quả",
+    seoTitle: "Cách Khắc Phục Lỗi Màn Hình Xanh BSOD Windows 11 Tại Nhà",
     seoDescription:
-      "Hướng dẫn xử lý lỗi màn hình xanh BSOD Windows 11 nhanh chóng tại nhà.",
+      "Hướng dẫn đọc mã STOP CODE và khắc phục lỗi màn hình xanh BSOD Windows 11 từng bước tại nhà. Hỗ trợ cài Win, sửa lỗi tận nơi BMT tại MQTech.",
   },
   {
     title: "Nên Nâng Cấp SSD Hay RAM Trước Để Laptop Cũ Chạy Nhanh Hơn?",
     slug: "nen-nang-cap-ssd-hay-ram-truoc-cho-laptop-cu",
     excerpt:
       "Phân tích rõ trường hợp nào cần lên SSD trước, trường hợp nào cần thêm RAM để không tốn tiền oan mà hiệu năng tăng rõ rệt.",
-    content: `Nhiều khách hàng tại BMT mang laptop chạy chậm đến hỏi nên nâng RAM hay SSD. Câu trả lời phụ thuộc vào cấu hình hiện tại của máy bạn:
+    content: `Nhiều khách hàng tại Buôn Ma Thuột mang laptop dùng 3–5 năm đến MQTech hỏi: *"Máy khởi động chậm, mở Chrome hay Excel hay đơ, giờ **nên nâng cấp SSD hay RAM trước** để tiết kiệm chi phí?"*
 
-### 1. Nếu máy vẫn đang dùng ổ cứng cơ (HDD) -> Nâng SSD ngay lập tức
-Ổ HDD truyền thống có tốc độ đọc ghi chỉ khoảng 80-120MB/s, trong khi SSD NVMe đạt từ 1.800 đến 3.500MB/s. Thay SSD giúp thời gian bật máy giảm từ 2 phút xuống còn 10-12 giây.
+Chọn đúng linh kiện cần nâng cấp giúp laptop cũ nhanh lên rõ rệt chỉ với vài trăm nghìn đồng. Dưới đây là hướng dẫn tự kiểm tra và chọn nâng cấp chuẩn xác theo cấu hình máy của bạn.
 
-### 2. Nếu máy đã có SSD nhưng RAM dưới 8GB -> Nâng cấp lên 16GB RAM
-Windows 11 và các trình duyệt hiện đại ngốn trung bình 5-6GB RAM ngay khi mở vài tab. Nâng lên 16GB RAM giúp bạn mở song song Chrome, Excel, phần mềm kế toán hoặc Photoshop mượt mà không giật lag.`,
+## Cách Tự Kiểm Tra Máy Đang Nghẽn Ở Ổ Cứng Hay RAM
+
+Nhấn **Ctrl + Shift + Esc** để mở **Task Manager** → chọn tab **Performance** và quan sát lúc máy chậm:
+
+- **Cột Disk luôn 95% – 100%** (loại ổ *HDD*): Cổ chai ở ổ cứng — nâng cấp SSD là ưu tiên số 1.
+- **Cột Memory luôn trên 85% – 95%** (máy đã dùng *SSD*): Máy thiếu RAM — nâng thêm RAM sẽ hết giật lag đa nhiệm.
+- **Cả Disk và Memory đều thấp nhưng quạt kêu to**: Có thể máy quá nhiệt hoặc lỗi Windows — xem thêm bài [7 nguyên nhân laptop chạy chậm tại Tân Lập BMT](/bai-viet/laptop-chay-cham-phai-lam-sao-tan-lap-bmt) trước khi mua linh kiện.
+
+## Bảng So Sánh HDD, SSD SATA, SSD NVMe & RAM 8GB/16GB
+
+| Linh kiện nâng cấp | Tốc độ / Thông số thực tế | Phù hợp với nhu cầu nào? | Mức độ cải thiện |
+| :--- | :--- | :--- | :--- |
+| **Ổ cứng cơ HDD (Cũ)** | Đọc/ghi 80 – 120 MB/s | Chỉ nên dùng lưu trữ dữ liệu phụ | Bật máy 1–3 phút, hay 100% Disk |
+| **SSD SATA 2.5 inch** | Đọc/ghi 500 – 550 MB/s | Laptop đời cũ không có khe M.2 | Nhanh gấp **4–5 lần** HDD, bật máy 15 giây |
+| **SSD M.2 NVMe Gen3/4** | Đọc/ghi 2.000 – 5.000 MB/s | Laptop có khe M.2 NVMe, đồ họa, kỹ thuật | Nhanh gấp **15–30 lần** HDD, bật máy 8–10 giây |
+| **RAM 8GB** | Đủ tác vụ văn phòng cơ bản | Học sinh, sinh viên, Word, Excel nhẹ | Tạm đủ cho Windows 10/11 |
+| **RAM 16GB (Dual Channel)** | Băng thông gấp đôi khi lắp 2 thanh | Kế toán, 20+ tab Chrome, Photoshop, AutoCAD | Đa nhiệm cực mượt, không reload tab |
+
+## Trường Hợp 1: Nâng Cấp SSD Trước (Nếu Máy Đang Dùng HDD)
+
+Nếu laptop vẫn chạy Windows trên ổ cơ HDD, **hãy nâng SSD ngay lập tức**. Dù lắp 16GB RAM, ổ HDD ~100 MB/s vẫn khiến Windows khởi động mất 2 phút và mở phần mềm phải chờ xoay vòng.
+
+Khi lên SSD 256GB hoặc 512GB chính hãng:
+
+- Thời gian khởi động giảm từ 2 phút xuống **10–15 giây**.
+- Mở Word, Excel, MISA, Chrome gần như tức thì.
+- Chống sốc tốt hơn hẳn ổ đĩa cơ khi mang đi học, đi làm.
+
+## Trường Hợp 2: Nâng Cấp RAM Trước (Khi Máy Đã Có SSD)
+
+Phần lớn laptop đời mới đã có sẵn SSD 256GB/512GB nhưng chỉ lắp **4GB hoặc 8GB RAM**. Riêng Windows 11 đã chiếm gần 4GB RAM khi khởi động; mở thêm Chrome nhiều tab, Zalo và Excel nặng là máy lập tức tràn RAM.
+
+- **Đang dùng 4GB RAM**: Nên nâng lên tối thiểu **8GB** hoặc **12GB/16GB**.
+- **Đang dùng 8GB RAM (1 thanh)**: Lắp thêm 1 thanh 8GB cùng Bus để chạy **Dual Channel 16GB**, vừa mượt đa nhiệm vừa tăng 15–25% hiệu năng đồ họa tích hợp.
+
+## Lưu Ý Trước Khi Nâng Cấp Linh Kiện Laptop
+
+1. **Kiểm tra khe cắm hỗ trợ**: Một số mẫu máy mỏng nhẹ hàn chết RAM trên mainboard hoặc chỉ có 1 khe RAM duy nhất, nên cần kiểm tra đúng mã máy trước khi chọn mua thanh RAM mới.
+2. **Chọn đúng chuẩn Bus RAM và giao tiếp SSD**: Lắp sai chuẩn DDR3/DDR4/DDR5 hoặc mua SSD M.2 NVMe cho khe chỉ hỗ trợ M.2 SATA sẽ khiến máy không nhận linh kiện.
+3. **Chọn linh kiện chính hãng bảo hành 36 tháng**: Tránh SSD/RAM trôi nổi giá rẻ dễ gây lỗi màn hình xanh, tụt tốc độ hoặc mất dữ liệu đột ngột sau vài tháng sử dụng.
+4. **Giữ nguyên 100% dữ liệu**: Tại [dịch vụ nâng cấp RAM, ổ cứng SSD & linh kiện MQTech](/dich-vu/nang-cap-ram-ssd-linh-kien), kỹ thuật viên hỗ trợ chuyển nguyên Windows hoặc cài sạch, bảo toàn dữ liệu. Bạn cũng có thể tự test bàn phím, màn hình, loa, mic qua công cụ [kiểm tra phần cứng máy tính online](/kiem-tra-may-tinh) miễn phí.
+
+## Câu Hỏi Thường Gặp
+
+**1. Nâng cấp SSD và RAM tại BMT giá bao nhiêu?**
+
+Tại MQTech, RAM 8GB DDR4 chính hãng chỉ từ **420.000đ**, SSD 256GB (kèm cài Win & giữ dữ liệu) chỉ từ **550.000đ**, bảo hành **36 tháng (1 đổi 1)**. Xem chi tiết tại [bảng giá nâng cấp linh kiện BMT](/bang-gia).
+
+**2. Thời gian nâng cấp mất bao lâu? Có làm tận nhà không?**
+
+Lắp RAM mất 10–15 phút, nâng SSD và cài đặt mất 30–45 phút. MQTech hỗ trợ lắp tận nhà tại Buôn Ma Thuột miễn phí công lắp.
+
+**3. Ổ HDD cũ tháo ra có tận dụng được không?**
+
+Được! Bạn có thể lắp vào **Box ổ cứng di động USB 3.0** hoặc khay **Caddy Bay** làm ổ lưu trữ ảnh, video rất tiết kiệm.
+
+**4. Làm sao biết máy tôi nâng tối đa được bao nhiêu RAM và lắp được NVMe không?**
+
+Gửi model máy (hoặc chụp tem mặt đáy) qua Zalo **0987 482 573** hoặc [đặt lịch kiểm tra miễn phí tại MQTech](/dat-lich) để nhận tư vấn và báo giá trong 2 phút.
+
+---
+
+**MQTech – Trung Tâm Nâng Cấp & Sửa Laptop Uy Tín Buôn Ma Thuột:**
+
+- **Địa chỉ:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
+- **Hotline / Zalo:** 0987 482 573
+- **Tra cứu bảo hành điện tử:** suamaytinhbmt.id.vn/tra-cuu`,
     category: "Nâng Cấp Máy",
     coverImage:
       "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=1200&q=80",
     authorName: "Kỹ thuật MQTech BMT",
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
     featured: false,
-    seoTitle: "Nâng Cấp SSD Hay RAM Trước Cho Laptop Chạy Nhanh Hơn?",
+    seoTitle: "Nên Nâng Cấp SSD Hay RAM Trước Cho Laptop Cũ? Tư Vấn BMT",
     seoDescription:
-      "Tư vấn chọn nâng cấp SSD hoặc RAM đúng bệnh, tiết kiệm chi phí từ kỹ thuật viên MQTech BMT.",
+      "So sánh chi tiết HDD, SSD SATA, NVMe và RAM 8GB/16GB theo nhu cầu thực tế. Tư vấn nâng cấp SSD hay RAM trước cho laptop cũ chuẩn xác tại MQTech BMT.",
   },
   {
     title: "Bí Quyết Bảo Vệ Pin MacBook Bền Lâu Trên 1000 Chu Kỳ Sạc",
     slug: "bi-quyet-bao-ve-pin-macbook-ben-lau",
     excerpt:
       "Những thói quen sạc pin đúng cách cho MacBook Air/Pro Intel & Apple Silicon giúp hạn chế chai pin, phồng pin và giữ hiệu năng ổn định.",
-    content: `Pin MacBook chính hãng có tuổi thọ thiết kế khoảng 1000 chu kỳ sạc. Tuy nhiên nếu sử dụng sai cách trong môi trường nóng ẩm, pin có thể xuống cấp chỉ sau 1-2 năm.
+    content: `Pin lithium-polymer trên các dòng MacBook Air và MacBook Pro có tuổi thọ thiết kế khoảng **1.000 chu kỳ sạc (Cycle Count)** trước khi dung lượng tối đa giảm dưới 80%. Tuy nhiên tại phòng Lab MQTech Buôn Ma Thuột, nhiều chiếc MacBook mới dùng 1,5–2 năm đã báo *Service Recommended* hoặc phồng pin do thói quen sạc sai cách và nhiệt độ cao.
 
-### Bật Optimized Battery Charging trong macOS
-Tính năng này học thói quen sử dụng của bạn và giữ mức sạc ở 80% khi bạn cắm sạc cố định tại bàn làm việc.
+Áp dụng đúng các bí quyết dưới đây sẽ giúp pin MacBook bền bỉ 4–5 năm, giữ hiệu năng ổn định và hạn chế tối đa nguy cơ phồng pin.
 
-### Tránh để máy cạn kiệt về 0% thường xuyên
-Hãy cắm sạc khi pin còn khoảng 15-20%. Việc cắm sạc liên tục khi làm việc tại văn phòng hoàn toàn an toàn vì MacBook tự ngắt dòng vào pin khi đầy 100%.`,
+## Hiểu Đúng Về Chu Kỳ Sạc (Cycle Count) Trên MacBook
+
+**1 chu kỳ sạc** được Apple tính khi bạn tiêu thụ đủ tổng cộng **100% dung lượng pin** (cộng dồn nhiều lần, không phải cứ cắm sạc là tính 1 chu kỳ). Ví dụ hôm nay dùng 50% rồi sạc đầy, ngày mai dùng tiếp 50% rồi sạc đầy mới tính là 1 chu kỳ.
+
+Cách kiểm tra nhanh: bấm biểu tượng **Apple ()** → giữ phím **Option** chọn **System Information** → mục **Power** để xem *Cycle Count* và *Maximum Capacity*.
+
+## Bảng Ngưỡng Sức Khỏe Pin & Thói Quen Sạc (Intel vs Apple Silicon)
+
+| Tiêu chí / Ngưỡng pin | MacBook Intel (2016 – 2020) | MacBook Apple Silicon (M1 / M2 / M3) | Khuyến nghị kỹ thuật MQTech |
+| :--- | :--- | :--- | :--- |
+| **Dung lượng 90% – 100%** | Hoạt động tốt, chú ý tản nhiệt | Thời lượng pin cao (10–15 tiếng) | Luôn bật *Optimized Battery Charging* |
+| **Dung lượng 80% – 89%** | Tụt pin nhanh hơn khi chạy nặng | Vẫn đáp ứng trọn 1 ngày làm việc | Tránh xả dưới 15%, giữ máy mát |
+| **Dưới 80% / >1000 chu kỳ** | Dễ sập nguồn ảo ở mức 20–30% | Báo *Service Recommended* | Lên kế hoạch thay pin chuẩn dung lượng |
+| **Cắm sạc liên tục tại bàn** | Sinh nhiệt cao, cần kê thoáng đáy | Quản lý điện tốt, tự dùng nguồn trực tiếp | An toàn nếu dùng sạc zin & máy mát |
+| **Tản nhiệt ảnh hưởng pin** | Quạt bám bụi làm nóng pin nhanh | MacBook Air không quạt, dễ nóng trên nệm | Vệ sinh định kỳ (dòng có quạt), đặt bàn phẳng |
+
+## 5 Thói Quen Vàng Giúp Pin MacBook Bền Trên 1.000 Chu Kỳ
+
+### 1. Bật tính năng Optimized Battery Charging trong macOS
+
+Vào **System Settings** → **Battery** → biểu tượng **(i)** ở *Battery Health* và bật **Optimized Battery Charging**. macOS sẽ học thói quen sử dụng, giữ mức pin ở **80%** khi cắm sạc cố định tại văn phòng và chỉ nạp 100% trước lúc bạn rút sạc.
+
+### 2. Cắm sạc làm việc thoải mái, nhưng tránh để cạn về 0%
+
+Khi pin đầy 100%, mạch nguồn MacBook tự ngắt dòng vào pin và chuyển sang dùng điện trực tiếp từ củ sạc. Vì vậy vừa cắm sạc vừa làm việc giúp **giảm chu kỳ sạc**. Ngược lại, dùng cạn về 0% sập nguồn mới sạc là nguyên nhân hàng đầu làm chai cell pin. Hãy cắm sạc khi pin còn khoảng **20%**.
+
+### 3. Giữ máy luôn mát mẻ
+
+Nhiệt độ cao làm phồng pin nhanh nhất. Tránh đặt MacBook trên chăn gối hoặc bỏ máy đang Sleep trong cốp xe giữa trời nắng Buôn Ma Thuột. Với MacBook Pro có quạt tản nhiệt, nên dùng [dịch vụ vệ sinh và tra keo tản nhiệt định kỳ](/dich-vu/ve-sinh-tra-keo-tan-nhiet) mỗi 12 tháng để máy mát êm và bảo vệ pin.
+
+### 4. Dùng củ sạc và cáp chính hãng đúng công suất
+
+Sạc trôi nổi dễ gây dao động điện áp, chết IC sạc trên mainboard và phồng pin. Hãy dùng củ sạc Apple hoặc chuẩn USB-PD uy tín (Anker, Ugreen...) đúng công suất khuyến nghị (30W–35W cho MacBook Air, 67W–140W cho MacBook Pro).
+
+### 5. Giữ pin ở mức 50% khi không dùng dài ngày
+
+Nếu cất máy trên 2 tuần không dùng, hãy đưa pin về mức **50%**, chọn *Shut Down* và bảo quản nơi khô ráo.
+
+## Khi Nào Cần Thay Pin MacBook Ngay?
+
+Hãy đưa máy đến [dịch vụ sửa MacBook chuyên nghiệp tại BMT](/dich-vu/sua-macbook-chuyen-nghiep) nếu thấy các dấu hiệu:
+
+- Trackpad cứng khó bấm, mặt đáy kênh hoặc gập màn hình không khít (pin đã phồng).
+- Báo *Service Recommended*, dung lượng dưới 75% hoặc tụt pin sập nguồn đột ngột.
+
+Tại MQTech, thay pin MacBook Air/Pro chuẩn dung lượng giá chỉ từ **1.150.000đ**, bảo hành 1 đổi 1 từ 6–12 tháng, tra cứu bảo hành điện tử tại \`suamaytinhbmt.id.vn/tra-cuu\`. Xem thêm tại [bảng giá sửa MacBook MQTech BMT](/bang-gia).
+
+## Câu Hỏi Thường Gặp
+
+**1. Vừa cắm sạc vừa dùng MacBook cả ngày có chai pin không?**
+
+Không. Khi đạt 100% (hoặc 80% với Optimized Battery Charging), máy tự lấy điện trực tiếp từ bộ sạc, giúp tiết kiệm chu kỳ sạc.
+
+**2. Thay pin MacBook tại MQTech BMT mất bao lâu?**
+
+Chỉ **45–60 phút**, khách hàng quan sát trực tiếp và lấy máy ngay trong buổi.
+
+**3. Pin MacBook phồng nhẹ có nên dùng tiếp không?**
+
+Tuyệt đối không. Pin phồng có thể làm vỡ trackpad, cong mainboard hoặc tiềm ẩn rủi ro chập cháy. Cần tháo và thay pin sớm.
+
+**4. Đặt lịch kiểm tra và thay pin MacBook tại BMT như thế nào?**
+
+Bạn có thể [đặt lịch kiểm tra MacBook miễn phí tại MQTech](/dat-lich) hoặc nhắn mã máy (Axxxx ở mặt đáy) qua Zalo **0987 482 573** để nhận báo giá ngay.
+
+---
+
+**MQTech – Phòng Lab Sửa MacBook & Laptop Uy Tín Buôn Ma Thuột:**
+
+- **Địa chỉ:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
+- **Hotline / Zalo:** 0987 482 573
+- **Tra cứu bảo hành điện tử:** suamaytinhbmt.id.vn/tra-cuu`,
     category: "Cẩm Nang MacBook",
     coverImage:
       "https://images.unsplash.com/photo-1544281679-70f2022b5ced?auto=format&fit=crop&w=1200&q=80",
     authorName: "Kỹ thuật MQTech BMT",
-    readTimeMinutes: 3,
+    readTimeMinutes: 6,
     featured: false,
-    seoTitle: "Cách Sạc & Bảo Vệ Pin MacBook Bền Lâu",
+    seoTitle: "Bí Quyết Bảo Vệ Pin MacBook Bền Lâu Trên 1000 Chu Kỳ Sạc",
     seoDescription:
-      "Mẹo sử dụng và sạc pin MacBook Air/Pro đúng cách từ phòng Lab MQTech.",
+      "Hướng dẫn cách sạc và bảo vệ pin MacBook Air/Pro Intel & Apple Silicon M1/M2/M3 bền trên 1000 chu kỳ, tránh chai phồng pin từ phòng Lab MQTech BMT.",
   },
 ];
