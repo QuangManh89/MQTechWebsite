@@ -17,6 +17,45 @@ import {
 
 const STATUS_KEYS = Object.keys(TICKET_STATUS_MAP);
 
+const WARRANTY_DURATION_OPTIONS = [
+  { label: "Không BH", months: 0, text: "Không bảo hành" },
+  { label: "1T", months: 1, text: "Bảo hành 1 tháng" },
+  { label: "3T", months: 3, text: "Bảo hành 3 tháng" },
+  { label: "6T", months: 6, text: "Bảo hành 6 tháng (1 đổi 1)" },
+  { label: "12T", months: 12, text: "Bảo hành 12 tháng" },
+  { label: "24T", months: 24, text: "Bảo hành 24 tháng" },
+  { label: "36T", months: 36, text: "Bảo hành 36 tháng" },
+] as const;
+
+function addMonthsToDateInput(baseDate: Date, months: number): string {
+  if (months <= 0) return "";
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+  const day = baseDate.getDate();
+
+  const targetMonthIndex = month + months;
+  const targetYear = year + Math.floor(targetMonthIndex / 12);
+  const normalizedMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const lastDayOfTargetMonth = new Date(
+    targetYear,
+    normalizedMonth + 1,
+    0
+  ).getDate();
+  const clampedDay = Math.min(day, lastDayOfTargetMonth);
+
+  const yyyy = String(targetYear);
+  const mm = String(normalizedMonth + 1).padStart(2, "0");
+  const dd = String(clampedDay).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function formatDateVi(date: Date): string {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 export default function AdminTicketsPage() {
   const router = useRouter();
   const [tickets, setTickets] = useState<RepairTicket[]>([]);
@@ -31,7 +70,10 @@ export default function AdminTicketsPage() {
     null
   );
 
-  const [newForm, setNewForm] = useState({
+  const [selectedWarrantyMonths, setSelectedWarrantyMonths] = useState<
+    number | null
+  >(6);
+  const [newForm, setNewForm] = useState(() => ({
     customerName: "",
     customerPhone: "",
     serviceMode: "STORE",
@@ -43,9 +85,9 @@ export default function AdminTicketsPage() {
     issueDescription: "",
     estimatedCost: "",
     warrantyText: "Bảo hành 6 tháng (1 đổi 1)",
-    warrantyUntil: "",
+    warrantyUntil: addMonthsToDateInput(new Date(), 6),
     technicianNote: "",
-  });
+  }));
   const [newItems, setNewItems] = useState<RepairLineItem[]>([]);
 
   const loadTickets = useCallback(async () => {
@@ -113,6 +155,7 @@ export default function AdminTicketsPage() {
         toast.success("Đã tạo phiếu tiếp nhận mới!");
         setCreating(false);
         setNewItems([]);
+        setSelectedWarrantyMonths(6);
         setNewForm({
           customerName: "",
           customerPhone: "",
@@ -125,7 +168,7 @@ export default function AdminTicketsPage() {
           issueDescription: "",
           estimatedCost: "",
           warrantyText: "Bảo hành 6 tháng (1 đổi 1)",
-          warrantyUntil: "",
+          warrantyUntil: addMonthsToDateInput(new Date(), 6),
           technicianNote: "",
         });
         await loadTickets();
@@ -560,25 +603,65 @@ export default function AdminTicketsPage() {
               />
             </div>
             <div>
-              <label
-                htmlFor="newTicketWarrantyUntil"
-                className="block text-xs font-semibold text-ink-muted mb-1"
-              >
-                Hạn bảo hành đến ngày
-              </label>
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <label
+                  htmlFor="newTicketWarrantyUntil"
+                  className="block text-xs font-semibold text-ink-muted"
+                >
+                  Hạn bảo hành đến ngày
+                </label>
+                <span className="text-[11px] text-ink-subtle">
+                  Tính từ {formatDateVi(new Date())}
+                </span>
+              </div>
               <input
                 id="newTicketWarrantyUntil"
                 type="date"
                 value={newForm.warrantyUntil}
-                onChange={(e) =>
-                  setNewForm({ ...newForm, warrantyUntil: e.target.value })
-                }
+                onChange={(e) => {
+                  setSelectedWarrantyMonths(null);
+                  setNewForm({ ...newForm, warrantyUntil: e.target.value });
+                }}
                 className="min-h-11 w-full rounded-xl border border-line px-3.5 py-2.5 text-base sm:text-sm"
               />
             </div>
           </div>
 
           <div>
+            <div className="flex flex-wrap items-center gap-1.5 mb-2" role="group" aria-label="Chọn nhanh thời hạn bảo hành">
+              <span className="text-xs font-semibold text-ink-muted mr-1">
+                Chọn nhanh thời hạn:
+              </span>
+              {WARRANTY_DURATION_OPTIONS.map((opt) => {
+                const isActive = selectedWarrantyMonths === opt.months;
+                return (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      setSelectedWarrantyMonths(opt.months);
+                      setNewForm((prev) => ({
+                        ...prev,
+                        warrantyUntil: addMonthsToDateInput(
+                          new Date(),
+                          opt.months
+                        ),
+                        warrantyText: opt.text,
+                      }));
+                    }}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                      isActive
+                        ? "border-brand bg-brand text-ink-inverse shadow-sm"
+                        : "border-line bg-surface text-ink-body hover:border-brand/50 hover:text-brand"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
             <label
               htmlFor="newTicketWarrantyText"
               className="block text-xs font-semibold text-ink-muted mb-1"
