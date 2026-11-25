@@ -8,6 +8,19 @@ export const metadata: Metadata = {
   title: "Tra Cứu Tiến Độ Sửa Chữa & Bảo Hành Điện Tử",
   description:
     "Tra cứu nhanh trạng thái sửa chữa máy tính, laptop và thời hạn bảo hành điện tử tại MQTech Buôn Ma Thuột bằng Mã phiếu hoặc Số điện thoại.",
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/tra-cuu",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Tra Cứu Tiến Độ Sửa Chữa & Bảo Hành Điện Tử",
+    description:
+      "Tra cứu nhanh trạng thái sửa chữa máy tính, laptop và thời hạn bảo hành điện tử tại MQTech Buôn Ma Thuột bằng Mã phiếu hoặc Số điện thoại.",
+    url: "https://suamaytinhbmt.id.vn/tra-cuu",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 export default async function LookupPage({

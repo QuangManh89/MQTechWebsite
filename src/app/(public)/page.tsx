@@ -214,11 +214,50 @@ export default async function HomePage() {
             name: "Phường Tân An, TP. Buôn Ma Thuột",
           },
           {
+            "@type": "AdministrativeArea",
+            name: "Phường Ea Tam, TP. Buôn Ma Thuột",
+          },
+          {
+            "@type": "AdministrativeArea",
+            name: "Phường Tân Lợi, TP. Buôn Ma Thuột",
+          },
+          {
+            "@type": "AdministrativeArea",
+            name: "Phường Tự An, TP. Buôn Ma Thuột",
+          },
+          {
+            "@type": "AdministrativeArea",
+            name: "Phường Thành Công, TP. Buôn Ma Thuột",
+          },
+          {
+            "@type": "AdministrativeArea",
+            name: "Phường Thắng Lợi, TP. Buôn Ma Thuột",
+          },
+          {
+            "@type": "AdministrativeArea",
+            name: "Phường Tân Tiến, TP. Buôn Ma Thuột",
+          },
+          {
             "@type": "City",
             name: "Thành phố Buôn Ma Thuột, Tỉnh Đắk Lắk",
           },
         ],
-        openingHours: settings.workingHours,
+        openingHoursSpecification: [
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ],
+            opens: "07:30",
+            closes: "20:00",
+          },
+        ],
       },
       {
         "@type": "FAQPage",

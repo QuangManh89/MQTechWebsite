@@ -14,6 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const DEVICE_TYPES = [
@@ -186,6 +187,11 @@ export function BookingWizard({
         toast.error(msg);
         return;
       }
+      trackEvent("booking_submitted", {
+        service_category: serviceCategory,
+        service_mode: serviceMode,
+        device_type: deviceType,
+      });
       setCreatedCode(data.ticket.ticketCode);
       toast.success("Đặt lịch sửa chữa thành công!");
     } catch (err) {

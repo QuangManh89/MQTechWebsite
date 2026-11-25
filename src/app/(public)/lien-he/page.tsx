@@ -18,6 +18,19 @@ export const metadata: Metadata = {
   title: "Liên Hệ & Chỉ Đường - MQTech Computer Service BMT",
   description:
     "Liên hệ MQTech - Computer Service tại Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk. Hỗ trợ siêu tốc 15 - 20 phút tại P. Tân Lập, P. Tân An & trung tâm BMT. Hotline/Zalo 0987 482 573.",
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/lien-he",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Liên Hệ & Chỉ Đường - MQTech Computer Service BMT",
+    description:
+      "Liên hệ MQTech - Computer Service tại Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk. Hỗ trợ siêu tốc 15 - 20 phút tại P. Tân Lập, P. Tân An & trung tâm BMT. Hotline/Zalo 0987 482 573.",
+    url: "https://suamaytinhbmt.id.vn/lien-he",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 export default async function ContactPage() {

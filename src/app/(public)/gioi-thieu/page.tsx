@@ -11,6 +11,19 @@ export const metadata: Metadata = {
   title: "Về Chúng Tôi - MQTech Computer Service BMT",
   description:
     "Tìm hiểu về MQTech - Computer Service tại Buôn Ma Thuột, Đắk Lắk: trang thiết bị kỹ thuật, đội ngũ tận tâm và phương châm phục vụ.",
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/gioi-thieu",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Về Chúng Tôi - MQTech Computer Service BMT",
+    description:
+      "Tìm hiểu về MQTech - Computer Service tại Buôn Ma Thuột, Đắk Lắk: trang thiết bị kỹ thuật, đội ngũ tận tâm và phương châm phục vụ.",
+    url: "https://suamaytinhbmt.id.vn/gioi-thieu",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 const LAB_TOOLS = [

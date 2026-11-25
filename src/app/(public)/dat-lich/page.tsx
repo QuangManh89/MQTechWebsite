@@ -10,6 +10,19 @@ export const metadata: Metadata = {
   title: "Đặt Lịch Sửa Máy Tính Tại Nhà BMT & Tại Tiệm",
   description:
     "Đặt lịch sửa chữa Laptop, MacBook, PC tại nhà Buôn Ma Thuột hoặc mang máy đến MQTech chỉ trong 60 giây. Giảm ngay 50.000đ khi đặt online.",
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/dat-lich",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Đặt Lịch Sửa Máy Tính Tại Nhà BMT & Tại Tiệm",
+    description:
+      "Đặt lịch sửa chữa Laptop, MacBook, PC tại nhà Buôn Ma Thuột hoặc mang máy đến MQTech chỉ trong 60 giây. Giảm ngay 50.000đ khi đặt online.",
+    url: "https://suamaytinhbmt.id.vn/dat-lich",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 export default async function BookingPage({

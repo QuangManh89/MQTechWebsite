@@ -9,6 +9,19 @@ export const metadata: Metadata = {
   title: "Dịch Vụ Sửa Máy Tính, Laptop, MacBook & Build PC BMT",
   description:
     "Danh mục dịch vụ sửa máy tính tại nhà Buôn Ma Thuột, sửa Laptop, MacBook, Build PC, vệ sinh nâng cấp RAM/SSD và bảo trì IT doanh nghiệp.",
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/dich-vu",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Dịch Vụ Sửa Máy Tính, Laptop, MacBook & Build PC BMT",
+    description:
+      "Danh mục dịch vụ sửa máy tính tại nhà Buôn Ma Thuột, sửa Laptop, MacBook, Build PC, vệ sinh nâng cấp RAM/SSD và bảo trì IT doanh nghiệp.",
+    url: "https://suamaytinhbmt.id.vn/dich-vu",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 export default async function ServicesPage() {

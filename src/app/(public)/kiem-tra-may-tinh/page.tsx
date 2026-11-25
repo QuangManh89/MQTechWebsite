@@ -19,6 +19,19 @@ export const metadata: Metadata = {
     "benchmark cpu online",
     "MQTech BMT",
   ],
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/kiem-tra-may-tinh",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Kiểm Tra Máy Tính Online - Test Bàn Phím, Màn Hình, Loa, Mic, Camera | MQTech BMT",
+    description:
+      "Bộ công cụ kiểm tra phần cứng máy tính online miễn phí 100% trên trình duyệt: test bàn phím, màn hình điểm chết, loa Stereo, micro, webcam và đo hiệu năng CPU/GPU không cần cài đặt phần mềm.",
+    url: "https://suamaytinhbmt.id.vn/kiem-tra-may-tinh",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 export default async function DeviceTestPage() {

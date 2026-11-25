@@ -2,6 +2,7 @@ import { getSiteSettings } from "@/lib/site-data";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingQuickContact } from "@/components/layout/FloatingQuickContact";
+import { ConversionTracker } from "@/components/analytics/ConversionTracker";
 
 export const revalidate = 300;
 
@@ -36,6 +37,7 @@ export default async function PublicLayout({
         zaloUrl={settings.zaloUrl}
         messengerUrl={settings.messengerUrl}
       />
+      <ConversionTracker />
     </div>
   );
 }

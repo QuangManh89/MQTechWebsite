@@ -9,6 +9,19 @@ export const metadata: Metadata = {
   title: "Kiến Thức Công Nghệ & Thủ Thuật Máy Tính",
   description:
     "Chia sẻ kinh nghiệm bảo dưỡng laptop, khắc phục lỗi Windows, nâng cấp SSD/RAM và mẹo dùng máy tính bền bỉ từ MQTech BMT.",
+  alternates: {
+    canonical: "https://suamaytinhbmt.id.vn/bai-viet",
+  },
+  openGraph: {
+    siteName: "MQTech - Computer Service",
+    title: "Kiến Thức Công Nghệ & Thủ Thuật Máy Tính",
+    description:
+      "Chia sẻ kinh nghiệm bảo dưỡng laptop, khắc phục lỗi Windows, nâng cấp SSD/RAM và mẹo dùng máy tính bền bỉ từ MQTech BMT.",
+    url: "https://suamaytinhbmt.id.vn/bai-viet",
+    type: "website",
+    locale: "vi_VN",
+    images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
+  },
 };
 
 export default async function BlogPage() {
