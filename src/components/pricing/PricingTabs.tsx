@@ -22,8 +22,7 @@ function mapPricingToServiceOption(item: PricingItem): string {
     return "Bảo trì IT công ty / phòng máy";
   }
   if (
-    name.includes("windows") ||
-    /\bwin\b/.test(name) ||
+    /(?:cài|cai)\s*(?:đặt\s*)?(?:win|windows|phần mềm|phan mem)/i.test(name) ||
     name.includes("phần mềm")
   ) {
     return "Cài Win 10/11 & Phần mềm tại nhà BMT";
