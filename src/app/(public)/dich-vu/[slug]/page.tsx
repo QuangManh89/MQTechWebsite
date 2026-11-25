@@ -6,6 +6,7 @@ import {
   CalendarCheck,
   CheckCircle2,
   Clock,
+  Info,
   Phone,
   ShieldCheck,
   Sparkles,
@@ -19,6 +20,7 @@ import {
 import { getCategoryLabel } from "@/lib/utils";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { ResponsiveImage } from "@/components/ui/ResponsiveImage";
+import { FaqAccordion, type FaqItem } from "@/components/home/FaqAccordion";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
@@ -217,6 +219,198 @@ function getRelatedPostsForService<
   return scored.slice(0, limit).map((item) => item.post);
 }
 
+interface ServiceAeoContent {
+  directAnswer: string;
+  faqs: FaqItem[];
+}
+
+function getServiceAeoContent(
+  service: {
+    slug: string;
+    title: string;
+    priceFrom: string;
+    duration: string;
+    warranty: string;
+  },
+  settings: {
+    brandName: string;
+    hotline: string;
+    address: string;
+    workingHours: string;
+    bookingDiscount: string;
+  }
+): ServiceAeoContent {
+  const s = service.slug.toLowerCase();
+  const priceText = service.priceFrom || "báo giá công khai sau kiểm tra";
+  const hours = settings.workingHours || "07:30 - 20:00 (Thứ 2 - Chủ Nhật)";
+
+  if (s === "sua-may-tinh-tai-nha-bmt") {
+    return {
+      directAnswer: `${settings.brandName} cung cấp dịch vụ sửa máy tính, laptop và PC tại nhà trên toàn TP. Buôn Ma Thuột (${hours}). Kỹ thuật viên có mặt tận nơi sau 20 - 30 phút tại Tân Lập, Tân Lợi, Tân An, Tự An, Ea Tam, Thắng Lợi và khu vực lân cận; kiểm tra miễn phí, báo giá trước (${priceText}), bảo hành ${service.warranty}. Hotline/Zalo: ${settings.hotline}.`,
+      faqs: [
+        {
+          id: "tn-1",
+          question: "MQTech có hỗ trợ sửa máy tính tại nhà ở những phường nào tại Buôn Ma Thuột?",
+          answer: `Kỹ thuật viên MQTech xuất phát từ ${settings.address}, phục vụ tận nhà khắp TP. Buôn Ma Thuột gồm Tân Lập, Tân Lợi, Tân An, Tân Thành, Tự An, Thắng Lợi, Ea Tam, Khánh Xuân, Thành Nhất và các khu vực lân cận. Thời gian di chuyển trung bình 20 - 30 phút sau khi xác nhận lịch.`,
+        },
+        {
+          id: "tn-2",
+          question: "Sửa máy tính tại nhà có bị tính phí kiểm tra nếu không sửa không?",
+          answer: `MQTech kiểm tra chẩn đoán lỗi và báo giá minh bạch trước khi thực hiện. Nếu khách hàng ở khu vực nội thành BMT chỉ cần kiểm tra cơ bản hoặc chọn sửa ngay tại chỗ, phí kiểm tra được miễn phí 100%; không có chi phí ẩn hay tự ý thay linh kiện.`,
+        },
+        {
+          id: "tn-3",
+          question: "Những lỗi nào có thể sửa lấy liền ngay tại nhà mà không cần mang máy về tiệm?",
+          answer: "Hơn 85% sự cố phổ biến được xử lý dứt điểm ngay tại chỗ trong 30 - 60 phút: cài Windows 10/11, cài Office/phần mềm đồ họa, sửa lỗi mất Wi-Fi, không kết nối máy in mạng LAN, máy chạy chậm 100% disk, thay RAM/SSD, thay bàn phím, thay pin và vệ sinh tra keo tản nhiệt.",
+        },
+        {
+          id: "tn-4",
+          question: "MQTech có làm việc Thứ 7, Chủ Nhật hoặc buổi tối không?",
+          answer: `Có. MQTech phục vụ xuyên suốt ${hours}, hỗ trợ cả cuối tuần và ngoài giờ hành chính cho khách hàng văn phòng, sinh viên tại Buôn Ma Thuột. Đặt lịch trực tuyến trên website được giảm ngay ${settings.bookingDiscount}.`,
+        },
+      ],
+    };
+  }
+
+  if (s === "cai-win-10-11-phan-mem-tai-nha-bmt") {
+    return {
+      directAnswer: `Dịch vụ cài Win 10, Win 11 và phần mềm văn phòng, đồ họa tại nhà TP. Buôn Ma Thuột của ${settings.brandName} xử lý nhanh trong ${service.duration}, chi phí minh bạch ${priceText}. Cam kết bảo toàn 100% dữ liệu cá nhân ổ D/E, cài đủ driver chuẩn hãng, Unikey, Office, trình duyệt và hỗ trợ bảo hành phần mềm ${service.warranty}. Liên hệ ${settings.hotline}.`,
+      faqs: [
+        {
+          id: "cw-1",
+          question: "Cài lại Windows 10/11 tại MQTech có bị mất dữ liệu ở Desktop và ổ D không?",
+          answer: "Không. Trước khi cài mới, kỹ thuật viên luôn sao lưu toàn bộ dữ liệu quan trọng ở Desktop, Documents, Downloads sang phân vùng an toàn và chỉ format phân vùng hệ điều hành (ổ C) sau khi khách hàng xác nhận.",
+        },
+        {
+          id: "cw-2",
+          question: "Gói cài Win tại nhà BMT đã bao gồm những phần mềm cơ bản nào?",
+          answer: "Gói tiêu chuẩn đã bao gồm Windows 10 hoặc 11 sạch chuẩn hãng (không ghost đa cấu hình), đầy đủ driver Wi-Fi/âm thanh/card đồ họa, bộ gõ tiếng Việt Unikey, bộ font chữ văn phòng, trình duyệt, phần mềm giải nén, đọc PDF và bộ tin học văn phòng theo yêu cầu.",
+        },
+        {
+          id: "cw-3",
+          question: "Máy đời cũ hoặc RAM 4GB nên cài Windows 10 hay Windows 11?",
+          answer: "Kỹ thuật viên sẽ kiểm tra thực tế cấu hình CPU, RAM và ổ cứng trước khi cài. Với máy RAM 4GB hoặc chạy ổ HDD, Windows 10 tối ưu nhẹ sẽ ổn định hơn; máy có SSD và RAM từ 8GB trở lên chạy Windows 11 rất mượt mà.",
+        },
+        {
+          id: "cw-4",
+          question: "Cài Win và phần mềm chuyên ngành (AutoCAD, Photoshop, Kế toán) mất bao lâu?",
+          answer: `Thời gian cài Windows và bộ phần mềm cơ bản mất khoảng ${service.duration}. Nếu cài thêm các bộ phần mềm đồ họa, kỹ thuật nặng như AutoCAD, Photoshop, Illustrator, thời gian xử lý khoảng 60 - 90 phút ngay tại nhà hoặc tại cửa hàng.`,
+        },
+      ],
+    };
+  }
+
+  if (s === "sua-laptop-windows") {
+    return {
+      directAnswer: `${settings.brandName} chuyên sửa chữa Laptop Windows (Dell, HP, Asus, Acer, Lenovo, MSI) tại TP. Buôn Ma Thuột với thời gian xử lý ${service.duration}, chi phí tham khảo ${priceText} và bảo hành ${service.warranty}. Khách hàng được kiểm tra lỗi miễn phí, ký tên lên linh kiện nếu cần giữ máy và quan sát trực tiếp quy trình thay thế minh bạch. Hotline: ${settings.hotline}.`,
+      faqs: [
+        {
+          id: "sl-1",
+          question: "Laptop bật nguồn sáng đèn nhưng không lên màn hình có sửa lấy liền được không?",
+          answer: "Tùy nguyên nhân cụ thể: nếu do lỏng RAM, lỗi cáp màn hình hoặc hư màn hình thì có thể xử lý lấy liền trong 30 - 60 phút. Nếu lỗi nguồn trên mainboard hoặc chip GPU, kỹ thuật viên sẽ đo đạc miễn phí, báo giá rõ ràng và hẹn thời gian trả máy chính xác.",
+        },
+        {
+          id: "sl-2",
+          question: "Thay pin, bàn phím hoặc màn hình laptop có được kiểm tra linh kiện trước khi lắp không?",
+          answer: "Có. MQTech cho khách hàng kiểm tra trực tiếp tem mác, thông số và độ tương thích của pin, bàn phím hoặc màn hình mới trước khi thay. Khách hàng có thể ngồi xem trực tiếp toàn bộ quá trình tháo lắp.",
+        },
+        {
+          id: "sl-3",
+          question: "Nếu phải giữ lại laptop để sửa phần cứng mainboard thì MQTech đảm bảo linh kiện thế nào?",
+          answer: "Với các ca sửa mainboard cần thời gian đo đạc chuyên sâu, khách hàng được ký tên xác nhận lên từng linh kiện quan trọng (RAM, SSD, pin, màn hình) và nhận phiếu biên nhận ghi rõ tình trạng máy cùng thời hạn bảo hành.",
+        },
+        {
+          id: "sl-4",
+          question: "Chế độ bảo hành sau khi sửa laptop tại MQTech BMT ra sao?",
+          answer: `Mọi hạng mục sửa chữa và linh kiện thay thế đều có tem và phiếu bảo hành rõ ràng (${service.warranty} tùy hạng mục). Khi phát sinh lỗi trong thời hạn bảo hành, MQTech hỗ trợ kiểm tra và xử lý ưu tiên không thu thêm phí.`,
+        },
+      ],
+    };
+  }
+
+  if (s === "nang-cap-ram-ssd-linh-kien") {
+    return {
+      directAnswer: `Dịch vụ nâng cấp SSD NVMe/SATA và RAM DDR4/DDR5 chính hãng tại TP. Buôn Ma Thuột của ${settings.brandName} giúp tăng tốc khởi động máy chỉ còn 10 - 15 giây, xử lý lấy liền trong ${service.duration} (${priceText}). Miễn phí công lắp đặt, hỗ trợ chuyển toàn bộ Windows và dữ liệu cũ sang ổ mới, bảo hành chính hãng ${service.warranty}. Hotline: ${settings.hotline}.`,
+      faqs: [
+        {
+          id: "nc-1",
+          question: "Máy tính chạy chậm 100% Disk nên nâng cấp SSD hay nâng cấp RAM trước?",
+          answer: "Nếu máy đang dùng ổ cứng cơ HDD, nâng cấp lên ổ SSD mang lại hiệu quả tăng tốc rõ rệt nhất (khởi động nhanh gấp 4 - 5 lần và hết tình trạng treo 100% Disk). Sau đó, nâng cấp RAM lên tối thiểu 8GB hoặc 16GB sẽ giúp mở nhiều tab trình duyệt và phần mềm cùng lúc không bị giật lag.",
+        },
+        {
+          id: "nc-2",
+          question: "Nâng cấp SSD mới có giữ lại được Windows và dữ liệu từ ổ cứng cũ không?",
+          answer: "Hoàn toàn được. Kỹ thuật viên MQTech hỗ trợ nhân bản (clone) toàn bộ hệ điều hành, phần mềm và dữ liệu sang ổ SSD mới hoặc cài sạch Windows rồi chép đầy đủ dữ liệu cũ sang, đảm bảo không mất tệp tin công việc.",
+        },
+        {
+          id: "nc-3",
+          question: "Làm sao biết laptop của tôi còn khe trống để gắn thêm RAM hay SSD NVMe?",
+          answer: `Bạn chỉ cần gửi model máy qua Zalo ${settings.hotline} hoặc mang máy đến ${settings.address}, kỹ thuật viên sẽ tra cứu và kiểm tra thực tế miễn phí số khe RAM, chuẩn bus hỗ trợ và khe M.2 NVMe trước khi tư vấn phương án tiết kiệm nhất.`,
+        },
+        {
+          id: "nc-4",
+          question: "Linh kiện RAM và SSD tại MQTech là hàng mới chính hãng và bảo hành bao lâu?",
+          answer: `MQTech chỉ sử dụng RAM và SSD chính hãng (Kingston, Crucial, Samsung, Lexar, WD...) nguyên seal, có tem nhà phân phối và thời gian bảo hành dài hạn (${service.warranty}).`,
+        },
+      ],
+    };
+  }
+
+  if (s === "ve-sinh-tra-keo-tan-nhiet") {
+    return {
+      directAnswer: `Dịch vụ vệ sinh laptop, PC và tra keo tản nhiệt cao cấp tại TP. Buôn Ma Thuột của ${settings.brandName} thực hiện trực tiếp lấy liền sau ${service.duration} với chi phí chỉ ${priceText}. Làm sạch bụi bẩn quạt tản nhiệt, khe gió, thay keo tản nhiệt dẫn nhiệt cao giúp giảm ngay 10 - 15°C, hết kêu quạt to và tăng tuổi thọ linh kiện. Hotline: ${settings.hotline}.`,
+      faqs: [
+        {
+          id: "vs-1",
+          question: "Bao lâu nên vệ sinh laptop và tra keo tản nhiệt một lần?",
+          answer: "Với khí hậu Tây Nguyên nhiều bụi mịn, bạn nên vệ sinh và thay keo tản nhiệt định kỳ mỗi 6 - 12 tháng/lần (hoặc 6 tháng/lần với laptop gaming, máy làm đồ họa chạy tải cao liên tục) để tránh khô keo gây quá nhiệt sập nguồn.",
+        },
+        {
+          id: "vs-2",
+          question: "Vệ sinh laptop tại MQTech mất bao lâu và có được ngồi xem trực tiếp không?",
+          answer: `Quy trình tháo máy, làm sạch bụi quạt, khe tản nhiệt và tra keo mới mất khoảng ${service.duration}. Khách hàng có thể ngồi quan sát trực tiếp tại quầy kỹ thuật hoặc đặt lịch kỹ thuật viên đến làm tận nhà tại BMT.`,
+        },
+        {
+          id: "vs-3",
+          question: "MQTech sử dụng loại keo tản nhiệt nào khi bảo dưỡng máy?",
+          answer: "MQTech sử dụng keo tản nhiệt hiệu năng cao (chuẩn MX-4 / Kryonaut hoặc tương đương cho dòng gaming/workstation), tuyệt đối không dùng keo silicon trắng rẻ tiền nhanh khô.",
+        },
+        {
+          id: "vs-4",
+          question: "Vệ sinh máy có giúp hết tình trạng laptop bị tụt FPS và quạt kêu ồn không?",
+          answer: "Có. Khi khe tản nhiệt bị bít bụi và keo cũ bị khô cứng, CPU/GPU sẽ tự hạ xung nhịp (thermal throttling) để bảo vệ máy gây giật lag và quạt quay tối đa. Vệ sinh sạch và thay keo mới giúp máy mát hơn 10 - 15°C và vận hành êm ái trở lại.",
+        },
+      ],
+    };
+  }
+
+  return {
+    directAnswer: `${service.title} tại ${settings.brandName} (TP. Buôn Ma Thuột, Đắk Lắk) được thực hiện bởi kỹ thuật viên trực tiếp trong ${service.duration}, mức giá công khai ${priceText}, bảo hành ${service.warranty}. Miễn phí kiểm tra ban đầu, báo giá trước khi làm và hỗ trợ tận nơi hoặc tại ${settings.address} (${hours}). Hotline/Zalo: ${settings.hotline}.`,
+    faqs: [
+      {
+        id: "gen-1",
+        question: `Dịch vụ ${service.title} tại MQTech BMT mất bao lâu và giá bao nhiêu?`,
+        answer: `Thời gian xử lý trung bình là ${service.duration} với chi phí tham khảo ${priceText}. Kỹ thuật viên luôn kiểm tra miễn phí và báo giá trọn gói trước khi tiến hành để khách hàng hoàn toàn chủ động.`,
+      },
+      {
+        id: "gen-2",
+        question: "MQTech có hỗ trợ kiểm tra tận nơi ở Buôn Ma Thuột không?",
+        answer: `Có. Đội ngũ MQTech phục vụ cả tại cửa hàng (${settings.address}) và tận nơi nội thành TP. Buôn Ma Thuột trong khung giờ ${hours}.`,
+      },
+      {
+        id: "gen-3",
+        question: "Chính sách bảo hành của dịch vụ này như thế nào?",
+        answer: `Dịch vụ được bảo hành rõ ràng (${service.warranty}) kèm biên nhận hoặc tem bảo hành. Mọi vấn đề phát sinh trong thời hạn bảo hành đều được kiểm tra và hỗ trợ nhanh chóng.`,
+      },
+      {
+        id: "gen-4",
+        question: "Đặt lịch online qua website có ưu đãi gì không?",
+        answer: `Khách hàng đặt lịch trực tuyến qua website hoặc Zalo ${settings.hotline} được ưu tiên xếp kỹ thuật viên sớm nhất và giảm ngay ${settings.bookingDiscount} trên hóa đơn dịch vụ.`,
+      },
+    ],
+  };
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -304,32 +498,50 @@ export default async function ServiceDetailPage({
     .slice(0, 3);
   const relatedPosts = getRelatedPostsForService(service, allPosts, 3);
   const promoBanner = getServicePromoBanner(service.slug, service.category);
+  const aeo = getServiceAeoContent(service, settings);
 
   const serviceJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Service",
-    name: service.title,
-    description: service.shortDesc,
-    url: canonicalUrl,
-    serviceType: service.title,
-    areaServed: {
-      "@type": "City",
-      name: "Buôn Ma Thuột, Đắk Lắk",
-    },
-    provider: {
-      "@type": "LocalBusiness",
-      name: settings.brandName,
-      telephone: settings.hotline,
-      address: settings.address,
-      url: baseUrl,
-    },
+    "@graph": [
+      {
+        "@type": "Service",
+        name: service.title,
+        description: service.shortDesc,
+        url: canonicalUrl,
+        serviceType: service.title,
+        areaServed: {
+          "@type": "City",
+          name: "Buôn Ma Thuột, Đắk Lắk",
+        },
+        provider: {
+          "@type": "LocalBusiness",
+          name: settings.brandName,
+          telephone: settings.hotline,
+          address: settings.address,
+          url: baseUrl,
+        },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: aeo.faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
+      },
+    ],
   };
 
   return (
     <div className="bg-surface">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceJsonLd).replace(/</g, "\\u003c"),
+        }}
       />
 
       <section className="border-b border-line bg-surface-subtle py-12 sm:py-16">
@@ -450,6 +662,19 @@ export default async function ServiceDetailPage({
             />
           </Link>
 
+          <aside
+            aria-label="Tóm tắt dịch vụ nhanh"
+            className="rounded-2xl border border-line border-l-4 border-l-brand bg-surface-subtle p-6 sm:p-7"
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand mb-2">
+              <Info className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>Tóm tắt dịch vụ nhanh</span>
+            </div>
+            <p className="text-sm leading-relaxed text-ink-body sm:text-base max-w-[78ch] break-words">
+              {aeo.directAnswer}
+            </p>
+          </aside>
+
           <div className="grid gap-10 lg:grid-cols-2">
             <div className="rounded-2xl border border-line bg-surface-subtle p-6 sm:p-8">
               <h2 className="font-heading text-2xl font-bold text-navy mb-5">
@@ -532,6 +757,21 @@ export default async function ServiceDetailPage({
               </p>
             </div>
           </div>
+
+          {aeo.faqs.length > 0 && (
+            <div className="border-t border-line pt-14">
+              <div className="max-w-3xl mb-8">
+                <h2 className="font-heading text-2xl font-bold text-navy sm:text-3xl">
+                  Câu hỏi thường gặp về {service.title}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted sm:text-base">
+                  Giải đáp nhanh chi phí, thời gian xử lý và quy trình bảo hành
+                  tại TP. Buôn Ma Thuột.
+                </p>
+              </div>
+              <FaqAccordion items={aeo.faqs} />
+            </div>
+          )}
 
           {relatedPosts.length > 0 && (
             <div className="border-t border-line pt-14">
