@@ -1,4 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import {
+  BadgeCheck,
+  CalendarCheck,
+  FileCheck2,
+  Phone,
+  ShieldCheck,
+} from "lucide-react";
 import { getActivePricing, getSiteSettings } from "@/lib/site-data";
 import { PricingTabs } from "@/components/pricing/PricingTabs";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -93,11 +101,93 @@ export default async function PricingPage() {
       </section>
 
       <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <PricingTabs
             items={items}
             showExactPrices={settings.showExactPrices}
           />
+
+          {/* Cam kết 3 Không tại MQTech BMT */}
+          <div className="rounded-2xl border border-line bg-surface-subtle p-6 sm:p-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase tracking-wider text-brand">
+                Minh bạch từng hạng mục
+              </p>
+              <h2 className="mt-1.5 font-heading text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+                Cam kết 3 Không tại MQTech BMT
+              </h2>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-line bg-surface p-5 shadow-card">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-light text-brand">
+                  <BadgeCheck className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <h3 className="mt-4 font-heading text-base font-bold text-navy">
+                  1. Không phí kiểm tra
+                </h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+                  Kiểm tra lỗi và tư vấn phương án xử lý hoàn toàn miễn phí tại
+                  cửa hàng — không sửa không thu bất kỳ chi phí nào.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-line bg-surface p-5 shadow-card">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-light text-brand">
+                  <FileCheck2 className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <h3 className="mt-4 font-heading text-base font-bold text-navy">
+                  2. Không phát sinh chi phí ẩn
+                </h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+                  Báo giá trọn gói rõ ràng theo bảng niêm yết trước khi làm,
+                  chỉ tiến hành sửa chữa khi khách hàng xác nhận đồng ý.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-line bg-surface p-5 shadow-card">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-light text-brand">
+                  <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <h3 className="mt-4 font-heading text-base font-bold text-navy">
+                  3. Không tráo đổi linh kiện
+                </h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+                  Khách hàng ký tên trực tiếp lên linh kiện nếu cần giữ máy,
+                  theo dõi tiến độ và bảo hành điện tử minh bạch theo mã phiếu.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Bar */}
+          <div className="flex flex-col items-start justify-between gap-6 rounded-2xl bg-navy p-6 text-ink-inverse shadow-card sm:p-8 lg:flex-row lg:items-center">
+            <div className="max-w-xl">
+              <h2 className="font-heading text-xl font-bold text-ink-inverse sm:text-2xl">
+                Cần báo giá nhanh theo đúng model máy?
+              </h2>
+              <p className="mt-2 text-sm text-ink-inverse-muted">
+                Đặt lịch trước qua website để được ưu tiên tiếp nhận tại tiệm
+                hoặc sửa tận nhà Buôn Ma Thuột trong 20–30 phút.
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <Link
+                href="/dat-lich"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-cta px-6 py-3 text-sm font-semibold text-ink-inverse shadow-sm transition-colors hover:bg-cta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-glow focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+              >
+                <CalendarCheck className="h-4 w-4" aria-hidden="true" />
+                <span>Đặt lịch giảm ngay {settings.bookingDiscount}</span>
+              </Link>
+              <a
+                href={`tel:${settings.hotlineRaw}`}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-surface/25 bg-surface/10 px-6 py-3 font-mono text-sm font-bold text-ink-inverse tabular-nums transition-colors hover:bg-surface/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-glow focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+              >
+                <Phone className="h-4 w-4" aria-hidden="true" />
+                <span>Gọi {settings.hotline}</span>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </div>

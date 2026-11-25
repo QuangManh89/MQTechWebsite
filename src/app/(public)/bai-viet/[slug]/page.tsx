@@ -197,6 +197,10 @@ export default async function PostDetailPage({
           coverImage={post.coverImage}
           title={post.title}
           galleryImagesJson={post.galleryImages}
+          category={post.category}
+          hotline={settings.hotline}
+          hotlineRaw={settings.hotlineRaw}
+          bookingDiscount={settings.bookingDiscount}
         />
 
         <div className="mt-14 rounded-2xl bg-navy p-7 text-ink-inverse shadow-lg flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

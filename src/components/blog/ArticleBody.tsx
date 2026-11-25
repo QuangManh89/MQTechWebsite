@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Camera, Image as ImageIcon, ZoomIn, Info } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarCheck,
+  Camera,
+  Image as ImageIcon,
+  Info,
+  Phone,
+  ZoomIn,
+} from "lucide-react";
 import { ResponsiveImage } from "@/components/ui/ResponsiveImage";
 import { ImageLightbox, type LightboxImage } from "@/components/ui/ImageLightbox";
 
@@ -10,6 +19,75 @@ interface ArticleBodyProps {
   coverImage: string;
   title: string;
   galleryImagesJson?: string | null;
+  category?: string;
+  hotline?: string;
+  hotlineRaw?: string;
+  bookingDiscount?: string;
+}
+
+interface ContextualCtaConfig {
+  heading: string;
+  body: string;
+  bookingHref: string;
+  serviceHref?: string;
+  serviceLabel?: string;
+}
+
+function getContextualCta(category?: string): ContextualCtaConfig {
+  switch (category?.trim()) {
+    case "Thủ Thuật Văn Phòng":
+      return {
+        heading:
+          "Đang vướng lỗi Word/Excel, Unikey hay chia sẻ máy in LAN tại BMT?",
+        body: "Kỹ thuật viên MQTech hỗ trợ xử lý tận nơi hoặc qua UltraViewer nhanh chóng — kiểm tra miễn phí, báo giá trước khi làm.",
+        bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
+          "Cài Win 10/11 & Phần mềm tại nhà BMT"
+        )}`,
+        serviceHref: "/dich-vu/bao-tri-it-cong-ty-phong-may",
+        serviceLabel: "Xem dịch vụ bảo trì IT công ty & phòng máy",
+      };
+    case "Thủ Thuật Windows":
+      return {
+        heading:
+          "Cần cài Win 10/11 sạch & phần mềm tận nhà BMT trong 20 phút?",
+        body: "Cài hệ điều hành sạch ổn định, giữ nguyên 100% dữ liệu, đầy đủ driver & bộ Office/Unikey chuẩn văn phòng.",
+        bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
+          "Cài Win 10/11 & Phần mềm tại nhà BMT"
+        )}`,
+      };
+    case "Bảo Dưỡng Phần Cứng":
+      return {
+        heading: "Máy quá nhiệt, không lên nguồn hay lỗi màn hình tại BMT?",
+        body: "Chẩn đoán phần cứng miễn phí 100%, vệ sinh tra keo tản nhiệt chuẩn kỹ thuật, quan sát trực tiếp lấy liền.",
+        bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
+          "Sửa chữa Laptop Windows"
+        )}`,
+      };
+    case "Nâng Cấp Máy":
+      return {
+        heading:
+          "Nâng cấp SSD NVMe & RAM giữ nguyên 100% dữ liệu — Lấy liền 30 phút",
+        body: "Linh kiện chính hãng bảo hành 1 đổi 1 đến 36 tháng, miễn phí công lắp đặt & chuyển hệ điều hành.",
+        bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
+          "Nâng cấp RAM / SSD"
+        )}`,
+      };
+    case "Cẩm Nang MacBook":
+      return {
+        heading:
+          "Cần kiểm tra pin, nguồn hoặc vệ sinh MacBook chuẩn Lab tại BMT?",
+        body: "Kỹ thuật viên chuyên dòng MacBook Intel & Apple Silicon, kiểm tra miễn phí, báo đúng bệnh, bảo hành điện tử.",
+        bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
+          "Sửa MacBook chuyên nghiệp"
+        )}`,
+      };
+    default:
+      return {
+        heading: "Cần kỹ thuật viên kiểm tra máy tận nhà tại Buôn Ma Thuột?",
+        body: "Có mặt nhanh 15–20 phút tại trung tâm BMT, kiểm tra miễn phí 100%, báo giá minh bạch trước khi sửa.",
+        bookingHref: "/dat-lich",
+      };
+  }
 }
 
 interface ParsedGalleryItem {
@@ -23,6 +101,10 @@ export function ArticleBody({
   coverImage,
   title,
   galleryImagesJson,
+  category,
+  hotline,
+  hotlineRaw,
+  bookingDiscount,
 }: ArticleBodyProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
@@ -90,10 +172,32 @@ export function ArticleBody({
     setLightboxOpen(true);
   };
 
-// Split content into blocks
+  // Split content into blocks
   const blocks = useMemo(() => {
     return content.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
   }, [content]);
+
+  const contextualCta = useMemo(() => getContextualCta(category), [category]);
+
+  // Insert contextual CTA once around the midpoint when article has >= 8 blocks & hotline is provided.
+  // Never insert immediately after a heading block (## / ###).
+  const inlineCtaAfterIdx = useMemo(() => {
+    if (blocks.length < 8 || !hotline) return -1;
+    let targetIdx = Math.floor(blocks.length / 2);
+    while (
+      targetIdx < blocks.length - 1 &&
+      (blocks[targetIdx].startsWith("## ") || blocks[targetIdx].startsWith("### "))
+    ) {
+      targetIdx += 1;
+    }
+    return targetIdx;
+  }, [blocks, hotline]);
+
+  const telHref = hotlineRaw
+    ? `tel:${hotlineRaw}`
+    : hotline
+      ? `tel:${hotline.replace(/\s+/g, "")}`
+      : undefined;
 
   function renderInlineFormatting(text: string): React.ReactNode[] {
     const parts: React.ReactNode[] = [];
@@ -194,190 +298,245 @@ export function ArticleBody({
       {/* Article Content Stream */}
       <div className="mx-auto max-w-[68ch] space-y-6 text-base leading-relaxed text-ink-body break-words">
         {blocks.map((block, idx) => {
-          // Check for Markdown Image: ![Caption](URL)
-          const imgMatch = /^!\[([^\]]*)\]\(([^)]+)\)$/.exec(block);
-          if (imgMatch) {
-            const caption = imgMatch[1]?.trim();
-            const src = imgMatch[2]?.trim();
-            return (
-              <figure
-                key={idx}
-                className="group my-8 overflow-hidden rounded-2xl border border-line bg-surface-muted shadow-card cursor-pointer transition-shadow hover:shadow-lg"
-                onClick={() => openLightboxForUrl(src)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    openLightboxForUrl(src);
-                  }
-                }}
-                aria-label={`Phóng to hình ảnh: ${caption || title}`}
-              >
-                <div className="relative">
-                  <ResponsiveImage
-                    src={src}
-                    alt={caption || title}
-                    width={1000}
-                    height={560}
-                    sizes="(max-width: 896px) 100vw, 896px"
-                    className="w-full object-cover max-h-[500px] transition-transform duration-300 group-hover:scale-[1.01]"
-                  />
-                  <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-navy/80 px-3 py-1.5 text-xs font-medium text-ink-inverse backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ZoomIn className="h-3.5 w-3.5 text-brand-light" aria-hidden="true" />
-                    <span>Xem ảnh gốc</span>
+          const renderBlock = () => {
+            // Check for Markdown Image: ![Caption](URL)
+            const imgMatch = /^!\[([^\]]*)\]\(([^)]+)\)$/.exec(block);
+            if (imgMatch) {
+              const caption = imgMatch[1]?.trim();
+              const src = imgMatch[2]?.trim();
+              return (
+                <figure
+                  className="group my-8 overflow-hidden rounded-2xl border border-line bg-surface-muted shadow-card cursor-pointer transition-shadow hover:shadow-lg"
+                  onClick={() => openLightboxForUrl(src)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openLightboxForUrl(src);
+                    }
+                  }}
+                  aria-label={`Phóng to hình ảnh: ${caption || title}`}
+                >
+                  <div className="relative">
+                    <ResponsiveImage
+                      src={src}
+                      alt={caption || title}
+                      width={1000}
+                      height={560}
+                      sizes="(max-width: 896px) 100vw, 896px"
+                      className="w-full object-cover max-h-[500px] transition-transform duration-300 group-hover:scale-[1.01]"
+                    />
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-navy/80 px-3 py-1.5 text-xs font-medium text-ink-inverse backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-3.5 w-3.5 text-brand-light" aria-hidden="true" />
+                      <span>Xem ảnh gốc</span>
+                    </div>
+                  </div>
+                  {caption && (
+                    <figcaption className="flex items-center justify-center gap-1.5 border-t border-line-subtle bg-surface px-4 py-2.5 text-center text-xs font-medium text-ink-muted">
+                      <Camera className="h-3.5 w-3.5 text-brand shrink-0" aria-hidden="true" />
+                      <span>{caption}</span>
+                    </figcaption>
+                  )}
+                </figure>
+              );
+            }
+
+            // Check for Horizontal Rule
+            if (block === "---" || block === "***") {
+              return <hr className="my-8 border-line" />;
+            }
+
+            // Check for Markdown Table
+            const tableLines = block.trim().split("\n").map((l) => l.trim()).filter(Boolean);
+            if (
+              tableLines.length >= 2 &&
+              tableLines.every((l) => l.startsWith("|") && l.endsWith("|")) &&
+              tableLines[1].includes("-")
+            ) {
+              const headerCells = tableLines[0]
+                .slice(1, -1)
+                .split("|")
+                .map((c) => c.trim());
+              const dataRows = tableLines.slice(2);
+
+              return (
+                <div className="my-6 overflow-x-auto rounded-xl border border-line shadow-card">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-line bg-surface-subtle text-xs font-semibold uppercase tracking-wider text-navy">
+                      <tr>
+                        {headerCells.map((h, i) => (
+                          <th key={i} className="px-4 py-3">
+                            {renderInlineFormatting(h)}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line bg-surface">
+                      {dataRows.map((row, rIdx) => {
+                        const cells = row
+                          .slice(1, -1)
+                          .split("|")
+                          .map((c) => c.trim());
+                        return (
+                          <tr
+                            key={rIdx}
+                            className="transition-colors hover:bg-surface-muted/50"
+                          >
+                            {cells.map((cell, cIdx) => (
+                              <td key={cIdx} className="px-4 py-3 text-ink-body">
+                                {renderInlineFormatting(cell)}
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            }
+
+            // Check for Headings
+            if (block.startsWith("### ")) {
+              return (
+                <h2 className="pt-6 font-heading text-xl font-bold tracking-tight text-navy sm:text-2xl">
+                  {renderInlineFormatting(block.replace(/^###\s+/, ""))}
+                </h2>
+              );
+            }
+            if (block.startsWith("## ")) {
+              return (
+                <h2 className="pt-6 font-heading text-xl font-bold tracking-tight text-navy sm:text-2xl">
+                  {renderInlineFormatting(block.replace(/^##\s+/, ""))}
+                </h2>
+              );
+            }
+
+            // Check for Blockquote / Callout (> )
+            if (block.startsWith("> ")) {
+              const cleanText = block.replace(/^>\s*/gm, "");
+              return (
+                <div className="my-5 flex gap-3 rounded-2xl border border-brand/20 bg-brand-light/30 p-4 text-sm text-navy sm:p-5">
+                  <Info className="h-5 w-5 text-brand shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="leading-relaxed font-medium">
+                    {renderInlineFormatting(cleanText)}
                   </div>
                 </div>
-                {caption && (
-                  <figcaption className="flex items-center justify-center gap-1.5 border-t border-line-subtle bg-surface px-4 py-2.5 text-center text-xs font-medium text-ink-muted">
-                    <Camera className="h-3.5 w-3.5 text-brand shrink-0" aria-hidden="true" />
-                    <span>{caption}</span>
-                  </figcaption>
-                )}
-              </figure>
-            );
-          }
+              );
+            }
 
-          // Check for Horizontal Rule
-          if (block === "---" || block === "***") {
-            return <hr key={idx} className="my-8 border-line" />;
-          }
+            // Check for Bullet Lists
+            if (
+              block
+                .split("\n")
+                .every((line) => line.trim().startsWith("- ") || line.trim().startsWith("* "))
+            ) {
+              const items = block
+                .split("\n")
+                .map((l) => l.replace(/^[-*]\s+/, "").trim())
+                .filter(Boolean);
+              return (
+                <ul className="my-4 space-y-2 pl-2">
+                  {items.map((item, itemIdx) => (
+                    <li key={itemIdx} className="flex items-start gap-2.5 text-ink-body">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+                      <span className="leading-relaxed">{renderInlineFormatting(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              );
+            }
 
-          // Check for Markdown Table
-          const tableLines = block.trim().split("\n").map((l) => l.trim()).filter(Boolean);
-          if (
-            tableLines.length >= 2 &&
-            tableLines.every((l) => l.startsWith("|") && l.endsWith("|")) &&
-            tableLines[1].includes("-")
-          ) {
-            const headerCells = tableLines[0]
-              .slice(1, -1)
-              .split("|")
-              .map((c) => c.trim());
-            const dataRows = tableLines.slice(2);
+            // Check for Numbered / Ordered Lists (1. 2. 3.)
+            if (block.split("\n").every((line) => /^\d+\.\s+/.test(line.trim()))) {
+              const items = block
+                .split("\n")
+                .map((l) => l.replace(/^\d+\.\s+/, "").trim())
+                .filter(Boolean);
+              return (
+                <ol className="my-4 space-y-2 pl-5 list-decimal text-ink-body">
+                  {items.map((item, itemIdx) => (
+                    <li key={itemIdx} className="leading-relaxed">
+                      {renderInlineFormatting(item)}
+                    </li>
+                  ))}
+                </ol>
+              );
+            }
 
+            // Normal Paragraph
             return (
-              <div
-                key={idx}
-                className="my-6 overflow-x-auto rounded-xl border border-line shadow-card"
-              >
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b border-line bg-surface-subtle text-xs font-semibold uppercase tracking-wider text-navy">
-                    <tr>
-                      {headerCells.map((h, i) => (
-                        <th key={i} className="px-4 py-3">
-                          {renderInlineFormatting(h)}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-line bg-surface">
-                    {dataRows.map((row, rIdx) => {
-                      const cells = row
-                        .slice(1, -1)
-                        .split("|")
-                        .map((c) => c.trim());
-                      return (
-                        <tr
-                          key={rIdx}
-                          className="transition-colors hover:bg-surface-muted/50"
-                        >
-                          {cells.map((cell, cIdx) => (
-                            <td key={cIdx} className="px-4 py-3 text-ink-body">
-                              {renderInlineFormatting(cell)}
-                            </td>
-                          ))}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <p className="leading-relaxed">
+                {renderInlineFormatting(block)}
+              </p>
             );
-          }
+          };
 
-          // Check for Headings
-          if (block.startsWith("### ")) {
-            return (
-              <h2
-                key={idx}
-                className="pt-6 font-heading text-xl font-bold tracking-tight text-navy sm:text-2xl"
-              >
-                {renderInlineFormatting(block.replace(/^###\s+/, ""))}
-              </h2>
-            );
-          }
-          if (block.startsWith("## ")) {
-            return (
-              <h2
-                key={idx}
-                className="pt-6 font-heading text-xl font-bold tracking-tight text-navy sm:text-2xl"
-              >
-                {renderInlineFormatting(block.replace(/^##\s+/, ""))}
-              </h2>
-            );
-          }
-
-          // Check for Blockquote / Callout (> )
-          if (block.startsWith("> ")) {
-            const cleanText = block.replace(/^>\s*/gm, "");
-            return (
-              <div
-                key={idx}
-                className="my-5 flex gap-3 rounded-2xl border border-brand/20 bg-brand-light/30 p-4 text-sm text-navy sm:p-5"
-              >
-                <Info className="h-5 w-5 text-brand shrink-0 mt-0.5" aria-hidden="true" />
-                <div className="leading-relaxed font-medium">
-                  {renderInlineFormatting(cleanText)}
-                </div>
-              </div>
-            );
-          }
-
-          // Check for Bullet Lists
-          if (
-            block
-              .split("\n")
-              .every((line) => line.trim().startsWith("- ") || line.trim().startsWith("* "))
-          ) {
-            const items = block
-              .split("\n")
-              .map((l) => l.replace(/^[-*]\s+/, "").trim())
-              .filter(Boolean);
-            return (
-              <ul key={idx} className="my-4 space-y-2 pl-2">
-                {items.map((item, itemIdx) => (
-                  <li key={itemIdx} className="flex items-start gap-2.5 text-ink-body">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
-                    <span className="leading-relaxed">{renderInlineFormatting(item)}</span>
-                  </li>
-                ))}
-              </ul>
-            );
-          }
-
-          // Check for Numbered / Ordered Lists (1. 2. 3.)
-          if (block.split("\n").every((line) => /^\d+\.\s+/.test(line.trim()))) {
-            const items = block
-              .split("\n")
-              .map((l) => l.replace(/^\d+\.\s+/, "").trim())
-              .filter(Boolean);
-            return (
-              <ol key={idx} className="my-4 space-y-2 pl-5 list-decimal text-ink-body">
-                {items.map((item, itemIdx) => (
-                  <li key={itemIdx} className="leading-relaxed">
-                    {renderInlineFormatting(item)}
-                  </li>
-                ))}
-              </ol>
-            );
-          }
-
-          // Normal Paragraph
           return (
-            <p key={idx} className="leading-relaxed">
-              {renderInlineFormatting(block)}
-            </p>
+            <React.Fragment key={idx}>
+              {renderBlock()}
+              {idx === inlineCtaAfterIdx && hotline && (
+                <aside
+                  aria-label="Hỗ trợ kỹ thuật MQTech"
+                  className="my-8 rounded-2xl border border-line bg-surface-subtle p-5 sm:p-6 shadow-card"
+                >
+                  <div className="space-y-3">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand">
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-brand"
+                        aria-hidden="true"
+                      />
+                      <span>Hỗ trợ tận nơi tại Buôn Ma Thuột</span>
+                    </div>
+                    <h3 className="font-heading text-lg font-bold leading-snug text-navy sm:text-xl">
+                      {contextualCta.heading}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-ink-muted">
+                      {contextualCta.body}
+                    </p>
+                    {contextualCta.serviceHref && contextualCta.serviceLabel && (
+                      <div>
+                        <Link
+                          href={contextualCta.serviceHref}
+                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-hover"
+                        >
+                          <span>{contextualCta.serviceLabel}</span>
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        </Link>
+                      </div>
+                    )}
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <Link
+                        href={contextualCta.bookingHref}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-full bg-cta px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-cta-glow transition-all hover:bg-cta-hover hover:-translate-y-0.5"
+                      >
+                        <CalendarCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span>
+                          {bookingDiscount
+                            ? `Đặt lịch (Giảm ${bookingDiscount})`
+                            : "Đặt lịch ngay"}
+                        </span>
+                      </Link>
+                      {telHref && (
+                        <a
+                          href={telHref}
+                          className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-navy bg-surface px-4 py-2.5 text-sm font-semibold text-navy transition-colors hover:bg-navy hover:text-ink-inverse"
+                        >
+                          <Phone
+                            className="h-4 w-4 shrink-0 text-brand"
+                            aria-hidden="true"
+                          />
+                          <span className="font-mono tabular-nums">
+                            {hotline}
+                          </span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </aside>
+              )}
+            </React.Fragment>
           );
         })}
       </div>

@@ -26,6 +26,7 @@ const DEVICE_TYPES = [
 
 const SERVICE_OPTIONS = [
   "Chưa rõ / Cần chẩn đoán miễn phí",
+  "Cài Win 10/11 & Phần mềm tại nhà BMT",
   "Sửa máy tính tại nhà BMT",
   "Sửa chữa Laptop Windows",
   "Sửa MacBook chuyên nghiệp",
@@ -34,6 +35,98 @@ const SERVICE_OPTIONS = [
   "Nâng cấp RAM / SSD",
   "Bảo trì IT công ty / phòng máy",
 ];
+
+type QuickIssueChip = {
+  label: string;
+  description: string;
+  suggestedService?: string;
+};
+
+const QUICK_ISSUE_CHIPS: QuickIssueChip[] = [
+  {
+    label: "Cài Win 10/11 & Phần mềm",
+    description:
+      "Cần cài lại Windows 10/11 sạch, Office và phần mềm văn phòng",
+    suggestedService: "Cài Win 10/11 & Phần mềm tại nhà BMT",
+  },
+  {
+    label: "Máy chạy chậm / Nâng SSD",
+    description:
+      "Máy khởi động chậm, hay bị đơ lag, cần kiểm tra nâng cấp SSD/RAM",
+    suggestedService: "Nâng cấp RAM / SSD",
+  },
+  {
+    label: "Vệ sinh + Tra keo tản nhiệt",
+    description: "Máy nóng, quạt kêu to, cần vệ sinh và tra keo tản nhiệt",
+    suggestedService: "Vệ sinh & Tra keo tản nhiệt",
+  },
+  {
+    label: "Không lên nguồn / Màn hình đen",
+    description:
+      "Bật máy không lên nguồn hoặc màn hình đen, cần kỹ thuật kiểm tra",
+  },
+  {
+    label: "Lỗi WiFi / Chia sẻ máy in",
+    description:
+      "Lỗi không kết nối được WiFi hoặc không in được máy in văn phòng",
+  },
+  {
+    label: "Thay Pin / Phím / Màn hình",
+    description: "Cần kiểm tra thay pin / bàn phím / màn hình laptop",
+  },
+];
+
+function resolveInitialService(raw?: string): string {
+  const trimmed = raw?.trim();
+  if (!trimmed) return SERVICE_OPTIONS[0];
+
+  const lower = trimmed.toLowerCase();
+  const exact = SERVICE_OPTIONS.find((opt) => opt.toLowerCase() === lower);
+  if (exact) return exact;
+
+  if (lower.includes("macbook")) return "Sửa MacBook chuyên nghiệp";
+  if (
+    lower.includes("bảo trì it") ||
+    lower.includes("phòng máy") ||
+    lower.includes("doanh nghiệp") ||
+    lower.includes("công ty")
+  ) {
+    return "Bảo trì IT công ty / phòng máy";
+  }
+  if (
+    lower.includes("cài win") ||
+    lower.includes("windows") ||
+    /\bwin\b/.test(lower) ||
+    lower.includes("phần mềm")
+  ) {
+    return "Cài Win 10/11 & Phần mềm tại nhà BMT";
+  }
+  if (
+    lower.includes("ssd") ||
+    /\bram\b/.test(lower) ||
+    lower.includes("nâng cấp")
+  ) {
+    return "Nâng cấp RAM / SSD";
+  }
+  if (lower.includes("vệ sinh") || lower.includes("keo tản nhiệt")) {
+    return "Vệ sinh & Tra keo tản nhiệt";
+  }
+  if (
+    lower.includes("build") ||
+    lower.includes("máy bộ") ||
+    /\bpc\b/.test(lower)
+  ) {
+    return "Sửa PC & Build máy bộ";
+  }
+  if (lower.includes("tại nhà") || lower.includes("tận nơi")) {
+    return "Sửa máy tính tại nhà BMT";
+  }
+  if (lower.includes("laptop")) {
+    return "Sửa chữa Laptop Windows";
+  }
+
+  return trimmed;
+}
 
 const TIME_SLOTS = [
   "08:00 - 10:00",
@@ -74,12 +167,31 @@ export function BookingWizard({
     wizardTopRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
+  const resolvedInitialService = useMemo(
+    () => resolveInitialService(initialService),
+    [initialService]
+  );
+
   const [deviceType, setDeviceType] = useState("Laptop Windows");
   const [serviceCategory, setServiceCategory] = useState(
-    initialService || SERVICE_OPTIONS[0]
+    resolvedInitialService
   );
   const [deviceModel, setDeviceModel] = useState("");
   const [issueDescription, setIssueDescription] = useState(initialIssue || "");
+
+  const selectServiceOptions = useMemo(() => {
+    const options = [...SERVICE_OPTIONS];
+    if (
+      resolvedInitialService &&
+      !options.includes(resolvedInitialService)
+    ) {
+      options.unshift(resolvedInitialService);
+    }
+    if (serviceCategory && !options.includes(serviceCategory)) {
+      options.unshift(serviceCategory);
+    }
+    return options;
+  }, [resolvedInitialService, serviceCategory]);
 
   const [serviceMode, setServiceMode] = useState<"ONSITE" | "STORE">("ONSITE");
   const [onsiteAddress, setOnsiteAddress] = useState("");
@@ -416,10 +528,7 @@ export function BookingWizard({
                 onChange={(e) => setServiceCategory(e.target.value)}
                 className="min-h-12 w-full rounded-xl border border-line bg-surface px-4 py-3 text-base text-navy focus:border-brand sm:text-sm"
               >
-                {!SERVICE_OPTIONS.includes(serviceCategory) && (
-                  <option value={serviceCategory}>{serviceCategory}</option>
-                )}
-                {SERVICE_OPTIONS.map((opt) => (
+                {selectServiceOptions.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -452,6 +561,43 @@ export function BookingWizard({
               >
                 Mô tả lỗi gặp phải *
               </label>
+
+              <div className="mb-3">
+                <p className="text-xs font-medium text-ink-muted mb-2">
+                  Chọn nhanh tình trạng máy (1 chạm):
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_ISSUE_CHIPS.map((chip) => {
+                    const isSelected = issueDescription === chip.description;
+                    return (
+                      <button
+                        key={chip.label}
+                        type="button"
+                        aria-pressed={isSelected}
+                        onClick={() => {
+                          setIssueDescription(chip.description);
+                          clearFieldError("issueDescription");
+                          if (
+                            chip.suggestedService &&
+                            serviceCategory === SERVICE_OPTIONS[0]
+                          ) {
+                            setServiceCategory(chip.suggestedService);
+                          }
+                        }}
+                        className={cn(
+                          "min-h-11 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:text-sm",
+                          isSelected
+                            ? "border-brand bg-brand-light text-brand ring-1 ring-brand"
+                            : "border-line bg-surface-subtle text-navy hover:border-brand/50 hover:bg-brand-light/50"
+                        )}
+                      >
+                        {chip.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <textarea
                 id="issueDescription"
                 rows={4}

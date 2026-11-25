@@ -318,10 +318,12 @@ export default async function HomePage() {
               <div className="flex flex-wrap items-center gap-3.5 pt-1">
                 <Link
                   href="/dat-lich"
-                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-semibold text-ink-inverse shadow-brand-glow transition-all hover:bg-brand-hover hover:-translate-y-0.5 sm:text-base"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-cta px-6 py-3.5 text-sm font-semibold text-ink-inverse shadow-cta-glow transition-all hover:bg-cta-hover hover:-translate-y-0.5 sm:text-base"
                 >
                   <CalendarCheck className="h-5 w-5" aria-hidden="true" />
-                  <span>Đặt lịch kiểm tra miễn phí</span>
+                  <span>
+                    Đặt lịch ngay (Giảm {settings.bookingDiscount})
+                  </span>
                 </Link>
                 <a
                   href={`tel:${settings.hotlineRaw}`}
@@ -333,6 +335,39 @@ export default async function HomePage() {
                   </span>
                 </a>
               </div>
+
+              <ul
+                aria-label="Ưu đãi và cam kết đặt lịch"
+                className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-xs font-medium text-ink-muted sm:text-sm"
+              >
+                <li className="inline-flex items-center gap-1.5">
+                  <CheckCircle2
+                    className="h-4 w-4 shrink-0 text-status-success-solid"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    Giảm ngay{" "}
+                    <strong className="font-mono font-semibold text-navy tabular-nums">
+                      {settings.bookingDiscount}
+                    </strong>{" "}
+                    khi đặt online
+                  </span>
+                </li>
+                <li className="inline-flex items-center gap-1.5">
+                  <CheckCircle2
+                    className="h-4 w-4 shrink-0 text-status-success-solid"
+                    aria-hidden="true"
+                  />
+                  <span>Kiểm tra miễn phí</span>
+                </li>
+                <li className="inline-flex items-center gap-1.5">
+                  <CheckCircle2
+                    className="h-4 w-4 shrink-0 text-status-success-solid"
+                    aria-hidden="true"
+                  />
+                  <span>Có mặt 15–20 phút tại BMT</span>
+                </li>
+              </ul>
             </div>
 
             <div className="lg:col-span-4 min-w-0 space-y-4">
