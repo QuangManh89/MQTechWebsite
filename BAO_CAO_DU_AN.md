@@ -9,13 +9,13 @@ Tài liệu này tổng hợp toàn bộ kiến trúc kỹ thuật, hạ tầng 
 | Thành phần | Chi tiết cấu hình |
 | :--- | :--- |
 | **Tên thương hiệu** | **MQTech - Computer Service** (`DỊCH VỤ SỬA MÁY TÍNH TẠI NHÀ BMT`) |
-| **Tên miền chính thức** | `https://suamaytinhbmt.id.vn` (đã trỏ SSL Let's Encrypt qua Fly.io) |
+| **Tên miền chính thức** | `https://suamaytinhbmt.id.vn` (`HTTP 200 OK`; `www` chuyển hướng `308` về root domain, SSL tự động qua Vercel) |
 | **Địa chỉ cửa hàng** | 13/2 hẻm 4, Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk |
-| **Khu vực phục vụ trọng tâm** | Phường Tân Lập, Phường Tân An và toàn TP. Buôn Ma Thuột |
-| **Máy chủ ứng dụng (Hosting)** | **Fly.io** — App Name: `mqtech-bmt`, Region: `sin` (Singapore), RAM `512mb`, `1 shared CPU` (`fly.toml`) |
+| **Khu vực phục vụ trọng tâm** | Phường Tân Lập, Phường Tân An, Tân Lợi, Tự An, Ea Tam, Thắng Lợi và toàn TP. Buôn Ma Thuột |
+| **Máy chủ ứng dụng (Hosting)** | **Vercel Singapore (`sin1`)** — auto-deploy từ GitHub `QuangManh89/MQTechWebsite` (`master`), cấu hình tại `vercel.json` *(Fly.io đã ngừng sử dụng & scale về `0`)* |
 | **Cơ sở dữ liệu (Database)** | **Neon Cloud Serverless PostgreSQL** (Region: Singapore `ap-southeast-1`) — tách biệt 100% khỏi source code web |
 | **Lưu trữ hình ảnh (Storage)** | **Cloudflare R2** — Bucket: `mqtech-uploads` (lưu ảnh bài viết, dịch vụ, thiết bị) |
-| **Đo lường & SEO** | Đã xác minh **Google Search Console** (`sitemap.xml` động) và gắn **Google Analytics 4 (GA4)** qua cấu hình trong Admin |
+| **Đo lường, SEO & AI-SEO** | Đã submit **Google Search Console** (36 URLs), **Bing Webmaster Tools** (ChatGPT/Copilot), **Brave Search** (Claude); có `/llms.txt` động, Schema `LocalBusiness`/`Service`/`OfferCatalog`/`FAQPage` và **GA4 (`G-QMFWXSV7YL`)** theo dõi chuyển đổi (`click_hotline`, `click_zalo`, `click_messenger`, `booking_submitted`) |
 | **Thông báo đơn hàng** | **Telegram Bot** & **Email SMTP** (cấu hình trực tiếp trong Admin) |
 
 ---
@@ -242,3 +242,49 @@ npm run dev
 - Gửi thành công **`/sitemap.xml`** trên Google Search Console — trạng thái **Thành công**, Google đã khám phá đủ **36 URL** (9 trang tĩnh + 8 trang dịch vụ + 19 bài viết).
 - Đã gửi **Yêu cầu lập chỉ mục (Request Indexing)** thành công cho **5 trang chủ lực** (`/dich-vu/sua-may-tinh-tai-nha-bmt`, `/dich-vu/cai-win-10-11-phan-mem-tai-nha-bmt`, `/dich-vu/sua-laptop-windows`, `/dich-vu/nang-cap-ram-ssd-linh-kien`, `/bang-gia`) và các bài viết mới.
 - **Lộ trình tiếp theo (Trụ cột 2–5 trong 90 ngày):** Đẩy mạnh **Google Business Profile (Google Maps + Review 5 sao)**, thay ảnh chụp thực tế tại tiệm vào 5 trang chủ lực, bổ sung FAQ Schema trên trang dịch vụ, triển khai **Giai đoạn 3 SEO** (kéo traffic công cụ `/kiem-tra-may-tinh` & MacBook BMT) và tối ưu định kỳ theo dữ liệu GSC.
+
+
+---
+
+## 8. Nhật ký Nâng cấp Tài chính, Kho hàng & Tối ưu CRO / SEO / AI-SEO (25/11/2026)
+
+### 8.1. Thiết kế lại Quản lý Thu Chi & Đồng bộ Giá nhập Kho (`e854266`)
+- **Tách rõ 4 chỉ số cốt lõi tại `/admin/tai-chinh`:**
+  - **Tổng doanh thu / Phần Thu:** Lấy tự động từ các **đơn hàng (phiếu sửa) đã hoàn thành**.
+  - **Phần Chi:** Tách rõ **Chi nhập kho (`NHAP_HANG`)** (lấy từ giao dịch nhập kho) và **Chi phí vận hành** (ghi tay).
+  - **Phần Lãi kinh doanh:** Tự động đối chiếu doanh thu trừ chi phí theo từng kỳ.
+- **Bộ lọc 5 chế độ thời gian & Biểu đồ tương tác (`FinanceRevenueChart.tsx`):**
+  - Hỗ trợ xem báo cáo doanh thu, chi phí và lãi theo **Tuần | Tháng | Quý | Năm | Toàn bộ**.
+  - Kèm biểu đồ tương tác trực quan, hỗ trợ xuất CSV.
+- **Đồng bộ 2 chiều khi sửa giá nhập sai trong Kho hàng (`/api/admin/inventory/[id]`):**
+  - Khi chỉnh sửa giá nhập (`costPrice`) bị sai của sản phẩm/dịch vụ trong `/admin/kho-hang`, hệ thống tự động đồng bộ lại khoản chi nhập kho (`NHAP_HANG`) của lần nhập gần nhất, đồng thời bảo vệ toàn vẹn số liệu các đơn hàng đã hoàn thành trước đó.
+  - Đã đối soát và đồng bộ 3 dòng dữ liệu nhập kho thực tế trên Neon DB (tổng `NHAP_HANG = 2.178.000đ`).
+
+### 8.2. Cài đặt bộ 53 Marketing Skills & Hoàn thành Đợt 1 — AI-SEO, Schema & GA4 (`5ea0334`)
+- **Cài đặt `coreyhaines31/marketingskills`:** Nạp đủ 53 skill vào `.agents/skills/` + `skills-lock.json` và tạo tài liệu ngữ cảnh thương hiệu `.agents/product-marketing.md`.
+- **AI-SEO `/llms.txt` động (`src/app/llms.txt/route.ts`):** Trả về `HTTP 200` (`text/markdown; charset=utf-8`), tự động lấy dữ liệu live từ Neon DB (thông tin liên hệ, 8 dịch vụ, bảng giá tham khảo, công cụ miễn phí, 19 bài hướng dẫn).
+- **Chuẩn hóa Schema & Technical SEO:**
+  - Sửa `LocalBusiness` JSON-LD trên trang chủ dùng `openingHoursSpecification` (`Monday–Sunday`, `07:30–20:00`) và mở rộng `areaServed` phủ 8 phường trọng điểm TP. Buôn Ma Thuột.
+  - Bổ sung Schema `LocalBusiness -> hasOfferCatalog (OfferCatalog)` cho `/bang-gia`.
+  - Khóa explicit `alternates.canonical` và bảo toàn đầy đủ `openGraph` (`og-banner.png`, `siteName`, `locale`) trên toàn bộ 8 trang tĩnh.
+- **GA4 Conversion Tracking (`src/lib/analytics.ts`, `ConversionTracker.tsx`):** Tự động ghi nhận 4 sự kiện chuyển đổi về GA4 `G-QMFWXSV7YL` (`click_hotline`, `click_zalo`, `click_messenger`, `booking_submitted`).
+
+### 8.3. Hoàn thành Đợt 2 — Tối ưu Tỷ lệ chuyển đổi CRO toàn phễu (`56afc0e`, `e488744`)
+- **Trang chủ (`/`):** Nâng cấp nút Hero CTA chính sang `bg-cta` (`#c2410c`, chuẩn WCAG AA 4.7:1) với copy **`Đặt lịch ngay (Giảm 50.000đ)`** kèm 3 điểm cam kết niềm tin ngay dưới nút.
+- **Form Đặt lịch (`/dat-lich` — `BookingWizard.tsx`):** Thêm dịch vụ `"Cài Win 10/11 & Phần mềm tại nhà BMT"` vào danh sách, nâng cấp khớp deep-link `?dich_vu=...`, và bổ sung **6 chip chọn nhanh triệu chứng 1 chạm** ở Bước 1.
+- **Trang Bảng giá (`/bang-gia` — `PricingTabs.tsx`):** Gắn nút **`Đặt lịch`** deep-link trên từng dòng dịch vụ (desktop & mobile), thêm khối **Cam kết 3 Không** và thanh CTA giảm `50.000đ` + Hotline.
+- **Bài viết SEO (`/bai-viet/[slug]` — `ArticleBody.tsx`):** Tự động chèn **1 hộp Contextual Inline CTA** ở giữa bài viết khớp theo chuyên mục bài viết.
+
+### 8.4. Hoàn thành Đợt 3 — AI-SEO / AEO & Submit Index đa nền tảng (`1ae4365`)
+- **Trang chi tiết dịch vụ (`/dich-vu/[slug]`):**
+  - Bổ sung khối **Tóm tắt dịch vụ nhanh (Direct Answer Block)** 45–60 từ tự đủ ngữ cảnh cho AI trích dẫn.
+  - Bổ sung khối **Câu hỏi thường gặp (`FaqAccordion`)** gồm 4 câu hỏi thực tế cho từng dịch vụ trọng điểm và nâng cấp JSON-LD sang `@graph` gồm cả `Service` + `FAQPage`.
+  - Đã kiểm tra live production 6/6 trang dịch vụ đạt `HTTP 200`, đầy đủ Direct Answer + 4 câu hỏi `FAQPage` hợp lệ.
+- **Tài liệu theo dõi AI Visibility (`docs/AI_SEO_PLAYBOOK_AND_PROMPTS.md`):**
+  - Hướng dẫn submit index **Bing Webmaster Tools** (ChatGPT Search / Copilot) và **Brave Search** (Claude) — **đã hoàn thành submit index trong ngày 25/11/2026**.
+  - Bộ **12 Prompt theo dõi mức độ hiện diện AI** theo 4 giai đoạn khách hàng tại BMT (Baseline đầu tiên ghi nhận MQTech đã đạt **Top 1** cho truy vấn thương hiệu và truy vấn địa phương P. Tân Lập BMT).
+
+### 8.5. Việc ưu tiên tiếp theo (Tuần tới)
+1. **Cập nhật ô "Giờ làm việc" tại `/admin/cai-dat`:** Đổi từ `08:00 - 19:00 (Thứ 2 - 7)` sang lịch làm việc thực tế cả Chủ Nhật (ví dụ `07:30 - 20:00 (Thứ 2 - Chủ Nhật)`) để tự động đồng bộ `/llms.txt`, Direct Answer Block và Footer.
+2. **Tối ưu Google Business Profile (Google Maps) & đồng bộ Bing Places:** Cập nhật giờ mở cửa Chủ Nhật, gắn link `https://suamaytinhbmt.id.vn` và tích lũy đều đánh giá 5 sao thật từ khách hàng sau mỗi đơn sửa để cạnh tranh Top 1–3 trên ChatGPT Search & Google Maps cho từ khóa chung *"sửa máy tính tại nhà BMT uy tín"*.
+3. **Kiểm tra lại chỉ mục sau 3–7 ngày:** Gõ `site:suamaytinhbmt.id.vn` trên Bing và chấm điểm lại bộ 12 Prompt trong `docs/AI_SEO_PLAYBOOK_AND_PROMPTS.md`.
