@@ -29,12 +29,13 @@ export async function GET(req: NextRequest) {
   await ensureDbReady();
 
   const { searchParams } = new URL(req.url);
-  const month = searchParams.get("month"); // YYYY-MM
-  const fromParam = searchParams.get("from"); // YYYY-MM-DD
-  const toParam = searchParams.get("to"); // YYYY-MM-DD
+  const month = searchParams.get("month")?.trim() || ""; // YYYY-MM | ALL
+  const fromParam = searchParams.get("from")?.trim() || ""; // YYYY-MM-DD
+  const toParam = searchParams.get("to")?.trim() || ""; // YYYY-MM-DD
 
   const nowMonth = toDateStr(new Date()).slice(0, 7);
-  const activeMonth = month || (!fromParam && !toParam ? nowMonth : "");
+  const hasDateRange = Boolean(fromParam || toParam);
+  const activeMonth = hasDateRange ? "" : month || nowMonth;
 
   const [allTx, completedTickets, allInventory] = await Promise.all([
     db
@@ -53,15 +54,19 @@ export async function GET(req: NextRequest) {
   ]);
 
   const inRange = (dateStr: string): boolean => {
-    if (fromParam && dateStr < fromParam) return false;
-    if (toParam && dateStr > toParam) return false;
-    if (!fromParam && !toParam && activeMonth && activeMonth !== "ALL") {
+    if (hasDateRange) {
+      if (fromParam && dateStr < fromParam) return false;
+      if (toParam && dateStr > toParam) return false;
+      return true;
+    }
+    if (activeMonth && activeMonth !== "ALL") {
       return dateStr.startsWith(activeMonth);
     }
     return true;
   };
 
   const transactions = allTx.filter((t) => inRange(t.transactionDate));
+  const expenses = transactions.filter((t) => t.type === "EXPENSE");
 
   // Summarize completed tickets within the selected period
   const periodTickets = completedTickets
@@ -97,22 +102,23 @@ export async function GET(req: NextRequest) {
     .filter((t) => t.type === "INCOME")
     .reduce((s, t) => s + t.amount, 0);
 
-  const operatingExpenses = transactions
-    .filter((t) => t.type === "EXPENSE" && t.category !== "NHAP_HANG")
+  const operatingExpenses = expenses
+    .filter((t) => t.category !== "NHAP_HANG")
     .reduce((s, t) => s + t.amount, 0);
 
-  const stockPurchaseCashOut = transactions
-    .filter((t) => t.type === "EXPENSE" && t.category === "NHAP_HANG")
+  const stockPurchaseCashOut = expenses
+    .filter((t) => t.category === "NHAP_HANG")
     .reduce((s, t) => s + t.amount, 0);
 
-  const totalRevenue = repairRevenue + otherIncome;
-  const totalCashOut = operatingExpenses + stockPurchaseCashOut;
+  // 100% revenue comes from completed repair orders
+  const totalRevenue = repairRevenue;
+  const totalExpense = operatingExpenses + stockPurchaseCashOut;
 
-  // 2 parallel metrics as designed:
-  // 1) Business Profit (P&L) — excludes stock purchase cash out so COGS is not double-counted
+  // 2 parallel metrics:
+  // 1) Business Profit (Lãi trên từng đơn) — excludes stock purchase cash out so COGS is not double-counted
   const businessProfit = totalRevenue - repairCogs - operatingExpenses;
-  // 2) Actual Cashflow — all cash in minus all cash out including stock purchases
-  const cashflow = totalRevenue - totalCashOut;
+  // 2) Actual Cashflow (Cân đối Thu - Chi két tiền) — revenue minus all cash out including stock purchases
+  const cashflow = totalRevenue - totalExpense;
 
   const inventoryValue = allInventory.reduce(
     (s, item) => s + Math.max(0, item.quantity) * Math.max(0, item.avgCost),
@@ -121,18 +127,16 @@ export async function GET(req: NextRequest) {
 
   // Expense breakdown by category
   const expenseByCategory: Record<string, number> = {};
-  for (const tx of transactions) {
-    if (tx.type === "EXPENSE") {
-      expenseByCategory[tx.category] =
-        (expenseByCategory[tx.category] || 0) + tx.amount;
-    }
+  for (const tx of expenses) {
+    expenseByCategory[tx.category] =
+      (expenseByCategory[tx.category] || 0) + tx.amount;
   }
 
   return NextResponse.json({
     period: {
       month: activeMonth,
-      from: fromParam || "",
-      to: toParam || "",
+      from: fromParam,
+      to: toParam,
     },
     summary: {
       repairRevenue,
@@ -141,13 +145,16 @@ export async function GET(req: NextRequest) {
       totalRevenue,
       operatingExpenses,
       stockPurchaseCashOut,
-      totalCashOut,
+      totalExpense,
+      totalCashOut: totalExpense,
       businessProfit,
       cashflow,
+      netCashBalance: cashflow,
       inventoryValue,
       completedTicketCount: periodTickets.length,
     },
     expenseByCategory,
+    expenses,
     transactions,
     completedTickets: periodTickets,
   });
