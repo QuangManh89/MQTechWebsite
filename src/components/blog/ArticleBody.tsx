@@ -39,7 +39,7 @@ function getContextualCta(category?: string): ContextualCtaConfig {
       return {
         heading:
           "Đang vướng lỗi Word/Excel, Unikey hay chia sẻ máy in LAN tại BMT?",
-        body: "Kỹ thuật viên MQTech hỗ trợ xử lý tận nơi hoặc qua UltraViewer nhanh chóng — kiểm tra miễn phí, báo giá trước khi làm.",
+        body: "Kỹ thuật viên MQTech có mặt 15–20 phút tại P. Tân Lập, P. Tân An, P. Buôn Ma Thuột hoặc hỗ trợ qua UltraViewer — kiểm tra miễn phí, báo giá trước khi làm.",
         bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
           "Cài Win 10/11 & Phần mềm tại nhà BMT"
         )}`,
@@ -49,43 +49,53 @@ function getContextualCta(category?: string): ContextualCtaConfig {
     case "Thủ Thuật Windows":
       return {
         heading:
-          "Cần cài Win 10/11 sạch & phần mềm tận nhà BMT trong 20 phút?",
-        body: "Cài hệ điều hành sạch ổn định, giữ nguyên 100% dữ liệu, đầy đủ driver & bộ Office/Unikey chuẩn văn phòng.",
+          "Cần cài Win 10/11 sạch & phần mềm tận nhà tại Tân Lập, Tân An, Buôn Ma Thuột?",
+        body: "Cài hệ điều hành sạch ổn định, giữ nguyên 100% dữ liệu, đầy đủ driver & bộ Office/Unikey chuẩn văn phòng — hoàn tất 30–45 phút.",
         bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
           "Cài Win 10/11 & Phần mềm tại nhà BMT"
         )}`,
+        serviceHref: "/dich-vu/cai-win-10-11-phan-mem-tai-nha-bmt",
+        serviceLabel: "Xem trang dịch vụ cài Win 10/11 tại nhà BMT",
       };
     case "Bảo Dưỡng Phần Cứng":
       return {
         heading: "Máy quá nhiệt, không lên nguồn hay lỗi màn hình tại BMT?",
-        body: "Chẩn đoán phần cứng miễn phí 100%, vệ sinh tra keo tản nhiệt chuẩn kỹ thuật, quan sát trực tiếp lấy liền.",
+        body: "Chẩn đoán phần cứng miễn phí 100%, vệ sinh tra keo tản nhiệt chuẩn Lab, quan sát trực tiếp lấy liền tại P. Tân Lập, P. Tân An & P. Buôn Ma Thuột.",
         bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
           "Sửa chữa Laptop Windows"
         )}`,
+        serviceHref: "/kiem-tra-may-tinh",
+        serviceLabel: "Tự test màn hình, bàn phím, loa, nhiệt độ miễn phí trước khi sửa",
       };
     case "Nâng Cấp Máy":
       return {
         heading:
           "Nâng cấp SSD NVMe & RAM giữ nguyên 100% dữ liệu — Lấy liền 30 phút",
-        body: "Linh kiện chính hãng bảo hành 1 đổi 1 đến 36 tháng, miễn phí công lắp đặt & chuyển hệ điều hành.",
+        body: "Linh kiện chính hãng bảo hành 1 đổi 1 đến 36 tháng, miễn phí công lắp đặt & chuyển hệ điều hành tận nơi tại P. Tân Lập, P. Tân An, P. Buôn Ma Thuột.",
         bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
           "Nâng cấp RAM / SSD"
         )}`,
+        serviceHref: "/dich-vu/nang-cap-ram-ssd-linh-kien",
+        serviceLabel: "Xem bảng giá nâng cấp RAM & SSD chính hãng",
       };
     case "Cẩm Nang MacBook":
       return {
         heading:
           "Cần kiểm tra pin, nguồn hoặc vệ sinh MacBook chuẩn Lab tại BMT?",
-        body: "Kỹ thuật viên chuyên dòng MacBook Intel & Apple Silicon, kiểm tra miễn phí, báo đúng bệnh, bảo hành điện tử.",
+        body: "Kỹ thuật viên chuyên dòng MacBook Intel & Apple Silicon, kiểm tra miễn phí, báo đúng bệnh, bảo hành điện tử minh bạch.",
         bookingHref: `/dat-lich?dich_vu=${encodeURIComponent(
           "Sửa MacBook chuyên nghiệp"
         )}`,
+        serviceHref: "/dich-vu/sua-macbook-chuyen-nghiep",
+        serviceLabel: "Xem dịch vụ sửa MacBook Air / Pro chuyên nghiệp",
       };
     default:
       return {
         heading: "Cần kỹ thuật viên kiểm tra máy tận nhà tại Buôn Ma Thuột?",
-        body: "Có mặt nhanh 15–20 phút tại trung tâm BMT, kiểm tra miễn phí 100%, báo giá minh bạch trước khi sửa.",
+        body: "Có mặt nhanh 15–20 phút tại P. Tân Lập, P. Tân An & P. Buôn Ma Thuột, kiểm tra miễn phí 100%, báo giá minh bạch trước khi sửa.",
         bookingHref: "/dat-lich",
+        serviceHref: "/dich-vu/sua-may-tinh-tai-nha-bmt",
+        serviceLabel: "Xem dịch vụ sửa máy tính tại nhà BMT",
       };
   }
 }
@@ -179,11 +189,11 @@ export function ArticleBody({
 
   const contextualCta = useMemo(() => getContextualCta(category), [category]);
 
-  // Insert contextual CTA once around the midpoint when article has >= 8 blocks & hotline is provided.
+  // Insert contextual CTA once around the midpoint when article has >= 5 blocks & hotline is provided.
   // Never insert immediately after a heading block (## / ###).
   const inlineCtaAfterIdx = useMemo(() => {
-    if (blocks.length < 8 || !hotline) return -1;
-    let targetIdx = Math.floor(blocks.length / 2);
+    if (blocks.length < 5 || !hotline) return -1;
+    let targetIdx = Math.max(2, Math.floor(blocks.length / 2));
     while (
       targetIdx < blocks.length - 1 &&
       (blocks[targetIdx].startsWith("## ") || blocks[targetIdx].startsWith("### "))
@@ -400,9 +410,9 @@ export function ArticleBody({
             // Check for Headings
             if (block.startsWith("### ")) {
               return (
-                <h2 className="pt-6 font-heading text-xl font-bold tracking-tight text-navy sm:text-2xl">
+                <h3 className="pt-4 font-heading text-lg font-bold tracking-tight text-navy sm:text-xl">
                   {renderInlineFormatting(block.replace(/^###\s+/, ""))}
-                </h2>
+                </h3>
               );
             }
             if (block.startsWith("## ")) {
@@ -487,7 +497,7 @@ export function ArticleBody({
                         className="h-1.5 w-1.5 rounded-full bg-brand"
                         aria-hidden="true"
                       />
-                      <span>Hỗ trợ tận nơi tại Buôn Ma Thuột</span>
+                      <span>Hỗ trợ tận nơi: P. Tân Lập • P. Tân An • P. Buôn Ma Thuột</span>
                     </div>
                     <h3 className="font-heading text-lg font-bold leading-snug text-navy sm:text-xl">
                       {contextualCta.heading}

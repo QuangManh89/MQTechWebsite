@@ -260,6 +260,20 @@ CPU và GPU hiện đại có cơ chế tự bảo vệ **Thermal Throttling**: 
 
 Ngoài ra, bạn cũng nên kiểm tra thói quen sử dụng hằng ngày: không đặt laptop lên chăn, nệm hoặc mặt bàn phủ khăn dễ bịt khe hút gió dưới đáy máy. Khi làm việc nhiều giờ liên tục, kê nhẹ phần đuôi máy lên 1–2 cm bằng đế tản nhiệt nhôm sẽ giúp luồng khí lưu thông tốt hơn đáng kể.
 
+## 3 Cách Kiểm Tra Quạt Tản Nhiệt Laptop Nhanh Tại Nhà
+
+Trước khi mang máy đi vệ sinh hoặc sửa chữa, bạn có thể tự áp dụng **3 cách kiểm tra quạt tản nhiệt laptop** dưới đây trong 2 phút để biết quạt vẫn quay bình thường hay đã kẹt trục, chết quạt:
+
+### Cách 1: Kiểm tra luồng gió và tiếng ồn thủ công
+Đặt tay hoặc một mẩu giấy mỏng sát khe thoát nhiệt ở cạnh bên hoặc phía sau bản lề khi mở nhiều tab Chrome / xem video 4K. Nếu đáy máy rất nóng nhưng không có hơi gió đẩy ra và hoàn toàn im lặng, rất có thể quạt đã kẹt bụi hoặc hỏng động cơ. Ngược lại, nếu quạt phát tiếng rè, lạch cạch bất thường, trục quạt đang bị khô dầu hoặc cấn dị vật.
+
+### Cách 2: Đo tốc độ quạt (RPM) & nhiệt độ bằng phần mềm
+- **Trên Windows:** Cài **HWMonitor** hoặc **Open Hardware Monitor** để xem nhiệt độ CPU/GPU và tốc độ vòng quay quạt (RPM). Bạn cũng có thể chạy nhanh bài **Đo hiệu năng & tản nhiệt trực tuyến** ngay trên trình duyệt tại [công cụ kiểm tra máy tính online MQTech](/kiem-tra-may-tinh#benchmark) để xem máy có bị tụt xung khi tải nặng hay không.
+- **Trên macOS:** Dùng **Macs Fan Control** để theo dõi trực tiếp tốc độ quạt trái/phải và nhiệt độ từng cảm biến.
+
+### Cách 3: Kiểm tra trực tiếp trong BIOS / UEFI (Laptop Windows)
+Khởi động lại máy, nhấn liên tục phím vào BIOS (**F2**, **Del** hoặc **F10** tùy hãng Dell, HP, Asus, Lenovo), sau đó mở mục **Hardware Monitor** hoặc **Fan Status**. Nếu máy đang ấm mà chỉ số hiển thị **0 RPM** hoặc báo lỗi *Fan Error*, bạn nên tắt máy sớm và kiểm tra cáp/quạt để tránh cháy chip.
+
 ## Bảng Đánh Giá Nhiệt Độ & Chi Phí Vệ Sinh Laptop Tại BMT
 
 | Mức nhiệt độ CPU | Triệu chứng thường gặp | Mức độ rủi ro | Giải pháp & Giá tham khảo tại MQTech |
@@ -296,7 +310,11 @@ Hoàn toàn không. Quá trình vệ sinh không đụng chạm ổ cứng nên 
 
 **4. MQTech có hỗ trợ vệ sinh laptop tận nhà tại BMT không?**
 
-Có. Bạn có thể ghé tiệm hoặc [đặt lịch kỹ thuật viên đến tận nhà tại BMT](/dat-lich) trong 15–30 phút (ưu tiên P. Tân Lập, P. Tân An và toàn nội thành).
+Có. Bạn có thể ghé tiệm hoặc [đặt lịch kỹ thuật viên đến tận nhà tại BMT](/dat-lich) trong 15–30 phút (ưu tiên P. Tân Lập, P. Tân An và toàn nội thành), đặt lịch online còn được giảm trực tiếp 50.000đ.
+
+**5. Làm sao biết quạt tản nhiệt laptop bị chết quạt hay chỉ do bám bụi?**
+
+Nếu kiểm tra bằng tờ giấy ở khe gió thấy không có luồng khí hoặc BIOS báo 0 RPM kèm tiếng lạch cạch, khả năng cao quạt bị kẹt trục hoặc hỏng motor. Nếu quạt vẫn quay mạnh nhưng gió ra yếu và máy nóng trên 85°C, nguyên nhân thường là bụi bít khe đồng và keo tản nhiệt đã khô — chỉ cần vệ sinh tra keo chuẩn Lab là khắc phục dứt điểm.
 
 ---
 
@@ -309,11 +327,11 @@ Có. Bạn có thể ghé tiệm hoặc [đặt lịch kỹ thuật viên đến
     coverImage:
       "https://images.unsplash.com/photo-1721333089073-215a56fd710c?auto=format&fit=crop&w=1200&q=80",
     authorName: "Kỹ thuật MQTech BMT",
-    readTimeMinutes: 6,
+    readTimeMinutes: 7,
     featured: true,
-    seoTitle: "5 Dấu Hiệu Laptop Cần Vệ Sinh & Tra Keo Tản Nhiệt Tại BMT",
+    seoTitle: "5 Dấu Hiệu Laptop Cần Vệ Sinh & Cách Kiểm Tra Quạt Tản Nhiệt",
     seoDescription:
-      "Nhận biết 5 dấu hiệu laptop quá nhiệt cần vệ sinh, tra keo tản nhiệt Arctic MX-6 tại Buôn Ma Thuột. Hạ nhiệt 10-20°C trong 35 phút tại MQTech BMT.",
+      "Nhận biết 5 dấu hiệu laptop quá nhiệt, 3 cách kiểm tra quạt tản nhiệt laptop và bảng giá vệ sinh tra keo MX-6/Thermal Grizzly từ 120.000đ tại MQTech BMT.",
   },
   {
     title: "Cách Khắc Phục Nhanh Lỗi Màn Hình Xanh (BSOD) Trên Windows 11",
@@ -492,13 +510,15 @@ Gửi model máy (hoặc chụp tem mặt đáy) qua Zalo **0987 482 573** hoặ
       "So sánh chi tiết HDD, SSD SATA, NVMe và RAM 8GB/16GB theo nhu cầu thực tế. Tư vấn nâng cấp SSD hay RAM trước cho laptop cũ chuẩn xác tại MQTech BMT.",
   },
   {
-    title: "Bí Quyết Bảo Vệ Pin MacBook Bền Lâu Trên 1000 Chu Kỳ Sạc",
+    title: "Cách Sạc Pin MacBook Đúng Cách: Bền Lâu Trên 1.000 Chu Kỳ Sạc",
     slug: "bi-quyet-bao-ve-pin-macbook-ben-lau",
     excerpt:
-      "Những thói quen sạc pin đúng cách cho MacBook Air/Pro Intel & Apple Silicon giúp hạn chế chai pin, phồng pin và giữ hiệu năng ổn định.",
-    content: `Pin lithium-polymer trên các dòng MacBook Air và MacBook Pro có tuổi thọ thiết kế khoảng **1.000 chu kỳ sạc (Cycle Count)** trước khi dung lượng tối đa giảm dưới 80%. Tuy nhiên tại phòng Lab MQTech Buôn Ma Thuột, nhiều chiếc MacBook mới dùng 1,5–2 năm đã báo *Service Recommended* hoặc phồng pin do thói quen sạc sai cách và nhiệt độ cao.
+      "Hướng dẫn cách sạc pin MacBook Air/Pro Intel & Apple Silicon M1/M2/M3 đúng cách: có nên vừa sạc vừa dùng, cách bật Optimized Battery Charging và bảng giá thay pin tại BMT.",
+    content: `**Sạc pin MacBook đúng cách** không đòi hỏi bạn phải canh rút sạc liên tục: bạn hoàn toàn **có thể vừa cắm sạc vừa dùng** khi làm việc cố định (mạch quản lý nguồn sẽ tự ngắt dòng vào pin khi đầy), đồng thời bật **Optimized Battery Charging**, tránh để pin cạn về 0% và giữ máy luôn mát.
 
-Áp dụng đúng các bí quyết dưới đây sẽ giúp pin MacBook bền bỉ 4–5 năm, giữ hiệu năng ổn định và hạn chế tối đa nguy cơ phồng pin.
+Pin lithium-polymer trên các dòng MacBook Air và MacBook Pro có tuổi thọ thiết kế khoảng **1.000 chu kỳ sạc (Cycle Count)** trước khi dung lượng tối đa giảm dưới 80%. Tuy nhiên tại phòng Lab MQTech Buôn Ma Thuột, nhiều chiếc MacBook mới dùng 1,5–2 năm đã báo *Service Recommended* hoặc phồng pin do thói quen sạc sai cách và nhiệt độ cao.
+
+Áp dụng đúng 5 nguyên tắc sạc MacBook dưới đây sẽ giúp pin bền bỉ 4–5 năm, giữ hiệu năng ổn định và hạn chế tối đa nguy cơ phồng pin.
 
 ## Hiểu Đúng Về Chu Kỳ Sạc (Cycle Count) Trên MacBook
 
@@ -545,7 +565,15 @@ Hãy đưa máy đến [dịch vụ sửa MacBook chuyên nghiệp tại BMT](/d
 - Trackpad cứng khó bấm, mặt đáy kênh hoặc gập màn hình không khít (pin đã phồng).
 - Báo *Service Recommended*, dung lượng dưới 75% hoặc tụt pin sập nguồn đột ngột.
 
-Tại MQTech, thay pin MacBook Air/Pro chuẩn dung lượng giá chỉ từ **1.150.000đ**, bảo hành 1 đổi 1 từ 6–12 tháng, tra cứu bảo hành điện tử tại \`suamaytinhbmt.id.vn/tra-cuu\`. Xem thêm tại [bảng giá sửa MacBook MQTech BMT](/bang-gia).
+Tại MQTech, thay pin MacBook Air/Pro chuẩn dung lượng lấy liền **45–60 phút**, khách hàng quan sát trực tiếp, bảo hành điện tử 1 đổi 1 từ 6–12 tháng tra cứu tại \`suamaytinhbmt.id.vn/tra-cuu\`:
+
+| Dòng MacBook | Giá tham khảo tại MQTech BMT | Thời gian thay | Bảo hành điện tử |
+| :--- | :--- | :---: | :---: |
+| **MacBook Air Intel (2015 – 2020)** | Chỉ từ **1.150.000đ** | 45 phút | 6 – 12 tháng |
+| **MacBook Air Apple Silicon (M1 / M2 / M3)** | Chỉ từ **1.350.000đ** | 45 – 60 phút | 6 – 12 tháng |
+| **MacBook Pro 13" / 14" / 16" (Intel & M-Series)** | Báo giá chính xác theo mã máy (Axxxx) | 60 phút | 6 – 12 tháng |
+
+Xem đầy đủ hạng mục sửa chữa tại [bảng giá sửa MacBook MQTech BMT](/bang-gia) hoặc [đặt lịch online để được giảm ngay 50.000đ](/dat-lich).
 
 ## Câu Hỏi Thường Gặp
 
@@ -563,7 +591,7 @@ Tuyệt đối không. Pin phồng có thể làm vỡ trackpad, cong mainboard 
 
 **4. Đặt lịch kiểm tra và thay pin MacBook tại BMT như thế nào?**
 
-Bạn có thể [đặt lịch kiểm tra MacBook miễn phí tại MQTech](/dat-lich) hoặc nhắn mã máy (Axxxx ở mặt đáy) qua Zalo **0987 482 573** để nhận báo giá ngay.
+Bạn có thể [đặt lịch kiểm tra MacBook miễn phí tại MQTech](/dat-lich) (giảm trực tiếp 50.000đ khi đặt lịch online) hoặc nhắn mã máy (Axxxx ở mặt đáy) qua Zalo **0987 482 573** để nhận báo giá ngay.
 
 ---
 
@@ -576,10 +604,10 @@ Bạn có thể [đặt lịch kiểm tra MacBook miễn phí tại MQTech](/dat
     coverImage:
       "https://images.unsplash.com/photo-1544281679-70f2022b5ced?auto=format&fit=crop&w=1200&q=80",
     authorName: "Kỹ thuật MQTech BMT",
-    readTimeMinutes: 6,
+    readTimeMinutes: 7,
     featured: false,
-    seoTitle: "Bí Quyết Bảo Vệ Pin MacBook Bền Lâu Trên 1000 Chu Kỳ Sạc",
+    seoTitle: "Cách Sạc Pin MacBook Đúng Cách Bền Trên 1000 Chu Kỳ (2026)",
     seoDescription:
-      "Hướng dẫn cách sạc và bảo vệ pin MacBook Air/Pro Intel & Apple Silicon M1/M2/M3 bền trên 1000 chu kỳ, tránh chai phồng pin từ phòng Lab MQTech BMT.",
+      "Hướng dẫn cách sạc pin MacBook Air/Pro Intel & M1/M2/M3 đúng cách, tránh chai phồng pin + bảng giá thay pin MacBook từ 1.150.000đ lấy liền tại MQTech BMT.",
   },
 ];

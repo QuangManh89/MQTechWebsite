@@ -1,3 +1,4 @@
+import Script from "next/script";
 import { getSiteSettings } from "@/lib/site-data";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -12,9 +13,24 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }) {
   const settings = await getSiteSettings();
+  const ga4Id = settings.googleAnalyticsId?.trim();
 
   return (
     <div className="flex min-h-screen min-h-[100dvh] flex-col bg-surface-page text-ink">
+      {ga4Id && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4Id)}`}
+            strategy="afterInteractive"
+          />
+          <Script id="mqtech-ga4" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', ${JSON.stringify(ga4Id)});`}
+          </Script>
+        </>
+      )}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-brand focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-ink-inverse focus:shadow-lg"

@@ -24,10 +24,10 @@
 8. **Bảo trì hệ thống IT công ty & phòng máy BMT:** Từ 80.000đ/máy/tháng (gói văn phòng 5–15 máy từ 800.000đ/tháng, xử lý đột xuất 150.000đ/lượt) • Cam kết SLA 30 phút.
 
 ## Target Audience
-**Target segments in Buôn Ma Thuột:**
-1. **Cá nhân & nhân viên văn phòng làm việc tại nhà:** Sinh sống tại P. Tân Lập, P. Tân An, P. Ea Tam, P. Tân Lợi, P. Tự An, P. Thành Công, P. Thắng Lợi, P. Tân Tiến và nội thành BMT.
-2. **Sinh viên (đặc biệt ĐH Tây Nguyên & các trường cao đẳng tại BMT):** Dùng laptop học tập, làm đồ án, cần vệ sinh, cài Win, nâng cấp SSD/RAM hoặc sửa gấp với chi phí rõ ràng, không bị hét giá.
-3. **Doanh nghiệp nhỏ, phòng kế toán, cửa hàng & phòng máy tại BMT:** Không có nhân sự IT chuyên trách, cần xử lý nhanh lỗi máy tính, mạng LAN, máy in chia sẻ và bảo trì định kỳ.
+**Target segments (3 phường trọng điểm):**
+1. **Cá nhân & nhân viên văn phòng làm việc tại nhà:** Tập trung chủ lực tại **3 phường trọng điểm: Phường Tân Lập, Phường Tân An và Phường Buôn Ma Thuột** (Đắk Lắk).
+2. **Học sinh, sinh viên tại khu vực P. Tân Lập, P. Tân An, P. Buôn Ma Thuột:** Dùng laptop học tập, làm đồ án, cần vệ sinh, cài Win, nâng cấp SSD/RAM hoặc sửa gấp với chi phí rõ ràng, không bị hét giá.
+3. **Doanh nghiệp nhỏ, phòng kế toán, cửa hàng & phòng máy tại 3 phường trọng điểm:** Không có nhân sự IT chuyên trách, cần xử lý nhanh lỗi máy tính, mạng LAN, máy in chia sẻ và bảo trì định kỳ.
 
 **Decision-makers:** Chủ máy trực tiếp (B2C), trưởng phòng hành chính/kế toán hoặc chủ doanh nghiệp/chủ quán net (B2B nhỏ).
 **Primary use case:** Khắc phục nhanh sự cố máy tính/laptop/MacBook đang làm gián đoạn công việc, học tập mà không phải tháo máy mang đi xa hoặc lo bị tráo linh kiện.
@@ -59,7 +59,7 @@
 
 ## Differentiation
 **Key differentiators:**
-- **Phản ứng nhanh nội thành BMT:** Kỹ thuật viên có mặt trong 15–20 phút (ưu tiên P. Tân Lập, P. Tân An, P. Ea Tam, P. Tân Lợi và các phường trung tâm).
+- **Phản ứng nhanh tại 3 phường trọng điểm:** Kỹ thuật viên có mặt trong 15–20 phút tại **Phường Tân Lập, Phường Tân An và Phường Buôn Ma Thuột**.
 - **Minh bạch tuyệt đối:** Kiểm tra miễn phí tại tiệm, báo đúng lỗi và đúng giá niêm yết trước khi làm, khách hàng quan sát trực tiếp toàn bộ thao tác.
 - **Bảo hành điện tử (`/tra-cuu`):** Mọi ca sửa đều có mã phiếu (`MQ-XXXX`), khách tra cứu tiến độ và hạn bảo hành trực tuyến theo mã phiếu hoặc số điện thoại.
 - **Công cụ test phần cứng miễn phí (`/kiem-tra-may-tinh`):** Giúp người dùng tự kiểm tra bàn phím, màn hình, webcam, micro, loa, chuột ngay trên trình duyệt trước khi gọi thợ.

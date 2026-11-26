@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { KeyboardTester } from "./KeyboardTester";
 import { ScreenTester } from "./ScreenTester";
@@ -133,10 +134,23 @@ export function DeviceTestApp({ hotlineRaw }: { hotlineRaw: string }) {
     if (typeof window !== "undefined") {
       window.location.hash = tab === "tong-quan" ? "" : tab;
     }
+    if (tab !== "tong-quan") {
+      trackEvent("use_hardware_test", {
+        test_module: tab,
+        action: "open_module",
+      });
+    }
   }, []);
 
   function handleStatusUpdate(modId: string, status: ModuleStatus) {
     setStatuses((prev) => ({ ...prev, [modId]: status }));
+    if (status !== "untested") {
+      trackEvent("use_hardware_test", {
+        test_module: modId,
+        action: "mark_status",
+        status,
+      });
+    }
   }
 
   // Generate formatted diagnostic summary text
@@ -199,6 +213,12 @@ export function DeviceTestApp({ hotlineRaw }: { hotlineRaw: string }) {
       const text = getDiagnosticReport();
       await navigator.clipboard.writeText(text);
       setCopied(true);
+      trackEvent("use_hardware_test", {
+        test_module: "all",
+        action: "copy_report",
+        issue_count: issueCount,
+        good_count: goodCount,
+      });
       toast.success("Đã sao chép kết quả chẩn đoán vào bộ nhớ tạm");
       setTimeout(() => setCopied(false), 2500);
     } catch {

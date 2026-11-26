@@ -11,6 +11,7 @@ export function trackEvent(
   params?: GtagEventParams
 ): void {
   if (typeof window === "undefined") return;
+  if (window.location.pathname.startsWith("/admin")) return;
   const gtag = (window as WindowWithGtag).gtag;
   if (typeof gtag !== "function") return;
   try {

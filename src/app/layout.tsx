@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Toaster } from "sonner";
 import { getSiteSettings } from "@/lib/site-data";
 import "./globals.css";
@@ -66,14 +65,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getSiteSettings();
-  const ga4Id = settings.googleAnalyticsId?.trim();
-
   return (
     <html lang="vi">
       <head>
@@ -99,20 +95,6 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
       <body className="font-body bg-surface text-ink antialiased">
-        {ga4Id && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4Id)}`}
-              strategy="afterInteractive"
-            />
-            <Script id="mqtech-ga4" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', ${JSON.stringify(ga4Id)});`}
-            </Script>
-          </>
-        )}
         {children}
         <Toaster position="top-right" richColors closeButton />
       </body>
