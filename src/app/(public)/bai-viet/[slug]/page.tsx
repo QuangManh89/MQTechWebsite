@@ -19,6 +19,50 @@ import { ArticleBody } from "@/components/blog/ArticleBody";
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
+function stripMarkdownInline(text: string): string {
+  return text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractFaqItems(
+  markdown: string
+): Array<{ question: string; answer: string }> {
+  const faqHeadingMatch = markdown.match(
+    /^##\s+Câu\s+Hỏi\s+Thường\s+Gặp\s*$/im
+  );
+  if (!faqHeadingMatch || faqHeadingMatch.index === undefined) return [];
+
+  const afterHeading = markdown.slice(
+    faqHeadingMatch.index + faqHeadingMatch[0].length
+  );
+  const sectionEndMatch = afterHeading.match(/\n(?:---+|##\s+)/);
+  const faqBlock = sectionEndMatch
+    ? afterHeading.slice(0, sectionEndMatch.index)
+    : afterHeading;
+
+  const items: Array<{ question: string; answer: string }> = [];
+  const questionRegex =
+    /(?:^|\n)(?:\*\*\s*(?:\d+\.\s*)?([^*\n]+\?)\s*\*\*|###\s*(?:\d+\.\s*)?([^\n]+\?))\s*\n+([\s\S]*?)(?=\n(?:\*\*\s*(?:\d+\.\s*)?[^*\n]+\?\s*\*\*|###\s*(?:\d+\.\s*)?[^\n]+\?)|$)/g;
+
+  let match: RegExpExecArray | null;
+  while ((match = questionRegex.exec(faqBlock)) !== null) {
+    const rawQuestion = match[1] || match[2] || "";
+    const rawAnswer = match[3] || "";
+    const question = stripMarkdownInline(rawQuestion);
+    const answer = stripMarkdownInline(rawAnswer);
+    if (question && answer) {
+      items.push({ question, answer });
+    }
+  }
+
+  return items;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -151,12 +195,35 @@ export default async function PostDetailPage({
     },
   };
 
+  const faqItems = extractFaqItems(post.content);
+  const faqJsonLd =
+    faqItems.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqItems.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.answer,
+            },
+          })),
+        }
+      : null;
+
   return (
     <article className="bg-surface py-12 sm:py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
 
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <Breadcrumb
