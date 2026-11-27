@@ -31,21 +31,27 @@ export async function GET() {
     "https://suamaytinhbmt.id.vn"
   ).replace(/\/$/, "");
 
+  const facebookUrl =
+    clean(settings.facebookUrl) || "https://www.facebook.com/suamaytinhbmt";
+  const youtubeUrl = "https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ";
+
   const lines: string[] = [
     "# MQTech - Computer Service BMT",
     "",
-    `> ${settings.subTagline}. ${settings.slogan} Dịch vụ sửa máy tính, laptop, MacBook tận nhà và chuẩn phòng Lab tại TP. Buôn Ma Thuột, Đắk Lắk — có mặt 15-20 phút, kiểm tra miễn phí, báo giá công khai, quan sát trực tiếp và bảo hành điện tử.`,
+    `> ${settings.subTagline}. ${settings.slogan} Dịch vụ sửa máy tính, laptop, MacBook tận nhà và chuẩn phòng Lab tại Phường Tân Lập, Phường Tân An và Phường Buôn Ma Thuột (Đắk Lắk) — có mặt 15-20 phút, kiểm tra miễn phí, báo giá công khai, quan sát trực tiếp và bảo hành điện tử.`,
     "",
     "## Thông tin liên hệ & Khu vực phục vụ",
     "",
     `- **Thương hiệu:** ${settings.brandName}`,
     `- **Website:** ${baseUrl}`,
+    `- **Facebook Fanpage chính thức:** ${facebookUrl}`,
+    `- **Kênh YouTube chính thức:** ${youtubeUrl}`,
     `- **Địa chỉ:** ${settings.address}`,
     `- **Hotline / Zalo:** ${settings.hotline} (${settings.zaloUrl})`,
     `- **Email:** ${settings.email}`,
     `- **Giờ làm việc:** ${settings.workingHours}`,
     `- **Ưu đãi đặt lịch trực tuyến:** Giảm ngay ${settings.bookingDiscount} tại ${baseUrl}/dat-lich`,
-    "- **Khu vực phục vụ tận nơi (15-20 phút):** Phường Tân Lập, Phường Tân An, Phường Ea Tam, Phường Tân Lợi, Phường Tự An, Phường Thành Công, Phường Thắng Lợi, Phường Tân Tiến và toàn TP. Buôn Ma Thuột, Tỉnh Đắk Lắk.",
+    "- **Khu vực phục vụ tận nơi (15-20 phút):** Phường Tân Lập, Phường Tân An và Phường Buôn Ma Thuột (Tỉnh Đắk Lắk).",
     "",
     "## Dịch vụ chính",
     "",

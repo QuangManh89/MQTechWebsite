@@ -185,7 +185,7 @@ export default async function HomePage() {
         name: settings.brandName,
         url: siteUrl,
         image: `${siteUrl}/brand/og-banner.png`,
-        description: `${settings.subTagline}. ${settings.slogan} Hỗ trợ siêu tốc 15 - 20 phút tại Phường Tân Lập, Phường Tân An và TP. Buôn Ma Thuột.`,
+        description: `${settings.subTagline}. ${settings.slogan} Hỗ trợ siêu tốc 15 - 20 phút tại Phường Tân Lập, Phường Tân An và Phường Buôn Ma Thuột.`,
         telephone: settings.hotlineRaw,
         email: settings.email,
         priceRange: "100.000đ - 1.500.000đ",
@@ -203,43 +203,31 @@ export default async function HomePage() {
           longitude: 108.0378,
         },
         hasMap: settings.googleMapsEmbedUrl || mapsSearchUrl,
-        sameAs: [settings.facebookUrl, settings.zaloUrl].filter(Boolean),
+        sameAs: Array.from(
+          new Set(
+            [
+              settings.facebookUrl || "https://www.facebook.com/suamaytinhbmt",
+              settings.zaloUrl,
+              "https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ",
+            ].filter(Boolean)
+          )
+        ),
         areaServed: [
           {
             "@type": "AdministrativeArea",
-            name: "Phường Tân Lập, TP. Buôn Ma Thuột",
+            name: "Phường Tân Lập, Đắk Lắk",
           },
           {
             "@type": "AdministrativeArea",
-            name: "Phường Tân An, TP. Buôn Ma Thuột",
+            name: "Phường Tân An, Đắk Lắk",
           },
           {
             "@type": "AdministrativeArea",
-            name: "Phường Ea Tam, TP. Buôn Ma Thuột",
-          },
-          {
-            "@type": "AdministrativeArea",
-            name: "Phường Tân Lợi, TP. Buôn Ma Thuột",
-          },
-          {
-            "@type": "AdministrativeArea",
-            name: "Phường Tự An, TP. Buôn Ma Thuột",
-          },
-          {
-            "@type": "AdministrativeArea",
-            name: "Phường Thành Công, TP. Buôn Ma Thuột",
-          },
-          {
-            "@type": "AdministrativeArea",
-            name: "Phường Thắng Lợi, TP. Buôn Ma Thuột",
-          },
-          {
-            "@type": "AdministrativeArea",
-            name: "Phường Tân Tiến, TP. Buôn Ma Thuột",
+            name: "Phường Buôn Ma Thuột, Đắk Lắk",
           },
           {
             "@type": "City",
-            name: "Thành phố Buôn Ma Thuột, Tỉnh Đắk Lắk",
+            name: "Buôn Ma Thuột, Tỉnh Đắk Lắk",
           },
         ],
         openingHoursSpecification: [
@@ -252,10 +240,9 @@ export default async function HomePage() {
               "Thursday",
               "Friday",
               "Saturday",
-              "Sunday",
             ],
             opens: "07:30",
-            closes: "20:00",
+            closes: "19:00",
           },
         ],
       },

@@ -7,8 +7,10 @@
 **Brand & Entity:** MQTech - Computer Service (`https://suamaytinhbmt.id.vn`)
 **Address:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
 **Hotline / Zalo:** `0987 482 573` (`https://zalo.me/0987482573`)
+**Facebook Fanpage:** `https://www.facebook.com/suamaytinhbmt`
+**YouTube Channel:** `https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ`
 **Email:** `manhquang89@gmail.com`
-**Working Hours:** `07:30 - 20:00 (Thứ 2 - Chủ Nhật)`
+**Working Hours:** `07:30 - 19:00 (Thứ 2 - 7)`
 **One-liner:** Dịch vụ sửa máy tính, laptop, MacBook tận nhà và chuẩn phòng Lab tại TP. Buôn Ma Thuột — có mặt 15–20 phút, báo giá công khai, quan sát trực tiếp và bảo hành điện tử.
 **What it does:** MQTech chẩn đoán, sửa chữa phần cứng/phần mềm, vệ sinh tra keo tản nhiệt, nâng cấp RAM/SSD, lắp ráp PC theo yêu cầu và bảo trì IT định kỳ cho cá nhân, sinh viên và doanh nghiệp tại Buôn Ma Thuột, Đắk Lắk. Khách hàng có thể đặt lịch trực tuyến (giảm 50.000đ), tự kiểm tra phần cứng miễn phí trên web và tra cứu lịch sử bảo hành điện tử bất kỳ lúc nào.
 **Product category:** Dịch vụ sửa chữa máy tính, laptop, MacBook & bảo trì IT tại nhà (Local IT & Computer Repair Service — Buôn Ma Thuột).
