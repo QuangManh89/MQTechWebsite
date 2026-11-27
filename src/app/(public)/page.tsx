@@ -208,7 +208,7 @@ export default async function HomePage() {
             [
               settings.facebookUrl || "https://www.facebook.com/suamaytinhbmt",
               settings.zaloUrl,
-              "https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ",
+              "https://www.youtube.com/@mqtechbmt",
             ].filter(Boolean)
           )
         ),

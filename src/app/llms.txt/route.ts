@@ -33,7 +33,7 @@ export async function GET() {
 
   const facebookUrl =
     clean(settings.facebookUrl) || "https://www.facebook.com/suamaytinhbmt";
-  const youtubeUrl = "https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ";
+  const youtubeUrl = "https://www.youtube.com/@mqtechbmt";
 
   const lines: string[] = [
     "# MQTech - Sửa Máy Tính Tại Nhà BMT",

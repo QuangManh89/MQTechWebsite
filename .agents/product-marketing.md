@@ -8,7 +8,7 @@
 **Address:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
 **Hotline / Zalo:** `0987 482 573` (`https://zalo.me/0987482573`)
 **Facebook Fanpage:** `https://www.facebook.com/suamaytinhbmt`
-**YouTube Channel:** `https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ`
+**YouTube Channel:** `https://www.youtube.com/@mqtechbmt`
 **Email:** `manhquang89@gmail.com`
 **Working Hours:** `07:30 - 19:00 (Thứ 2 - 7)`
 **One-liner:** Dịch vụ sửa máy tính, laptop, MacBook tận nhà và chuẩn phòng Lab tại TP. Buôn Ma Thuột — có mặt 15–20 phút, báo giá công khai, quan sát trực tiếp và bảo hành điện tử.
