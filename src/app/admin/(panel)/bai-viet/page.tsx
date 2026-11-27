@@ -4,27 +4,34 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
+  AlertTriangle,
   Check,
   Copy,
   Edit3,
   Eye,
   Heading2,
-  Image as ImageIcon,
+  Heading3,
+  HelpCircle,
   Images,
   List,
   Plus,
   Quote,
   RefreshCw,
   Save,
+  Sparkles,
   Star,
+  Table2,
   Trash2,
   Upload,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Post } from "@/db/schema";
 import { ConfirmDialog, ModalDialog } from "@/components/ui/ModalDialog";
 import { ArticleBody } from "@/components/blog/ArticleBody";
 import { useAdminRole } from "@/components/admin/AdminShell";
+import { RankMathSeoPanel } from "@/components/admin/RankMathSeoPanel";
+import { analyzePostSeo, slugifyVietnamese } from "@/lib/seo-scorer";
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
 
@@ -243,16 +250,44 @@ export default function AdminPostsPage() {
     toast.success("Đã xóa ảnh khỏi kho bài viết");
   };
 
+  // Memoize SEO scores for post cards so typing inside the modal does not re-score the grid
+  const postSeoMap = useMemo(() => {
+    const map = new Map<number, ReturnType<typeof analyzePostSeo>>();
+    for (const p of posts) {
+      map.set(p.id, analyzePostSeo(p, posts));
+    }
+    return map;
+  }, [posts]);
+
+  // Real-time Rank Math SEO analysis for current editing post
+  const editingSeoAnalysis = useMemo(() => {
+    if (!editing) return null;
+    return analyzePostSeo(editing, posts);
+  }, [editing, posts]);
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!editing) return;
     setSaving(true);
     try {
       const isNew = !editing.id;
+      const sanitizedPayload = {
+        ...editing,
+        title: (editing.title || "").trim(),
+        slug: (editing.slug || "").trim(),
+        excerpt: (editing.excerpt || "").trim(),
+        content: (editing.content || "").trim(),
+        category: (editing.category || "").trim(),
+        coverImage: (editing.coverImage || "").trim(),
+        authorName: (editing.authorName || "").trim(),
+        focusKeyword: (editing.focusKeyword || "").trim(),
+        seoTitle: (editing.seoTitle || "").trim(),
+        seoDescription: (editing.seoDescription || "").trim(),
+      };
       const res = await fetch("/api/admin/posts", {
         method: isNew ? "POST" : "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editing),
+        body: JSON.stringify(sanitizedPayload),
       });
       if (res.ok) {
         toast.success(isNew ? "Đã đăng bài viết" : "Đã cập nhật bài viết");
@@ -314,6 +349,7 @@ export default function AdminPostsPage() {
               readTimeMinutes: 5,
               featured: false,
               isPublished: true,
+              focusKeyword: "",
               seoTitle: "",
               seoDescription: "",
             });
@@ -365,6 +401,14 @@ export default function AdminPostsPage() {
               }
             } catch {}
 
+            const postSeo = postSeoMap.get(post.id) ?? analyzePostSeo(post, posts);
+            const seoBadgeClass =
+              postSeo.score >= 80
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : postSeo.score >= 50
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : "bg-rose-50 text-rose-700 border-rose-200";
+
             return (
               <div
                 key={post.id}
@@ -384,6 +428,17 @@ export default function AdminPostsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="inline-flex rounded-full bg-brand-light px-2.5 py-0.5 text-xs font-semibold text-brand">
                         {post.category}
+                      </span>
+                      <span
+                        title={
+                          post.focusKeyword
+                            ? `Từ khóa chính: ${post.focusKeyword}`
+                            : "Chưa đặt Từ khóa chính (Focus Keyword)"
+                        }
+                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold font-mono ${seoBadgeClass}`}
+                      >
+                        <Sparkles className="h-3 w-3" aria-hidden="true" />
+                        <span>SEO {postSeo.score}/100</span>
                       </span>
                       {galleryCount > 0 && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-ink-muted border border-line">
@@ -434,12 +489,15 @@ export default function AdminPostsPage() {
         onOpenChange={(open) => {
           if (!open) setEditing(null);
         }}
-        title={editing?.id ? "Chỉnh sửa bài viết & Thư viện ảnh" : "Đăng bài viết mới"}
-        description="Soạn thảo nội dung kỹ thuật, tải lên nhiều hình ảnh và tối ưu hóa SEO."
-        maxWidthClass="max-w-4xl"
+        title={editing?.id ? "Chỉnh sửa bài viết & Tối ưu SEO" : "Đăng bài viết chuẩn SEO mới"}
+        description="Soạn thảo nội dung kỹ thuật, xem trước Google SERP và chấm điểm SEO real-time chuẩn Rank Math."
+        maxWidthClass="max-w-6xl"
       >
-        {editing && (
+        {editing && editingSeoAnalysis && (
           <form onSubmit={handleSave} className="space-y-5 text-sm">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] items-start">
+              {/* LEFT COLUMN: Content Editor */}
+              <div className="space-y-5 min-w-0">
             {/* Title & Slug */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
@@ -462,12 +520,30 @@ export default function AdminPostsPage() {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="postSlug"
-                  className="block text-xs font-semibold text-ink-muted mb-1"
-                >
-                  Slug URL *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="postSlug"
+                    className="block text-xs font-semibold text-ink-muted"
+                  >
+                    Slug URL *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const generated = slugifyVietnamese(editing.title || "");
+                      if (!generated) {
+                        toast.error("Hãy nhập Tiêu đề bài viết trước khi tạo Slug.");
+                        return;
+                      }
+                      setEditing({ ...editing, slug: generated });
+                      toast.success("Đã tạo Slug chuẩn không dấu");
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
+                  >
+                    <Wand2 className="h-3 w-3" aria-hidden="true" />
+                    <span>Tạo slug</span>
+                  </button>
+                </div>
                 <input
                   id="postSlug"
                   required
@@ -749,12 +825,47 @@ export default function AdminPostsPage() {
                   <div className="flex items-center gap-1 flex-wrap">
                     <button
                       type="button"
-                      onClick={() => insertTextAtCursor("\n\n### Tiêu đề mục...\n\n")}
+                      onClick={() => insertTextAtCursor("\n\n## Tiêu đề mục chính (H2)\n\n")}
                       title="Chèn Tiêu đề H2"
                       className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-ink-muted hover:border-brand/40 hover:text-brand"
                     >
                       <Heading2 className="h-3 w-3" />
                       <span>H2</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => insertTextAtCursor("\n\n### Tiểu mục (H3)\n\n")}
+                      title="Chèn Tiểu mục H3"
+                      className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-ink-muted hover:border-brand/40 hover:text-brand"
+                    >
+                      <Heading3 className="h-3 w-3" />
+                      <span>H3</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        insertTextAtCursor(
+                          "\n\n| Hạng mục / Triệu chứng | Chi phí tham khảo | Thời gian & Bảo hành |\n| :--- | :--- | :---: |\n| Kiểm tra chẩn đoán lỗi | Miễn phí khi sửa | 15 – 20 phút |\n| Dịch vụ sửa chữa chính | Từ 150.000đ | 30 – 45 phút (BH 3–12T) |\n\n"
+                        )
+                      }
+                      title="Chèn Bảng đối chiếu Markdown"
+                      className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-ink-muted hover:border-brand/40 hover:text-brand"
+                    >
+                      <Table2 className="h-3 w-3" />
+                      <span>Bảng</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        insertTextAtCursor(
+                          "\n\n## Câu Hỏi Thường Gặp\n\n**1. Dịch vụ tại MQTech BMT mất bao lâu và có mất dữ liệu không?**\n\nThời gian xử lý trung bình 30–45 phút, khách hàng quan sát trực tiếp và giữ nguyên 100% dữ liệu.\n\n**2. Chính sách bảo hành sau khi sửa chữa như thế nào?**\n\nMọi ca sửa đều được cấp mã bảo hành điện tử từ 1–36 tháng, tra cứu công khai tại [trang tra cứu bảo hành](/tra-cuu).\n\n"
+                        )
+                      }
+                      title="Chèn mẫu FAQ tự bật FAQPage JSON-LD"
+                      className="inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-brand/30 bg-brand-light/40 px-2.5 py-1 text-xs font-semibold text-brand hover:bg-brand-light"
+                    >
+                      <HelpCircle className="h-3 w-3" />
+                      <span>FAQ</span>
                     </button>
                     <button
                       type="button"
@@ -807,45 +918,61 @@ export default function AdminPostsPage() {
               )}
             </div>
 
-            {/* SEO Settings */}
-            <div className="grid gap-3 sm:grid-cols-2 rounded-xl bg-surface-subtle p-4">
-              <div>
-                <label
-                  htmlFor="postSeoTitle"
-                  className="block text-xs font-semibold text-ink-muted mb-1"
-                >
-                  SEO Title (tùy chọn)
-                </label>
-                <input
-                  id="postSeoTitle"
-                  maxLength={120}
-                  placeholder="Tiêu đề hiển thị kết quả tìm kiếm Google"
-                  value={editing.seoTitle || ""}
-                  onChange={(e) =>
-                    setEditing({ ...editing, seoTitle: e.target.value })
-                  }
-                  className="min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-xs focus:border-brand focus:outline-none"
-                />
               </div>
-              <div>
-                <label
-                  htmlFor="postSeoDesc"
-                  className="block text-xs font-semibold text-ink-muted mb-1"
-                >
-                  SEO Description (tùy chọn)
-                </label>
-                <input
-                  id="postSeoDesc"
-                  maxLength={250}
-                  placeholder="Mô tả tóm tắt hiển thị dưới tiêu đề Google"
-                  value={editing.seoDescription || ""}
-                  onChange={(e) =>
-                    setEditing({ ...editing, seoDescription: e.target.value })
+
+              {/* RIGHT COLUMN: Sticky Rank Math SEO Scorer & Google SERP Preview */}
+              <div className="lg:sticky lg:top-0 lg:max-h-[calc(90dvh-9rem)] lg:overflow-y-auto lg:pr-1">
+                <RankMathSeoPanel
+                  analysis={editingSeoAnalysis}
+                  focusKeyword={editing.focusKeyword || ""}
+                  slug={editing.slug || ""}
+                  seoTitle={editing.seoTitle || ""}
+                  seoDescription={editing.seoDescription || ""}
+                  onChangeFocusKeyword={(val) =>
+                    setEditing({ ...editing, focusKeyword: val })
                   }
-                  className="min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-xs focus:border-brand focus:outline-none"
+                  onChangeSeoTitle={(val) =>
+                    setEditing({ ...editing, seoTitle: val })
+                  }
+                  onChangeSeoDescription={(val) =>
+                    setEditing({ ...editing, seoDescription: val })
+                  }
                 />
               </div>
             </div>
+
+            {/* Soft SEO Warning Banner (non-blocking) */}
+            {(editingSeoAnalysis.score < 70 ||
+              editingSeoAnalysis.cannibalizationMatches.length > 0) && (
+              <div
+                role="status"
+                className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900"
+              >
+                <AlertTriangle
+                  className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
+                  aria-hidden="true"
+                />
+                <div className="min-w-0 space-y-1">
+                  <p className="font-bold">
+                    Gợi ý trước khi lưu (Điểm SEO hiện tại: {editingSeoAnalysis.score}/100 — vẫn có thể lưu bình thường):
+                  </p>
+                  <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                    {editingSeoAnalysis.cannibalizationMatches.length > 0 && (
+                      <li>
+                        Trùng Từ khóa chính với bài{" "}
+                        <strong>
+                          {editingSeoAnalysis.cannibalizationMatches[0].title}
+                        </strong>
+                        .
+                      </li>
+                    )}
+                    {editingSeoAnalysis.failingCriticalChecks.map((check) => (
+                      <li key={check.id}>{check.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button

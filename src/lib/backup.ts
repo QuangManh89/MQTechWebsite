@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { db, runRawSql } from "@/db";
-import { DDL_SQL } from "@/db/ensure-db";
+import { DDL_SQL, MIGRATION_STATEMENTS } from "@/db/ensure-db";
 import {
   siteSettings,
   services,
@@ -296,8 +296,11 @@ export async function syncToBackupPostgres(
     const schema = await import("@/db/schema");
     const backupDb = drizzle(backupPool, { schema });
 
-    // Ensure all 11 tables exist on the backup PostgreSQL
+    // Ensure all 11 tables and migrated columns exist on the backup PostgreSQL
     await backupPool.query(DDL_SQL);
+    for (const stmt of MIGRATION_STATEMENTS) {
+      await backupPool.query(stmt);
+    }
 
     const t = snapshot.tables;
 

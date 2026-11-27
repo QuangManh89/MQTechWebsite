@@ -8,6 +8,11 @@ import { revalidateSiteContent } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
 
+function cleanText(input: unknown): string {
+  if (typeof input !== "string") return "";
+  return input.replace(/^[\s\t\uFEFF]+|[\s\t\uFEFF]+$/g, "");
+}
+
 function normalizeGalleryImages(input: unknown): string {
   if (typeof input === "string") {
     try {
@@ -38,22 +43,30 @@ export async function POST(req: NextRequest) {
 
   await ensureDbReady();
   const body = await req.json();
+  const title = cleanText(body.title);
+  const slug = cleanText(body.slug);
+  const excerpt = cleanText(body.excerpt);
+  const seoTitle = cleanText(body.seoTitle) || title;
+  const seoDescription = cleanText(body.seoDescription) || excerpt;
+  const focusKeyword = cleanText(body.focusKeyword);
+
   const [created] = await db
     .insert(posts)
     .values({
-      title: body.title,
-      slug: body.slug,
-      excerpt: body.excerpt,
-      content: body.content,
-      category: body.category,
-      coverImage: body.coverImage,
-      authorName: body.authorName || "Kỹ thuật MQTech BMT",
+      title,
+      slug,
+      excerpt,
+      content: typeof body.content === "string" ? body.content.trim() : "",
+      category: cleanText(body.category),
+      coverImage: cleanText(body.coverImage),
+      authorName: cleanText(body.authorName) || "Kỹ thuật MQTech BMT",
       readTimeMinutes: Number(body.readTimeMinutes ?? 5),
       featured: Boolean(body.featured),
       isPublished: body.isPublished !== false,
       galleryImages: normalizeGalleryImages(body.galleryImages),
-      seoTitle: body.seoTitle || body.title,
-      seoDescription: body.seoDescription || body.excerpt,
+      focusKeyword,
+      seoTitle,
+      seoDescription,
     })
     .returning();
 
@@ -67,22 +80,30 @@ export async function PUT(req: NextRequest) {
 
   await ensureDbReady();
   const body = await req.json();
+  const title = cleanText(body.title);
+  const slug = cleanText(body.slug);
+  const excerpt = cleanText(body.excerpt);
+  const seoTitle = cleanText(body.seoTitle) || title;
+  const seoDescription = cleanText(body.seoDescription) || excerpt;
+  const focusKeyword = cleanText(body.focusKeyword);
+
   const [updated] = await db
     .update(posts)
     .set({
-      title: body.title,
-      slug: body.slug,
-      excerpt: body.excerpt,
-      content: body.content,
-      category: body.category,
-      coverImage: body.coverImage,
-      authorName: body.authorName || "Kỹ thuật MQTech BMT",
+      title,
+      slug,
+      excerpt,
+      content: typeof body.content === "string" ? body.content.trim() : "",
+      category: cleanText(body.category),
+      coverImage: cleanText(body.coverImage),
+      authorName: cleanText(body.authorName) || "Kỹ thuật MQTech BMT",
       readTimeMinutes: Number(body.readTimeMinutes ?? 5),
       featured: Boolean(body.featured),
       isPublished: Boolean(body.isPublished),
       galleryImages: normalizeGalleryImages(body.galleryImages),
-      seoTitle: body.seoTitle || body.title,
-      seoDescription: body.seoDescription || body.excerpt,
+      focusKeyword,
+      seoTitle,
+      seoDescription,
       updatedAt: new Date(),
     })
     .where(eq(posts.id, Number(body.id)))

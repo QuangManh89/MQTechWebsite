@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS posts (
   featured BOOLEAN NOT NULL DEFAULT FALSE,
   is_published BOOLEAN NOT NULL DEFAULT TRUE,
   gallery_images TEXT NOT NULL DEFAULT '[]',
+  focus_keyword TEXT NOT NULL DEFAULT '',
   seo_title TEXT,
   seo_description TEXT,
   published_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -208,17 +209,24 @@ CREATE INDEX IF NOT EXISTS idx_stock_movements_ticket_id ON stock_movements(tick
 CREATE INDEX IF NOT EXISTS idx_finance_transactions_date ON finance_transactions(transaction_date);
 `;
 
+export const MIGRATION_STATEMENTS = [
+  "ALTER TABLE posts ADD COLUMN IF NOT EXISTS gallery_images TEXT NOT NULL DEFAULT '[]';",
+  "ALTER TABLE posts ADD COLUMN IF NOT EXISTS focus_keyword TEXT NOT NULL DEFAULT '';",
+  "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_site_verification TEXT NOT NULL DEFAULT '';",
+  "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_analytics_id TEXT NOT NULL DEFAULT '';",
+  "ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_maps_embed_url TEXT NOT NULL DEFAULT '';",
+  "ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'ADMIN';",
+  "ALTER TABLE repair_tickets ADD COLUMN IF NOT EXISTS items_json TEXT NOT NULL DEFAULT '[]';",
+] as const;
+
 async function bootstrapDatabase(): Promise<void> {
   await runRawSql(DDL_SQL);
 
   // Auto-migrate new columns for existing production databases
   try {
-    await runRawSql("ALTER TABLE posts ADD COLUMN IF NOT EXISTS gallery_images TEXT NOT NULL DEFAULT '[]';");
-    await runRawSql("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_site_verification TEXT NOT NULL DEFAULT '';");
-    await runRawSql("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_analytics_id TEXT NOT NULL DEFAULT '';");
-    await runRawSql("ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_maps_embed_url TEXT NOT NULL DEFAULT '';");
-    await runRawSql("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'ADMIN';");
-    await runRawSql("ALTER TABLE repair_tickets ADD COLUMN IF NOT EXISTS items_json TEXT NOT NULL DEFAULT '[]';");
+    for (const stmt of MIGRATION_STATEMENTS) {
+      await runRawSql(stmt);
+    }
   } catch (migErr) {
     console.warn("[bootstrapDatabase migration notice]", migErr);
   }

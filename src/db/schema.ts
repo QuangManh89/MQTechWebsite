@@ -86,6 +86,7 @@ export const posts = pgTable("posts", {
   featured: boolean("featured").notNull().default(false),
   isPublished: boolean("is_published").notNull().default(true),
   galleryImages: text("gallery_images").notNull().default("[]"),
+  focusKeyword: text("focus_keyword").notNull().default(""),
   seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
   publishedAt: timestamp("published_at").notNull().defaultNow(),
