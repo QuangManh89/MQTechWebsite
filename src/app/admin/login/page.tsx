@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md rounded-2xl border border-navy-border bg-surface p-8 shadow-2xl space-y-6">
         <div className="flex justify-center">
           <BrandLogo
-            brandName="MQTech - Computer Service"
+            brandName="MQTech - Sửa Máy Tính Tại Nhà BMT"
             subTagline="QUẢN TRỊ HỆ THỐNG BMT"
             variant="light"
           />

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     canonical: "https://suamaytinhbmt.id.vn/dat-lich",
   },
   openGraph: {
-    siteName: "MQTech - Computer Service",
+    siteName: "MQTech - Sửa Máy Tính Tại Nhà BMT",
     title: "Đặt Lịch Sửa Máy Tính Tại Nhà BMT & Tại Tiệm",
     description:
       "Đặt lịch sửa chữa Laptop, MacBook, PC tại nhà Buôn Ma Thuột hoặc mang máy đến MQTech chỉ trong 60 giây. Giảm ngay 50.000đ khi đặt online.",

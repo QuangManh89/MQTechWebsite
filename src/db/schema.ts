@@ -9,7 +9,7 @@ import {
 
 export const siteSettings = pgTable("site_settings", {
   id: integer("id").primaryKey().default(1),
-  brandName: text("brand_name").notNull().default("MQTech - Computer Service"),
+  brandName: text("brand_name").notNull().default("MQTech - Sửa Máy Tính Tại Nhà BMT"),
   subTagline: text("sub_tagline").notNull().default("DỊCH VỤ SỬA MÁY TÍNH TẠI NHÀ BMT"),
   slogan: text("slogan").notNull().default("Sự Hài Lòng Của Khách Hàng Là Động Lực Của Chúng Tôi."),
   ticketPrefix: text("ticket_prefix").notNull().default("MQ"),

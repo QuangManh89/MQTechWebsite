@@ -333,7 +333,7 @@ export function RankMathSeoPanel({
             </span>
             <div className="min-w-0 leading-tight">
               <p className="font-medium text-[#202124] truncate">
-                MQTech - Computer Service BMT
+                MQTech - Sửa Máy Tính Tại Nhà BMT
               </p>
               <p className="text-[10px] text-[#4d5156] truncate">
                 https://suamaytinhbmt.id.vn › bai-viet › {slug || "slug-bai-viet"}

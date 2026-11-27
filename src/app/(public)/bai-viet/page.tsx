@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     canonical: "https://suamaytinhbmt.id.vn/bai-viet",
   },
   openGraph: {
-    siteName: "MQTech - Computer Service",
+    siteName: "MQTech - Sửa Máy Tính Tại Nhà BMT",
     title: "Kiến Thức Công Nghệ & Thủ Thuật Máy Tính",
     description:
       "Chia sẻ kinh nghiệm bảo dưỡng laptop, khắc phục lỗi Windows, nâng cấp SSD/RAM và mẹo dùng máy tính bền bỉ từ MQTech BMT.",

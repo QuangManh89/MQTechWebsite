@@ -4,7 +4,7 @@
 **Last updated:** 2026-11-25
 
 ## Product Overview
-**Brand & Entity:** MQTech - Computer Service (`https://suamaytinhbmt.id.vn`)
+**Brand & Entity:** MQTech - Sửa Máy Tính Tại Nhà BMT (`https://suamaytinhbmt.id.vn`)
 **Address:** Đường Võ Thị Sáu, P. Tân Lập, TP. Buôn Ma Thuột, Đắk Lắk
 **Hotline / Zalo:** `0987 482 573` (`https://zalo.me/0987482573`)
 **Facebook Fanpage:** `https://www.facebook.com/suamaytinhbmt`

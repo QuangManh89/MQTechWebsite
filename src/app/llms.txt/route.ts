@@ -36,7 +36,7 @@ export async function GET() {
   const youtubeUrl = "https://www.youtube.com/channel/UC5kaujiwP9bmfbCngxqLvfQ";
 
   const lines: string[] = [
-    "# MQTech - Computer Service BMT",
+    "# MQTech - Sửa Máy Tính Tại Nhà BMT",
     "",
     `> ${settings.subTagline}. ${settings.slogan} Dịch vụ sửa máy tính, laptop, MacBook tận nhà và chuẩn phòng Lab tại Phường Tân Lập, Phường Tân An và Phường Buôn Ma Thuột (Đắk Lắk) — có mặt 15-20 phút, kiểm tra miễn phí, báo giá công khai, quan sát trực tiếp và bảo hành điện tử.`,
     "",

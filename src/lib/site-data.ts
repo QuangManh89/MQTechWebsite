@@ -13,7 +13,7 @@ export function revalidateSiteContent() {
 
 const DEFAULT_SITE_SETTINGS: typeof siteSettings.$inferSelect = {
   id: 1,
-  brandName: "MQTech - Computer Service",
+  brandName: "MQTech - Sửa Máy Tính Tại Nhà BMT",
   subTagline: "DỊCH VỤ SỬA MÁY TÍNH TẠI NHÀ BMT",
   slogan: "Sự Hài Lòng Của Khách Hàng Là Động Lực Của Chúng Tôi.",
   ticketPrefix: "MQ",

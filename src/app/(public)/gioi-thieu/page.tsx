@@ -10,15 +10,15 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Về Chúng Tôi - MQTech Computer Service BMT",
   description:
-    "Tìm hiểu về MQTech - Computer Service tại Buôn Ma Thuột, Đắk Lắk: trang thiết bị kỹ thuật, đội ngũ tận tâm và phương châm phục vụ.",
+    "Tìm hiểu về MQTech - Sửa Máy Tính Tại Nhà BMT tại Buôn Ma Thuột, Đắk Lắk: trang thiết bị kỹ thuật, đội ngũ tận tâm và phương châm phục vụ.",
   alternates: {
     canonical: "https://suamaytinhbmt.id.vn/gioi-thieu",
   },
   openGraph: {
-    siteName: "MQTech - Computer Service",
+    siteName: "MQTech - Sửa Máy Tính Tại Nhà BMT",
     title: "Về Chúng Tôi - MQTech Computer Service BMT",
     description:
-      "Tìm hiểu về MQTech - Computer Service tại Buôn Ma Thuột, Đắk Lắk: trang thiết bị kỹ thuật, đội ngũ tận tâm và phương châm phục vụ.",
+      "Tìm hiểu về MQTech - Sửa Máy Tính Tại Nhà BMT tại Buôn Ma Thuột, Đắk Lắk: trang thiết bị kỹ thuật, đội ngũ tận tâm và phương châm phục vụ.",
     url: "https://suamaytinhbmt.id.vn/gioi-thieu",
     type: "website",
     locale: "vi_VN",

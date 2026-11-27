@@ -17,7 +17,7 @@ const globalForBootstrap = globalThis as unknown as {
 export const DDL_SQL = `
 CREATE TABLE IF NOT EXISTS site_settings (
   id INTEGER PRIMARY KEY DEFAULT 1,
-  brand_name TEXT NOT NULL DEFAULT 'MQTech - Computer Service',
+  brand_name TEXT NOT NULL DEFAULT 'MQTech - Sửa Máy Tính Tại Nhà BMT',
   sub_tagline TEXT NOT NULL DEFAULT 'DỊCH VỤ SỬA MÁY TÍNH TẠI NHÀ BMT',
   slogan TEXT NOT NULL DEFAULT 'Sự Hài Lòng Của Khách Hàng Là Động Lực Của Chúng Tôi.',
   ticket_prefix TEXT NOT NULL DEFAULT 'MQ',

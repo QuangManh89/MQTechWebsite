@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     canonical: "https://suamaytinhbmt.id.vn/kiem-tra-may-tinh",
   },
   openGraph: {
-    siteName: "MQTech - Computer Service",
+    siteName: "MQTech - Sửa Máy Tính Tại Nhà BMT",
     title: "Kiểm Tra Máy Tính Online - Test Bàn Phím, Màn Hình, Loa, Mic, Camera | MQTech BMT",
     description:
       "Bộ công cụ kiểm tra phần cứng máy tính online miễn phí 100% trên trình duyệt: test bàn phím, màn hình điểm chết, loa Stereo, micro, webcam và đo hiệu năng CPU/GPU không cần cài đặt phần mềm.",

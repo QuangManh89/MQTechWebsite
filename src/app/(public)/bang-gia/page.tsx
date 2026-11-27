@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     url: "https://suamaytinhbmt.id.vn/bang-gia",
     type: "website",
     locale: "vi_VN",
-    siteName: "MQTech - Computer Service",
+    siteName: "MQTech - Sửa Máy Tính Tại Nhà BMT",
     title: "Bảng Giá Sửa Máy Tính, Laptop, MacBook & Vệ Sinh BMT",
     description:
       "Bảng giá niêm yết công khai dịch vụ sửa Laptop, MacBook, Build PC, vệ sinh tra keo và sửa máy tính tại nhà Buôn Ma Thuột.",

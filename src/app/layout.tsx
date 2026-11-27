@@ -25,8 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     title: {
       default:
-        "MQTech - Computer Service | Sửa Máy Tính Tại Nhà BMT (Tân Lập, Tân An)",
-      template: "%s | MQTech - Computer Service BMT",
+        "MQTech - Sửa Máy Tính Tại Nhà BMT (Tân Lập, Tân An, Buôn Ma Thuột)",
+      template: "%s | MQTech - Sửa Máy Tính Tại Nhà BMT",
     },
     description:
       "Dịch vụ sửa máy tính tại nhà BMT, cài Win 10/11, sửa Laptop, MacBook, vệ sinh tra keo và nâng cấp SSD/RAM. Có mặt siêu tốc 15 - 20 phút tại P. Tân Lập, P. Tân An & trung tâm TP. Buôn Ma Thuột.",
@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: baseUrl,
       siteName: settings.brandName,
       title:
-        "MQTech - Computer Service | Sửa Máy Tính Tại Nhà BMT (Tân Lập, Tân An)",
+        "MQTech - Sửa Máy Tính Tại Nhà BMT (Tân Lập, Tân An, Buôn Ma Thuột)",
       description:
         "Có mặt siêu tốc 15 - 20 phút tại P. Tân Lập, P. Tân An và trung tâm TP. Buôn Ma Thuột. Kiểm tra miễn phí, báo giá trước khi sửa, bảo hành điện tử minh bạch.",
       images: [{ url: "/brand/og-banner.png", width: 1200, height: 630 }],
