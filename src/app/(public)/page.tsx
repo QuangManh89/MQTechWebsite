@@ -241,7 +241,7 @@ export default async function HomePage() {
               "Friday",
               "Saturday",
             ],
-            opens: "07:30",
+            opens: "08:00",
             closes: "19:00",
           },
         ],
